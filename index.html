@@ -32,11 +32,14 @@ textarea{width:100%;font:12px/1.4 ui-monospace,Menlo,Consolas,monospace;backgrou
 #rcode{display:none;font:900 56px/1.1 ui-monospace,Menlo,Consolas,monospace;letter-spacing:.25em;color:#fff;text-align:center;margin:8px 0 2px;text-shadow:0 0 18px #ff5a4d}
 #rc2{width:130px;font-size:20px;letter-spacing:.3em}
 #manual summary,#adv summary{cursor:pointer;color:#ffe14d}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}.tabs button{padding:4px 12px;font-size:13px}.tabs button.on{border-color:var(--ac);background:#3a1830}
+#help{min-height:150px}#keytab table{border-collapse:collapse;margin:6px auto}#keytab td{padding:3px 6px;text-align:center}#keytab button{min-width:74px;padding:4px 8px;font-size:13px}#keytab button.wait{border-color:#ffe14d;color:#ffe14d}
+input[type=range]{width:90px;padding:0}
 </style></head><body>
 <noscript><p style="color:#fff;padding:20px;text-align:center">此遊戲需要啟用 JavaScript 才能執行。</p></noscript>
 <canvas id="c" width="960" height="540"></canvas>
-<div id="pad"><div class="m"><button data-k="KeyA">◀</button><button data-k="KeyD">▶</button><button data-k="KeyW">▲</button><button data-k="KeyS">防</button></div>
-<div class="a"><button data-k="KeyU">輕拳</button><button data-k="KeyI">重拳</button><button data-k="KeyO">必殺</button><button data-k="KeyJ">輕腳</button><button data-k="KeyK">重腳</button><button data-k="KeyL">投</button></div></div>
+<div id="pad"><div class="m"><button data-k="T0l">◀</button><button data-k="T0r">▶</button><button data-k="T0u">▲</button><button data-k="T0d">防</button></div>
+<div class="a"><button data-k="T0a">輕拳</button><button data-k="T0b">重拳</button><button data-k="T0s">必殺</button><button data-k="T0x">輕腳</button><button data-k="T0y">重腳</button><button data-k="T0t">投</button></div></div>
 <div id="menu">
 <h1>烈焰對決</h1><p class="sub">FLAME DUEL</p>
 <div class="row">P1 <button id="c1"></button> P2／電腦 <button id="c2"></button></div>
@@ -54,14 +57,13 @@ textarea{width:100%;font:12px/1.4 ui-monospace,Menlo,Consolas,monospace;backgrou
 <div style="font-size:12px;color:#aab">房主按①並複製邀請連結傳給房客；房客打開連結後把回覆代碼傳回；房主貼上後自動連線。</div></details>
 <details style="margin:6px 0"><summary style="cursor:pointer;color:#ffe14d">進階：自訂中繼伺服器（TURN，通常不需要設定）</summary><div class="row"><input id="tu" placeholder="turn:伺服器位址:3478" style="width:230px;text-transform:none"><input id="tn" placeholder="帳號" autocomplete="off" style="width:110px;text-transform:none"><input id="tp" type="password" placeholder="密碼" autocomplete="off" style="width:110px;text-transform:none"><button id="ts">儲存</button></div><div style="font-size:12px;color:#aab">網站已內建 Cloudflare 中繼，直連失敗時會自動使用；只有想改用自己的 TURN 伺服器時才需要填。設定只存在這個瀏覽器；清空網址再儲存即可移除。</div></details><b>步驟：</b>房主按「建立房間」，畫面出現 4 位數代碼；把代碼告訴對手（或按「複製邀請連結」傳給他）。對手輸入代碼按「加入」，雙方就會自動連上。直連失敗時會自動改走 Cloudflare 中繼。<br>
 你的角色用上方「P1」按鈕選擇，場景由房主決定。連線對戰使用 P1 按鍵（A D W S／U I O J K L），不能暫停，按 Esc 離開。</div>
-<div class="help"><b>三戰兩勝</b>，每回合 60 秒。攻擊、受擊都會累積氣槽：50 氣放<b>必殺</b>，100 氣放<b>超必殺</b>。<br>
-<b>P1 移動：</b>A／D 走，W 跳，S 蹲防，連按兩下 A／D 衝刺（後撤有無敵）。背對對手按住也會自動防禦。<br>
-<b>P1 出招：</b>U 輕拳　I 重拳　J 輕腳　K 重腳　O 必殺　L 投技<br>
-<b>組合招：</b>S+U 升龍拳（對空無敵）　S+J／S+K 掃堂腿（下段擊倒）　→+I 突進肘擊　→+K 迴旋踢　S+O 超必殺　空中 U／I 空拳、J／K 飛踢<br>
-<b>連段：</b>輕攻擊命中或被防後，可取消成其他招式；重攻擊可取消成必殺／升龍；升龍命中後可接空中拳／腳。投技無視防禦。同一連段每招只能用一次；命中後可「雙擊方向」衝刺取消、重攻擊後按跳躍取消、必殺後接超必殺（100 氣）；對手投你時搶先按 L 可拆投；輕點跳躍鍵會跳小跳。<br>
-<b>進階組合：</b>→+U 前手刺拳　→+J 推踢（大擊退）　←+K 後空翻踢　←+L 背摔　空中 S+J／K 俯衝踢　→+O <b>角色專屬：</b><br>烈：←+O 烈焰升龍（無敵反擊）、空中 O 俯射火球、被動：腳技起手更快<br>鋼：←+O 爆裂摔（指令投，傷害極高）、空中 O 墜地重砸、被動：重攻擊起手有霸體<br>影：←+O 影遁手裏劍（退後無敵）、空中 O 雙苦無、被動：二段跳、輕攻擊起手更快<br>雷：O 雷球、→+O 落雷（定點對空）、←+O 電磁場（無敵）、空中 O 雷矢、S+O 天雷陣、被動：集氣更快、重攻擊較長<br>岩：O 突進抓（指令投）、→+O 岩石投擲、←+O 岩壁反擊（擋下攻擊後自動反擊）、空中 O 隕石墜（落地震波）、S+O 大地崩壞、被動：投技範圍與傷害提升、不易被擊退<br>
-<b>P2：</b>方向鍵移動，攻擊用數字鍵盤 4 輕拳 5 重拳 6 必殺 1 輕腳 2 重腳 3 投（沒有數字鍵盤：Z X C V B N 對應同樣順序），↓+招式即組合招。<br>
-<b>新增：</b>「影」可在空中再按一次 W 二段跳；對手出招起手時打中他會觸發<b>反擊（傷害 +30%）</b>；把對手逼到牆角，你會被反彈後退。支援手把（X 輕拳、Y 重拳、A 輕腳、B 重腳、RB／RT 必殺、LB／LT 投技，方向鍵或左搖桿移動）。<br>P 或 Esc 暫停（暫停時按 Q 回選單），M 靜音。手機有螢幕按鈕（P1）。</div>
+<div class="row"><button id="bset">⚙ 設定（按鍵・音量）</button></div>
+<div id="set" class="help" style="display:none"><b>設定</b>
+<div class="row" style="justify-content:flex-start">主音量 <input type="range" min="0" max="1" step=".05" data-v="all"> 音樂 <input type="range" min="0" max="1" step=".05" data-v="mus"> 音效 <input type="range" min="0" max="1" step=".05" data-v="sfx"></div>
+<div id="keytab"></div>
+<div class="row"><button id="kdef">恢復預設按鍵</button><button id="sclose">完成</button></div>
+<div style="font-size:12px;color:#aab">點按鈕後按下想用的鍵（Esc 取消）。同一個鍵只能對應一個動作，重複時會自動從舊的位置移除。設定只存在這個瀏覽器。</div></div>
+<div class="help" id="help"><div class="tabs" id="htabs"></div><div id="hbody"></div></div>
 </div>
 <script>
 window.addEventListener('error',e=>{try{let d=document.getElementById('errbox');if(!d){d=document.createElement('div');d.id='errbox';d.style.cssText='position:fixed;left:0;right:0;bottom:0;z-index:99;background:#7a1020;color:#fff;font:12px/1.5 monospace;padding:8px 12px;white-space:pre-wrap;max-height:40vh;overflow:auto';document.body.appendChild(d)}d.textContent='⚠ 遊戲發生錯誤（請把這段文字回報）：\n'+(e.message||'')+'\n'+String(e.filename||'').split('/').pop()+':'+(e.lineno||'')+':'+(e.colno||'')}catch(x){}});
@@ -129,7 +131,13 @@ function makeBg(S){
  return c;
 }
 const keys={};let mute=false,AC;
-function noise(d,v=.06,fc=2000,ty='lowpass',sl){if(mute||NOFX)return;try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume();const n=AC.currentTime,len=Math.max(1,AC.sampleRate*d|0),b=AC.createBuffer(1,len,AC.sampleRate),a=b.getChannelData(0);for(let i=0;i<len;i++)a[i]=Math.random()*2-1;const s=AC.createBufferSource(),f=AC.createBiquadFilter(),g=AC.createGain();s.buffer=b;f.type=ty;f.frequency.setValueAtTime(fc,n);if(sl)f.frequency.exponentialRampToValueAtTime(sl,n+d);g.gain.setValueAtTime(v,n);g.gain.exponentialRampToValueAtTime(.001,n+d);s.connect(f);f.connect(g);g.connect(AC.destination);s.start()}catch(e){}}
+const VOL={all:.8,mus:.7,sfx:.9};try{Object.assign(VOL,JSON.parse(localStorage.getItem('fd_vol')||'{}'))}catch(e){}
+let BUS=null,NB=null,MUS=0;
+function ac(){AC=AC||new(window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume();if(!BUS){const mk=()=>AC.createGain();BUS={all:mk(),mus:mk(),sfx:mk()};BUS.mus.connect(BUS.all);BUS.sfx.connect(BUS.all);BUS.all.connect(AC.destination);setVol()}return AC}
+function setVol(){if(BUS){BUS.all.gain.value=VOL.all;BUS.mus.gain.value=VOL.mus;BUS.sfx.gain.value=VOL.sfx}}
+const outBus=()=>MUS?BUS.mus:BUS.sfx;
+// 白噪音只產生一次（2 秒），每次從隨機位置截一段播放，避免連段時大量配置記憶體
+function noise(d,v=.06,fc=2000,ty='lowpass',sl){if(mute||NOFX)return;try{ac();const n=AC.currentTime;if(!NB){NB=AC.createBuffer(1,AC.sampleRate*2,AC.sampleRate);const a=NB.getChannelData(0);for(let i=0;i<a.length;i++)a[i]=Math.random()*2-1}const s=AC.createBufferSource(),f=AC.createBiquadFilter(),g=AC.createGain();s.buffer=NB;f.type=ty;f.frequency.setValueAtTime(fc,n);if(sl)f.frequency.exponentialRampToValueAtTime(sl,n+d);g.gain.setValueAtTime(v,n);g.gain.exponentialRampToValueAtTime(.001,n+d);s.connect(f);f.connect(g);g.connect(outBus());s.start(n,Math.random()*Math.max(0,2-d),d)}catch(e){}}
 function sfx(n,c=0){
  if(n==='thunder'){noise(.5,.22,4000,'highpass',300);snd(60,.6,'sawtooth',.12,30);return}if(n==='charge'){snd(300,.25,'sine',.04,1200);return}if(n==='vs'){snd(110,.5,'sawtooth',.1,55);noise(.4,.12,800,'bandpass',3000);return}if(n==='counter'){snd(900,.12,'square',.06,300);noise(.2,.15,1500,'lowpass',200);return}
  if(n==='hit'){noise(.12,.12,1800,'lowpass',300);snd(150+Math.min(c,8)*25,.1,'square',.07,60)}
@@ -149,6 +157,9 @@ function sfx(n,c=0){
 const BASS=[55,55,82,55,65,65,98,65],ARP=[330,392,494,392];let mstep=0;
 function music(){
  if(mute||G.pause||!(G.phase==='intro'||G.phase==='fight'))return;
+ MUS=1;try{musStep()}finally{MUS=0}
+}
+function musStep(){
  const s=mstep++%8,fast=G.phase==='fight'&&G.time<=10;
  snd(BASS[s],.2,'triangle',.05);
  if(s%4===0)snd(120,.12,'sine',.08,40);
@@ -156,7 +167,7 @@ function music(){
  noise(.04,.02,6000,'highpass');
 }
 setInterval(music,200);
-function snd(f,d,t='square',v=.05,sl){if(mute||NOFX)return;try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume();const o=AC.createOscillator(),g=AC.createGain(),n=AC.currentTime;o.type=t;o.frequency.setValueAtTime(f,n);if(sl)o.frequency.exponentialRampToValueAtTime(sl,n+d);g.gain.setValueAtTime(v,n);g.gain.exponentialRampToValueAtTime(.001,n+d);o.connect(g);g.connect(AC.destination);o.start();o.stop(n+d)}catch(e){}}
+function snd(f,d,t='square',v=.05,sl){if(mute||NOFX)return;try{ac();const o=AC.createOscillator(),g=AC.createGain(),n=AC.currentTime;o.type=t;o.frequency.setValueAtTime(f,n);if(sl)o.frequency.exponentialRampToValueAtTime(sl,n+d);g.gain.setValueAtTime(v,n);g.gain.exponentialRampToValueAtTime(.001,n+d);o.connect(g);g.connect(outBus());o.start();o.stop(n+d)}catch(e){}}
 const G={phase:'menu',mode:1,diff:1,stage:0,frame:0,hitstop:0,shake:0,pause:false,round:1,time:60,tf:0,pt:0,msg:'',mt:0,mm:1,cam:{z:1,cx:W/2},supEnd:0,supName:'',supCol:'#fff'};
 let p1,p2,projs=[],parts=[],sel=[0,1],bg=makeBg(STG[0]);
 const NI={l:0,r:0,u:0,d:0,dash:0,lp:0,hp:0,lk:0,hk:0,sp:0,th:0},rnd=(a,b)=>a+Math.random()*(b-a)|0;
@@ -570,7 +581,7 @@ function dec(b,pv){
 }
 function human(k,pv){return dec(cap(k),pv)}
 let d1=NI,d2=NI;
-const K1=[['KeyA','P0l'],['KeyD','P0r'],['KeyW','P0u'],['KeyS','P0d'],['KeyU','P0a'],['KeyI','P0b'],['KeyJ','P0x'],['KeyK','P0y'],['KeyO','P0s'],['KeyL','P0t']];
+const K1=[['KeyA','P0l','T0l'],['KeyD','P0r','T0r'],['KeyW','P0u','T0u'],['KeyS','P0d','T0d'],['KeyU','P0a','T0a'],['KeyI','P0b','T0b'],['KeyJ','P0x','T0x'],['KeyK','P0y','T0y'],['KeyO','P0s','T0s'],['KeyL','P0t','T0t']];
 const K2=[['ArrowLeft','P1l'],['ArrowRight','P1r'],['ArrowUp','P1u'],['ArrowDown','P1d'],['Numpad4','KeyZ','P1a'],['Numpad5','KeyX','P1b'],['Numpad1','KeyV','P1x'],['Numpad2','KeyB','P1y'],['Numpad6','KeyC','P1s'],['Numpad3','KeyN','P1t']];
 const pv1={},pv2={};
 function aiInput(me,op){
@@ -799,6 +810,7 @@ function draw(){
   for(const p of projs)drawProj(p);
   for(const p of parts)drawParticle(p);
   ctx.globalAlpha=1;
+  if(G.hb)drawBoxes();
   if(G.win>=0&&(G.phase==='over'||(G.phase==='ko'&&G.pt<100))){const wf=G.win?p2:p1;if(wf.st==='win')quote(wf)}
  }
  ctx.restore();
@@ -816,21 +828,7 @@ function draw(){
   const st=NET.stallT?performance.now()-NET.stallT:0,tx=NET.gone?'對手已離開':st>8000?'連線中斷，按 Esc 離開':st>500?'等待對手…':'';
   if(tx){ctx.strokeText(tx,W/2,H/2+90);ctx.fillText(tx,W/2,H/2+90)}ctx.restore()}
  if(G.phase==='over'){ctx.textAlign='center';ctx.font='bold 24px '+FONT;ctx.fillStyle='#fff';ctx.fillStyle='rgba(0,0,0,.55)';ctx.fillRect(0,H-58,W,40);ctx.fillStyle='#fff';ctx.fillText(G.mode===4?(NET.reL?(NET.reR?'準備開始…':'已送出再戰邀請，等待對手…'):(NET.reR?'對手想再戰一局！按 Enter 接受　Esc 離開':'按 Enter 再戰一局　Esc 離開')):'按 Enter 或點擊畫面回到選單',W/2,H-30)}
- if(G.pause){
-  ctx.fillStyle='#000c';ctx.fillRect(0,0,W,H);ctx.textAlign='center';ctx.fillStyle='#fff';ctx.font='900 50px '+FONT;ctx.fillText('暫停',W/2,96);
-  ctx.font='16px '+FONT;
-  ['U 輕拳　I 重拳　J 輕腳　K 重腳　O 必殺　L 投技　雙擊 A／D 衝刺',
- 'S+U 升龍　S+J／K 掃堂腿　→+U 刺拳　→+I 肘擊　→+J 推踢　→+K 迴旋踢　←+K 後空翻踢',
- '←+L 背摔　空中 U／I 空拳　J／K 飛踢　S+J／K 俯衝踢　S+O 超必殺（100 氣）',
- '連段：輕→重→必殺→超必殺；同一連段每招只能用一次；命中後可衝刺或跳躍取消',
- '對手投你時按 L 拆投（指令投無法拆）；起身前先按招式可起身反擊',
- '烈：O 波動彈　→+O 雙連波　←+O 烈焰升龍　空中 O 俯射火球　被動：腳技快',
- '鋼：O 衝擊拳　→+O 震地波　←+O 爆裂摔　空中 O 墜地重砸　被動：重攻擊霸體',
- '影：O 疾風斬　→+O 瞬移斬　←+O 影遁手裏劍　空中 O 雙苦無　被動：二段跳',
- '雷：O 雷球　→+O 落雷（定點）　←+O 電磁場（無敵）　空中 O 雷矢　被動：集氣快',
- '岩：O 突進抓　→+O 岩石投擲　←+O 岩壁反擊　空中 O 隕石墜　被動：投技強、難擊退',
- '按 P 或 Esc 繼續　按 Q 回到選單'].forEach((s,i)=>ctx.fillText(s,W/2,144+i*33));
- }
+ if(G.pause)pauseScreen();
 }
 
 // ================= 連線對戰(鎖步同步) =================
@@ -1038,14 +1036,16 @@ function loop(ts){requestAnimationFrame(loop);pads();acc+=Math.min(100,ts-last);
  draw()}
 requestAnimationFrame(loop);
 
-addEventListener('keydown',e=>{if(e.target&&(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'))return;
+addEventListener('keydown',e=>{if(KCAP){e.preventDefault();kcapDone(e.code);return}
+ if(e.target&&(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'))return;
+ if(e.code==='F2'){e.preventDefault();G.hb=!G.hb;return}
  if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code))e.preventDefault();
  keys[e.code]=1;pend[e.code]=1;
- if(G.mode===4&&NET.on&&e.code==='Escape')netQuit(1);else if((e.code==='KeyP'||e.code==='Escape')&&G.mode!==4&&G.phase!=='menu'&&G.phase!=='over')G.pause=!G.pause;
+ if(G.mode===4&&NET.on&&e.code==='Escape')netQuit(1);else if(((e.code==='KeyP'&&!bound(e.code))||e.code==='Escape')&&G.mode!==4&&G.phase!=='menu'&&G.phase!=='over')G.pause=!G.pause;
  if(G.vs>0&&G.mode!==4&&(e.code==='Enter'||e.code==='Space'))G.vs=1;
  if(e.code==='Enter'&&G.phase==='over'){if(G.mode===4&&NET.on)netRematch();else toMenu()}
- if(e.code==='KeyQ'&&G.pause){G.pause=false;toMenu()}
- if(e.code==='KeyM')mute=!mute;
+ if(e.code==='KeyQ'&&G.pause&&!bound(e.code)){G.pause=false;toMenu()}
+ if(e.code==='KeyM'&&!bound(e.code))mute=!mute;
 });
 addEventListener('keyup',e=>{keys[e.code]=0});
 addEventListener('blur',()=>{for(const k in keys)keys[k]=0;if(G.phase==='fight'&&G.mode!==4)G.pause=true});
@@ -1192,4 +1192,91 @@ function inviteHash(){
 }
 addEventListener('hashchange',inviteHash);
 inviteHash();
+// ===== 設定：改鍵、音量、說明分頁、判定框 =====
+const ACT=['左','右','跳','蹲／防','輕拳','重拳','輕腳','重腳','必殺','投技'];
+const isV=c=>/^[PT]\d[a-z]$/.test(c);
+const KDEF=[K1.map(a=>a.filter(c=>!isV(c))),K2.map(a=>a.filter(c=>!isV(c)))];
+const KV=[K1.map(a=>a.filter(isV)),K2.map(a=>a.filter(isV))];
+function setKeys(kb){[K1,K2].forEach((K,p)=>K.forEach((a,j)=>{a.length=0;a.push(...kb[p][j],...KV[p][j])}))}
+const curKeys=()=>[K1,K2].map(K=>K.map(a=>a.filter(c=>!isV(c))));
+try{const o=JSON.parse(localStorage.getItem('fd_keys')||'null');if(Array.isArray(o)&&o.length===2&&o.every(x=>Array.isArray(x)&&x.length===10&&x.every(Array.isArray)))setKeys(o.map(x=>x.map(a=>a.filter(c=>typeof c==='string'&&!isV(c)).slice(0,3))))}catch(e){}
+function saveKeys(){try{localStorage.setItem('fd_keys',JSON.stringify(curKeys()))}catch(e){}}
+const bound=c=>K1.some(a=>a.includes(c))||K2.some(a=>a.includes(c));
+const KNM={ArrowLeft:'←',ArrowRight:'→',ArrowUp:'↑',ArrowDown:'↓',Space:'空白',ShiftLeft:'左Shift',ShiftRight:'右Shift',ControlLeft:'左Ctrl',ControlRight:'右Ctrl',AltLeft:'左Alt',AltRight:'右Alt',Comma:',',Period:'.',Slash:'/',Semicolon:';',Quote:"'",BracketLeft:'[',BracketRight:']',Backslash:'\\',Minus:'-',Equal:'=',Backquote:'`',Backspace:'退格'};
+function keyName(c){if(!c)return'—';if(KNM[c])return KNM[c];let m=c.match(/^Key([A-Z])$/);if(m)return m[1];m=c.match(/^Digit(\d)$/);if(m)return m[1];m=c.match(/^Numpad(.+)$/);if(m)return'數'+m[1];return c}
+const KN=(p,j)=>{const a=(p?K2:K1)[j].filter(c=>!isV(c));return a.length?a.map(keyName).join('／'):'—'};
+let KCAP=null;
+function kcapDone(code){const c=KCAP;KCAP=null;if(!c)return;
+ if(code!=='Escape'&&code!=='Enter'&&!/^F\d+$/.test(code)){
+  [K1,K2].forEach(K=>K.forEach(a=>{const i=a.indexOf(code);if(i>=0)a.splice(i,1)}));
+  const a=(c.p?K2:K1)[c.j];a.length=0;a.push(code,...KV[c.p][c.j]);saveKeys();
+ }
+ keyTable();helpRender()}
+function keyTable(){
+ let h='<table><tr><td></td><td>P1</td><td>P2</td></tr>';
+ ACT.forEach((n,j)=>{h+='<tr><td>'+n+'</td>'+[0,1].map(p=>'<td><button data-p="'+p+'" data-j="'+j+'"'+(KCAP&&KCAP.p===p&&KCAP.j===j?' class="wait">按下按鍵…':'>'+KN(p,j))+'</button></td>').join('')+'</tr>'});
+ $('keytab').innerHTML=h+'</table>';
+ $('keytab').querySelectorAll('button').forEach(b=>b.onclick=()=>{KCAP={p:+b.dataset.p,j:+b.dataset.j};keyTable()});
+}
+document.querySelectorAll('#set input[type=range]').forEach(r=>{r.value=VOL[r.dataset.v];
+ r.oninput=()=>{VOL[r.dataset.v]=+r.value;setVol();try{localStorage.setItem('fd_vol',JSON.stringify(VOL))}catch(e){}};
+ r.onchange=()=>{MUS=r.dataset.v==='mus'?1:0;try{snd(440,.12,'triangle',.08)}finally{MUS=0}}});
+$('bset').onclick=()=>{const v=$('set').style.display==='none';$('set').style.display=v?'block':'none';if(v){keyTable();$('set').scrollIntoView&&$('set').scrollIntoView({block:'nearest'})}};
+$('sclose').onclick=()=>{KCAP=null;$('set').style.display='none'};
+$('kdef').onclick=()=>{KCAP=null;setKeys(KDEF);saveKeys();keyTable();helpRender()};
+// 角色專屬招式（↓ 蹲、→ 朝向對手、← 背向對手）
+const CHM=[
+ {p:'腳技起手更快',m:[['必殺','波動彈'],['→+必殺','雙連波'],['←+必殺','烈焰升龍（無敵反擊）'],['空中 必殺','俯射火球'],['↓+必殺','炎龍波']]},
+ {p:'重攻擊起手有霸體',m:[['必殺','衝擊拳'],['→+必殺','震地波（下段）'],['←+必殺','爆裂摔（指令投）'],['空中 必殺','墜地重砸'],['↓+必殺','崩山拳']]},
+ {p:'二段跳、輕攻擊起手更快',m:[['必殺','疾風斬'],['→+必殺','瞬移斬'],['←+必殺','影遁手裏劍（退後無敵）'],['空中 必殺','雙苦無'],['↓+必殺','影分身斬']]},
+ {p:'集氣更快、重攻擊較長',m:[['必殺','雷球'],['→+必殺','落雷（定點對空）'],['←+必殺','電磁場（無敵）'],['空中 必殺','雷矢'],['↓+必殺','天雷陣']]},
+ {p:'投技範圍與傷害提升、不易被擊退',m:[['必殺','突進抓（指令投）'],['→+必殺','岩石投擲'],['←+必殺','岩壁反擊（擋下攻擊後自動反擊）'],['空中 必殺','隕石墜（落地震波）'],['↓+必殺','大地崩壞']]}];
+let HTAB='基本';
+function helpRender(){
+ const k=j=>'<b>'+KN(0,j)+'</b>',q=j=>'<b>'+KN(1,j)+'</b>';
+ const T={
+  '基本':`<b>三戰兩勝</b>，每回合 60 秒。攻擊、受擊都會累積氣槽：50 氣放<b>必殺</b>，100 氣放<b>超必殺</b>。<br>
+<b>P1 移動：</b>${k(0)}／${k(1)} 走，${k(2)} 跳（輕點是小跳），${k(3)} 蹲下防禦；連按兩下方向衝刺（後撤有無敵）。背對對手按住也會自動防禦。<br>
+<b>P1 出招：</b>${k(4)} 輕拳　${k(5)} 重拳　${k(6)} 輕腳　${k(7)} 重腳　${k(8)} 必殺　${k(9)} 投技<br>
+<b>P2：</b>${q(0)} ${q(1)} ${q(2)} ${q(3)} 移動；${q(4)} 輕拳　${q(5)} 重拳　${q(6)} 輕腳　${q(7)} 重腳　${q(8)} 必殺　${q(9)} 投技<br>
+按鍵可在上方「設定」更改。第一次玩建議先到「訓練模式」熟悉操作。`,
+  '組合招':`方向以角色為準：<b>↓</b>＝蹲（${k(3)}），<b>→</b>＝朝向對手，<b>←</b>＝背向對手。<br>
+<b>地面：</b>↓+輕拳 升龍拳（對空無敵）　↓+輕腳／重腳 掃堂腿（下段擊倒）　→+輕拳 前手刺拳　→+重拳 突進肘擊　→+輕腳 推踢（大擊退）　→+重腳 迴旋踢　←+重腳 後空翻踢　←+投技 背摔　↓+必殺 超必殺（100 氣）<br>
+<b>空中：</b>輕拳／重拳 空拳　輕腳／重腳 飛踢　↓+輕腳／重腳 俯衝踢<br>
+<b>連段：</b>輕攻擊命中或被防後可取消成其他招式；重攻擊可取消成必殺／升龍；升龍命中後可接空中拳腳；必殺後可接超必殺。同一連段每招只能用一次。命中後雙擊方向可衝刺取消，重攻擊命中後按跳可跳躍取消。<br>
+<b>防守：</b>對手投你時搶先按投技可拆投（指令投無法拆）；對手出招起手時打中他會觸發<b>反擊（傷害 +30%）</b>；倒地時先按招式可起身反擊。`,
+  '角色':CH.map((c,i)=>`<b style="color:${c.col}">${c.n}・${c.ds}</b>（體力 ${c.hp}）：`+CHM[i].m.map(x=>x[0]+' '+x[1]).join('　')+`<br>　被動：${CHM[i].p}`).join('<br>'),
+  '系統':`<b>暫停：</b>P 或 Esc（暫停時按 Q 回選單）　<b>靜音：</b>M　<b>判定框：</b>F2（藍＝受擊框、紅＝攻擊判定、紫＝投技、黃＝反擊架勢、白＝無敵）<br>
+<b>手把：</b>X 輕拳、Y 重拳、A 輕腳、B 重腳、RB／RT 必殺、LB／LT 投技，方向鍵或左搖桿移動。<br>
+<b>手機：</b>螢幕下方有按鈕（操作 P1）。<br>
+<b>其他：</b>把對手逼到牆角時，你會被反彈後退。連線對戰使用 P1 按鍵，不能暫停，按 Esc 離開。`};
+ $('htabs').innerHTML=Object.keys(T).map(n=>'<button'+(n===HTAB?' class="on"':'')+'>'+n+'</button>').join('');
+ $('htabs').querySelectorAll('button').forEach(b=>b.onclick=()=>{HTAB=b.textContent;helpRender()});
+ $('hbody').innerHTML=T[HTAB];
+}
+helpRender();
+function pauseScreen(){
+ ctx.save();ctx.fillStyle='#000c';ctx.fillRect(0,0,W,H);ctx.textAlign='center';ctx.fillStyle='#fff';ctx.font='900 46px '+FONT;ctx.fillText('暫停',W/2,70);
+ const k=j=>KN(0,j),L=[
+  [k(4)+' 輕拳　'+k(5)+' 重拳　'+k(6)+' 輕腳　'+k(7)+' 重腳　'+k(8)+' 必殺　'+k(9)+' 投技　雙擊方向 衝刺','#fff'],
+  ['↓+輕拳 升龍　↓+腳 掃堂　→+輕拳 刺拳　→+重拳 肘擊　→+輕腳 推踢　→+重腳 迴旋踢','#fff'],
+  ['←+重腳 後空翻踢　←+投技 背摔　空中 ↓+腳 俯衝踢　↓+必殺 超必殺（100 氣）','#fff'],
+  ['連段：輕→重→必殺→超必殺；同一連段每招只能用一次；命中後可衝刺或跳躍取消','#cfd2ff'],['','#fff']];
+ const who=[p1].concat(G.mode===2&&p2.ch!==p1.ch?[p2]:[]);
+ who.forEach(f=>{const i=CH.indexOf(f.ch);L.push([f.ch.n+'：'+CHM[i].m.map(x=>x[0]+' '+x[1]).join('　'),f.ch.col]);L.push(['被動：'+CHM[i].p,f.ch.col2])});
+ L.push(['','#fff'],['按 P 或 Esc 繼續　按 Q 回到選單　F2 判定框'+(G.hb?'（開）':''),'#ffe14d']);
+ ctx.font='15px '+FONT;L.forEach((l,i)=>{ctx.fillStyle=l[1];ctx.fillText(l[0],W/2,120+i*30)});ctx.restore();
+}
+function drawBoxes(){
+ ctx.save();ctx.lineWidth=2;
+ const box=(b,f,s)=>{ctx.fillStyle=f;ctx.strokeStyle=s;ctx.fillRect(b[0],b[1],b[2]-b[0],b[3]-b[1]);ctx.strokeRect(b[0],b[1],b[2]-b[0],b[3]-b[1])};
+ for(const f of[p1,p2]){
+  const a=f.atk,inv=f.st==='down'||f.st==='ko'||(f.st==='dash'&&f.inv>0)||(a&&a.inv&&f.t<=a.su+3),ctr=f.st==='atk'&&a&&a.counter&&f.t>a.su&&f.t<=a.su+a.ac;
+  if(inv)ctx.setLineDash([5,4]);
+  box(hurt(f),inv?'rgba(255,255,255,.12)':ctr?'rgba(255,225,77,.25)':'rgba(77,210,255,.15)',inv?'#fff':ctr?'#ffe14d':'#4dd2ff');ctx.setLineDash([]);
+  if(f.st==='atk'&&a&&a.type!=='proj'&&a.type!=='strike'&&!a.counter&&f.t>a.su&&f.t<=a.su+a.ac)box(hbox(f,a),a.throw?'rgba(180,107,255,.35)':'rgba(255,64,64,.35)',a.throw?'#b46bff':'#ff4040');
+ }
+ for(const p of projs){if(p.wait>0||p.life<=0)continue;const r=p.big?28:14;box(p.strike?[p.x-26,0,p.x+26,GY]:[p.x-r,p.y-r,p.x+r,p.y+r],'rgba(255,64,64,.3)','#ff4040')}
+ ctx.restore();
+}
 </script></body></html>
