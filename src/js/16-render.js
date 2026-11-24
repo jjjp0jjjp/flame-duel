@@ -128,14 +128,14 @@ function drawF(f){
   else if(li===1){ // 護甲板與鉚釘
    ctx.strokeStyle=L.top2;ctx.lineWidth=2;ctx.beginPath();for(const t of[.32,.62]){const a=sp(t,-16*w),b=sp(t+.04,0),c2=sp(t,16*w);ctx.moveTo(a[0],a[1]);ctx.quadraticCurveTo(b[0],b[1],c2[0],c2[1])}ctx.stroke();
    ctx.fillStyle='#dfe8f8';for(const t of[.32,.62])for(const s2 of[-1,1]){const q=sp(t+.02,s2*9*w);ctx.beginPath();ctx.arc(q[0],q[1],1.4,0,6.3);ctx.fill()}
-   ctx.save();ctx.shadowColor=L.glow||'#7fd6ff';ctx.shadowBlur=10;ctx.fillStyle=L.acc||'#bff0ff';ctx.beginPath();ctx.arc(cx+d*2,cy-2,4.5,0,6.3);ctx.fill();ctx.fillStyle='#ffffff';ctx.beginPath();ctx.arc(cx+d*1,cy-3,1.6,0,6.3);ctx.fill();ctx.restore()}
+   glow(cx+d*2,cy-2,15,L.glow||'#7fd6ff',.8);ctx.save();ctx.fillStyle=L.acc||'#bff0ff';ctx.beginPath();ctx.arc(cx+d*2,cy-2,4.5,0,6.3);ctx.fill();ctx.fillStyle='#ffffff';ctx.beginPath();ctx.arc(cx+d*1,cy-3,1.6,0,6.3);ctx.fill();ctx.restore()}
   else if(li===2){ // 交叉綁帶與纏布
    ctx.strokeStyle=L.top2;ctx.lineWidth=2.4;ctx.beginPath();ctx.moveTo(tp[1][0],tp[1][1]+4);ctx.lineTo(tp[3][0],tp[3][1]-6);ctx.moveTo(tp[2][0],tp[2][1]+4);ctx.lineTo(tp[0][0],tp[0][1]-6);ctx.stroke();
    ctx.strokeStyle='rgba(0,0,0,.3)';ctx.lineWidth=1;ctx.beginPath();for(let t=.12;t<.9;t+=.13){const a=sp(t,-14*w),b=sp(t+.05,14*w);ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1])}ctx.stroke()}
   else if(li===3){ // 夾克：立領、拉鍊、閃電
    ctx.strokeStyle=L.top2;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(tp[1][0],tp[1][1]);ctx.lineTo(tp[2][0],tp[2][1]);ctx.stroke();
    ctx.strokeStyle='#cfd3e6';ctx.lineWidth=1.3;ctx.setLineDash([2,2]);ctx.beginPath();const z1=sp(.98,fs*3*w),z2=sp(.05,fs*3*w);ctx.moveTo(z1[0],z1[1]);ctx.lineTo(z2[0],z2[1]);ctx.stroke();ctx.setLineDash([]);
-   ctx.save();ctx.shadowColor=L.acc||'#ffd23d';ctx.shadowBlur=8;ctx.strokeStyle=L.acc||'#ffd23d';ctx.lineWidth=3;ctx.lineJoin='miter';ctx.beginPath();ctx.moveTo(cx+d*4,cy-13);ctx.lineTo(cx-d*3,cy-1);ctx.lineTo(cx+d*3,cy-1);ctx.lineTo(cx-d*4,cy+12);ctx.stroke();ctx.restore()}
+   glow(cx,cy,17,L.acc||'#ffd23d',.55);ctx.save();ctx.strokeStyle=L.acc||'#ffd23d';ctx.lineWidth=3;ctx.lineJoin='miter';ctx.beginPath();ctx.moveTo(cx+d*4,cy-13);ctx.lineTo(cx-d*3,cy-1);ctx.lineTo(cx+d*3,cy-1);ctx.lineTo(cx-d*4,cy+12);ctx.stroke();ctx.restore()}
   else{ // 敞開的背心，露出胸肌、腹肌
    const a=sp(1,fs*7*w),b=sp(.02,fs*5*w);ctx.lineCap='round';ctx.strokeStyle=OUT;ctx.lineWidth=17*w;ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);ctx.stroke();ctx.strokeStyle=L.skin;ctx.lineWidth=14*w;ctx.stroke();
    ctx.strokeStyle=shade(L.skin,-.35);ctx.lineWidth=1.4;ctx.beginPath();const p1=sp(.78,fs*1*w),p2=sp(.7,fs*11*w),p3=sp(.62,fs*6*w);ctx.moveTo(p1[0],p1[1]);ctx.quadraticCurveTo(p3[0],p3[1],p2[0],p2[1]);
@@ -184,7 +184,7 @@ function drawF(f){
   const ex=hx+d*(li===2?9:7),ey=hy-1;
   if(ko){ctx.strokeStyle='#111';ctx.lineWidth=1.8;ctx.beginPath();ctx.moveTo(ex-3,ey-3);ctx.lineTo(ex+3,ey+3);ctx.moveTo(ex+3,ey-3);ctx.lineTo(ex-3,ey+3);ctx.stroke()}
   else if(hit){ctx.strokeStyle='#111';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(ex-d*3,ey-3);ctx.lineTo(ex+d*2,ey);ctx.lineTo(ex-d*3,ey+3);ctx.stroke()}
-  else if(li===2){ctx.save();ctx.shadowColor='#e3ccff';ctx.shadowBlur=8;ctx.fillStyle='#f3e8ff';ctx.beginPath();ctx.ellipse(ex,ey,3.6,2.1,0,0,6.3);ctx.fill();ctx.restore()}
+  else if(li===2){glow(ex,ey,9,'#e3ccff',.7);ctx.save();ctx.fillStyle='#f3e8ff';ctx.beginPath();ctx.ellipse(ex,ey,3.6,2.1,0,0,6.3);ctx.fill();ctx.restore()}
   else{ctx.fillStyle='#fff';ctx.beginPath();ctx.ellipse(ex,ey,3.6,4.2,0,0,6.3);ctx.fill();ctx.fillStyle='#111';ctx.beginPath();ctx.arc(ex+d*1.4,ey,1.9,0,6.3);ctx.fill();ctx.strokeStyle='#111';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(ex-d*4,ey-6-(f.st==='atk'?1:0));ctx.lineTo(ex+d*5,ey-4-(f.st==='atk'?3:0));ctx.stroke()}
   if(li!==2&&!ko){const mx=hx+d*8,my=hy+7;ctx.fillStyle='#7a1f1f';ctx.strokeStyle='#111';ctx.lineWidth=1.5;if(hit||f.st==='atk'){ctx.beginPath();ctx.ellipse(mx,my,3,hit?3.2:2.4,0,0,6.3);ctx.fill();ctx.stroke()}else{ctx.beginPath();ctx.moveTo(mx-3,my);ctx.lineTo(mx+3,my);ctx.stroke()}}
  }
@@ -198,7 +198,7 @@ function drawF(f){
  const T=f.tr||(f.tr=[]);
  if(G.phase==='intro')T.length=0;
  if(f.lt!==G.frame){f.lt=G.frame;if(trk)T.push(trk);else if(T.length)T.shift();if(T.length>7)T.shift()}
- if(T.length>1){ctx.save();ctx.lineCap='round';ctx.shadowColor=CC;ctx.shadowBlur=14;for(let i=1;i<T.length;i++){ctx.globalAlpha=i/T.length*.75;ctx.strokeStyle=CC2;ctx.lineWidth=2+i*1.6;ctx.beginPath();ctx.moveTo(T[i-1][0],T[i-1][1]);ctx.lineTo(T[i][0],T[i][1]);ctx.stroke()}ctx.restore()}
+ if(T.length>1){ctx.save();ctx.lineCap='round';for(let i=1;i<T.length;i++){const al=i/T.length;ctx.beginPath();ctx.moveTo(T[i-1][0],T[i-1][1]);ctx.lineTo(T[i][0],T[i][1]);ctx.globalCompositeOperation='lighter';ctx.strokeStyle=CC;ctx.globalAlpha=al*.3;ctx.lineWidth=(2+i*1.6)*2.6;ctx.stroke();ctx.globalCompositeOperation='source-over';ctx.globalAlpha=al*.75;ctx.strokeStyle=CC2;ctx.lineWidth=2+i*1.6;ctx.stroke()}ctx.restore()}
  if(f.st==='dash'&&!f.tint){ctx.save();ctx.fillStyle=CC2;for(let i=0;i<4;i++){ctx.globalAlpha=.32-i*.07;ctx.fillRect(f.x-f.dd*(22+i*16)-(f.dd>0?36:0),f.y-100+i*24,36,3)}ctx.restore()}
 }
 function hud(){
@@ -238,7 +238,7 @@ function draw(){
  if(p1){
   [p1,p2].sort((a,b)=>(b.st==='ko'||b.st==='down')-(a.st==='ko'||a.st==='down')).forEach(drawF);
   for(const p of projs)drawProj(p);
-  for(const p of parts)drawParticle(p);
+  drawParts(parts);
   ctx.globalAlpha=1;
   if(G.hb)drawBoxes();
   if(G.win>=0&&(G.phase==='over'||(G.phase==='ko'&&G.pt<100))){const wf=G.win?p2:p1;if(wf.st==='win')quote(wf)}

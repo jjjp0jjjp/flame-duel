@@ -1,17 +1,28 @@
 // ================= 技能特效(純視覺,不影響遊戲判定) =================
 let NOFX=0;
-const P=o=>{if(NOFX)return o;const p=Object.assign({vx:0,vy:0,l:20},o);p.m=p.l;if(parts.length>800)parts.shift();parts.push(p);return p};
+const P=o=>{if(NOFX)return o;const p=Object.assign({vx:0,vy:0,l:20},o);p.m=p.l;if(parts.length>700)parts.shift();parts.push(p);return p};
 const rr_=(a,b)=>a+Math.random()*(b-a);
-function emb(x,y,c,n,sp,l,sz,up){for(let i=0;i<n;i++){const a=Math.random()*6.28,s=Math.random()*sp;P({t:'e',x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-(up||0),l:l+rnd(0,8),s:sz*(.6+Math.random()*.8),c,g:-.05,dr:.95})}}
+function emb(x,y,c,n,sp,l,sz,up){if(fxLo())n=Math.ceil(n/2);for(let i=0;i<n;i++){const a=Math.random()*6.28,s=Math.random()*sp;P({t:'e',x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-(up||0),l:l+rnd(0,8),s:sz*(.6+Math.random()*.8),c,g:-.05,dr:.95})}}
 const smk=(x,y,sz,c,l)=>P({t:'sm',x,y,vx:(Math.random()-.5)*1.4,vy:-Math.random()*1.2,l:l||26,s:sz,c:c||'#8a8fa8',g:-.02,dr:.95,grow:.8});
 const rok=(x,y,vx,vy,c)=>P({t:'rk',x,y,vx,vy,l:34+rnd(0,16),s:4+Math.random()*5,c:c||'#7d879c',g:.35,dr:.99,rot:Math.random()*6,vr:(Math.random()-.5)*.5});
 const slh=(x,y,ang,len,c,l)=>P({t:'sl',x,y,ang,len,l:l||12,c,g:0,dr:1});
 const gho=(f,tint)=>{const c=Object.assign({},f);c.tr=[];c.lt=-9;c.mt=0;c.hit=false;c.flash=0;c.tint=tint;P({t:'gh',f:c,l:14,g:0,dr:1})};
 function crk(x){const pts=[];let cx=-70;while(cx<70){pts.push([cx,(Math.random()-.5)*9]);cx+=9+Math.random()*10}P({t:'ck',x,y:GY+1,pts,l:55,g:0,dr:1})}
 const li_=f=>Math.max(0,CH.indexOf(f.ch));
+// ---- 發光貼圖（依顏色快取）：取代 shadowBlur 與逐顆畫圓，光暈更柔、成本更低
+const hex6=c=>c.length===4?'#'+c[1]+c[1]+c[2]+c[2]+c[3]+c[3]:c.slice(0,7),GLW=new Map();
+function glowSpr(c){c=hex6(c);let s=GLW.get(c);if(s)return s;s=document.createElement('canvas');s.width=s.height=64;const g=s.getContext('2d'),r=g.createRadialGradient(32,32,0,32,32,32);
+ r.addColorStop(0,'#ffffff');r.addColorStop(.16,c);r.addColorStop(.42,c+'55');r.addColorStop(1,c+'00');g.fillStyle=r;g.fillRect(0,0,64,64);GLW.set(c,s);return s}
+// 細長光芒貼圖（星芒只畫兩條光芒＋中心光暈，比整張方形貼圖少填很多像素）
+function raySpr(c){c=hex6(c);const k='r'+c;let s=GLW.get(k);if(s)return s;s=document.createElement('canvas');s.width=128;s.height=12;const g=s.getContext('2d'),r=g.createLinearGradient(0,0,128,0);r.addColorStop(0,c+'00');r.addColorStop(.42,c);r.addColorStop(.5,'#ffffff');r.addColorStop(.58,c);r.addColorStop(1,c+'00');g.fillStyle=r;g.beginPath();g.ellipse(64,6,64,5,0,0,6.3);g.fill();GLW.set(k,s);return s}
+const glow=(x,y,r,c,a)=>{const o=ctx.globalCompositeOperation,ga=ctx.globalAlpha;ctx.globalCompositeOperation='lighter';if(a!==undefined)ctx.globalAlpha=ga*a;ctx.drawImage(glowSpr(c),x-r,y-r,r*2,r*2);ctx.globalCompositeOperation=o;ctx.globalAlpha=ga};
+const flare=(x,y,c,s,l)=>P({t:'fl',x,y,c,s,l:l||8,g:0,dr:1,rot:Math.random()*.6-.3});
+const fxLo=()=>QM===3||(QM===0&&QA>=2);
+const PGL=['#ff8a2a','#7fd6ff','#b46bff','#ffe680',null]; // 各角色飛行道具的光色（岩是石頭，不發光）
 // ---- 招式動作特效(每幀,攻擊進行中)
 function fxMove(f,a,g){
  const li=li_(f),k=a.key,t=f.t,d=f.dir,x=f.x,y=f.y,act=t>a.su&&t<=a.su+a.ac,ex=x+d*a.r*.9,ey=y+(a.h||-70);
+ if(t===1&&(k==='sp'||k==='sp2'||k==='sp3'||k==='asp'||k==='ex')){const c=colOf(f);flare(x+d*26,y-82,c,k==='ex'?72:40,k==='ex'?10:6);if(k==='ex'){P({ring:1,x,y:y-60,c,l:18,rs:9,lw:6});emb(x,y-60,c,18,6,24,5,1);spark(x,y-60,c,14)}}
  if(a.vx&&act){if(t%2===0)gho(f,colOf(f));if(g)smk(x-d*16,GY-8,10,'#9aa0b8',20)}
  if(li===0){
   if(k==='sp3'&&t>=a.su&&t<=a.su+a.ac+6){for(let i=0;i<6;i++)emb(x+d*rr_(12,32),y-rr_(25,135),Math.random()<.5?'#ffcf4a':'#ff6a1a',1,1.4,20,rr_(6,12),1.8);if(t===a.su)P({ring:1,flat:1,x,y:GY-2,c:'#ff7a2a',l:16,rs:6,lw:5})}
@@ -43,7 +54,9 @@ function fxMove(f,a,g){
 // ---- 命中特效
 function hitFx(src,a,v){
  const li=li_(src),x=v.x,y=v.y-75,big=a.d>12||a.ex;
- if(a.ex)flash(src.ch.col,.35,220);else if(big)flash('#ffffff',.12,90);
+ if(a.ex)flash(colOf(src),.35,220);else if(big)flash('#ffffff',.12,90);
+ flare(x,y,colOf(src),a.ex?84:big?50:30,a.ex?10:big?7:5);if(a.ex)flare(x,y,'#ffffff',50,8);
+ if(li===4&&a.ex){for(let i=0;i<14;i++)rok(v.x+rr_(-40,40),GY-6,rr_(-5,5),-rr_(5,11),i%2?'#a8784a':'#6a4a2a');for(let i=0;i<8;i++)smk(v.x+rr_(-50,50),GY-10,20,'#b9967a',40);P({ring:1,flat:1,x:v.x,y:GY-2,c:'#ffb070',l:26,rs:12,lw:8});flare(v.x,GY-30,'#ffb070',96,11);G.shake=Math.max(G.shake,14)}
  if(li===0){emb(x,y,'#ffb347',big?22:10,big?7:4,26,5,1);emb(x,y,'#fff2b0',big?8:4,3,16,3,0);if(big)P({ring:1,x,y,c:'#ff7a2a',l:18,rs:5,lw:5});if(a.ex||a.launch)for(let i=0;i<10;i++)emb(x+rr_(-15,15),y+rr_(10,60),'#ff5a1a',1,2,30,rr_(4,8),3)}
  else if(li===1){const n=big?9:4;for(let i=0;i<n;i++)rok(x+rr_(-10,10),y,rr_(-3.5,3.5),-2-Math.random()*5);for(let i=0;i<(big?5:2);i++)smk(x+rr_(-15,15),v.y-20,14,'#9aa0b8');if(big)P({ring:1,x,y,c:'#cfe6ff',l:16,rs:6,lw:6});if(a.ex||a.throw)crk(v.x)}
  else if(li===2){const n=a.ex?7:big?4:2;for(let i=0;i<n;i++)slh(x+rr_(-12,12),y+rr_(-17,17),rr_(-1.1,.8)+(i%2?1.6:0),rr_(70,110),i%2?'#e3ccff':'#b46bff',12);smk(x,y+20,12,'#4a3a80',20)}
@@ -119,29 +132,46 @@ function quake(p,sc){
  ctx.globalCompositeOperation='lighter';ctx.fillStyle='rgba(120,200,255,.35)';ctx.beginPath();ctx.ellipse(0,-2,40,8,0,0,6.3);ctx.fill();ctx.restore();
 }
 function drawProj(p){
- const li=li_(p.own),k=p.k,t=G.frame;
+ const li=li_(p.own),k=p.k,t=G.frame,gc=p.strike?null:PGL[li];
+ if(gc&&!fxLo()&&!(p.wait>0)){const al=Math.max(0,1-(GY-p.y)/220);if(al>0){const o=ctx.globalCompositeOperation;ctx.globalCompositeOperation='lighter';ctx.globalAlpha=al*.55;ctx.drawImage(glowSpr(gc),p.x-100,GY-16,200,32);ctx.globalAlpha=1;ctx.globalCompositeOperation=o}if(li!==2)glow(p.x,p.y,p.big?78:40,gc,.75)}
  if(li===2){
   if(k==='asp')kunai(p.x,p.y,Math.atan2(p.vy||0,p.vx));
-  else{const rot=t*.55+p.x*.02;for(let i=3;i>=1;i--)shuriken(p.x-p.vx*i*1.4,p.y,22,rot-i*.5,.14*(4-i));ctx.save();ctx.shadowColor='#b46bff';ctx.shadowBlur=16;shuriken(p.x,p.y,25,rot,1);ctx.restore()}
+  else{const rot=t*.55+p.x*.02;for(let i=3;i>=1;i--)shuriken(p.x-p.vx*i*1.4,p.y,22,rot-i*.5,.14*(4-i));glow(p.x,p.y,44,'#b46bff',.9);shuriken(p.x,p.y,25,rot,1)}
  }else if(li===0){if(p.big)dragon(p);else fireball(p,k==='sp2'?10:13)}
  else if(li===1)quake(p);
  else if(li===3)drawRai(p);
  else if(li===4)drawIwa(p);
  else fireball(p,12);
 }
+// 批次繪製：火星（e）與光痕（sk）都是加亮混合，結果與順序無關，
+// 所以同色、同透明度（分 4 級）的合併成一條路徑一次畫完，其他粒子照舊逐顆畫
+function drawParts(L){
+ const B=new Map();
+ for(const p of L){if(p.t==='e'||p.t==='sk'){const q=Math.min(3,p.l/p.m*4|0),k=p.t+p.c+q;let b=B.get(k);if(!b){b={t:p.t,c:p.c,a:(q+.5)/4,ps:[]};B.set(k,b)}b.ps.push(p)}else drawParticle(p)}
+ ctx.globalCompositeOperation='lighter';ctx.lineCap='round';
+ for(const b of B.values()){
+  if(b.t==='e'){const k=.4+.6*b.a;ctx.fillStyle=b.c;
+   ctx.globalAlpha=b.a*.28;ctx.beginPath();for(const p of b.ps){const r=p.s*k*1.9;ctx.moveTo(p.x+r,p.y);ctx.arc(p.x,p.y,r,0,6.3)}ctx.fill();
+   ctx.globalAlpha=b.a;ctx.beginPath();for(const p of b.ps){const r=p.s*k;ctx.moveTo(p.x+r,p.y);ctx.arc(p.x,p.y,r,0,6.3)}ctx.fill()}
+  else{ctx.globalAlpha=b.a;ctx.strokeStyle=b.c;ctx.lineWidth=2.2;ctx.beginPath();for(const p of b.ps){ctx.moveTo(p.x,p.y);ctx.lineTo(p.x-p.vx*3,p.y-p.vy*3)}ctx.stroke()}}
+ ctx.globalCompositeOperation='source-over';ctx.globalAlpha=1;
+}
 function drawParticle(p){
  const al=p.l/p.m;ctx.globalAlpha=al;
  if(p.ring){ctx.strokeStyle=p.c;ctx.lineWidth=p.lw||4;ctx.beginPath();const rr=(p.r0||10)+(p.m-p.l)*(p.rs||4);if(p.flat)ctx.ellipse(p.x,p.y,rr,rr*.22,0,0,6.3);else ctx.arc(p.x,p.y,rr,0,6.3);ctx.stroke()}
  else if(p.text){ctx.font='900 '+(p.big?30:22)+'px '+FONT;ctx.textAlign='center';ctx.lineWidth=4;ctx.strokeStyle='#000';ctx.strokeText(p.txt,p.x,p.y);ctx.fillStyle=p.c;ctx.fillText(p.txt,p.x,p.y)}
- else if(p.t==='e'){ctx.globalCompositeOperation='lighter';ctx.fillStyle=p.c;ctx.beginPath();ctx.arc(p.x,p.y,p.s*(.4+.6*al),0,6.3);ctx.fill();ctx.globalCompositeOperation='source-over'}
+ else if(p.t==='e'){ctx.globalCompositeOperation='lighter';const r=p.s*(.4+.6*al)*1.4;ctx.drawImage(glowSpr(p.c),p.x-r,p.y-r,r*2,r*2);ctx.globalCompositeOperation='source-over'}
  else if(p.t==='sm'){ctx.globalAlpha=al*.45;ctx.fillStyle=p.c;ctx.beginPath();ctx.arc(p.x,p.y,p.s,0,6.3);ctx.fill()}
  else if(p.t==='rk'){ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.rot);ctx.fillStyle=p.c;ctx.strokeStyle='#10162a';ctx.lineWidth=1.5;ctx.fillRect(-p.s/2,-p.s/2,p.s,p.s);ctx.strokeRect(-p.s/2,-p.s/2,p.s,p.s);ctx.restore()}
- else if(p.t==='sl'){ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.ang);ctx.shadowColor=p.c;ctx.shadowBlur=10;const L=p.len*(1-al*.3);ctx.strokeStyle=p.c;ctx.lineWidth=3*al+1;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(-L/2,0);ctx.lineTo(L/2,0);ctx.stroke();ctx.strokeStyle='#fff';ctx.lineWidth=1;ctx.stroke();ctx.restore()}
- else if(p.t==='ar'){const pr=1-al,sw=1.9*Math.min(1,pr*3+.3);ctx.save();ctx.translate(p.x-p.dir*34,p.y);ctx.scale(p.dir,1);ctx.lineCap='round';ctx.shadowColor=p.c;ctx.shadowBlur=14;ctx.strokeStyle=p.c;ctx.lineWidth=9*al+2;ctx.beginPath();ctx.arc(0,0,62,-1.0,-1.0+sw);ctx.stroke();ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();ctx.restore()}
+ else if(p.t==='sl'){ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.ang);const L=p.len*(1-al*.3),lw=3*al+1;ctx.lineCap='round';ctx.globalCompositeOperation='lighter';ctx.strokeStyle=p.c;ctx.globalAlpha=al*.35;ctx.lineWidth=lw*4;ctx.beginPath();ctx.moveTo(-L/2,0);ctx.lineTo(L/2,0);ctx.stroke();ctx.globalAlpha=al;ctx.lineWidth=lw;ctx.stroke();ctx.strokeStyle='#fff';ctx.lineWidth=1;ctx.stroke();ctx.restore()}
+ else if(p.t==='ar'){const pr=1-al,sw=1.9*Math.min(1,pr*3+.3);ctx.save();ctx.translate(p.x-p.dir*34,p.y);ctx.scale(p.dir,1);ctx.lineCap='round';ctx.beginPath();ctx.arc(0,0,62,-1.0,-1.0+sw);ctx.strokeStyle=p.c;ctx.globalAlpha=al*.3;ctx.lineWidth=(9*al+2)*2.4;ctx.stroke();ctx.globalAlpha=al;ctx.lineWidth=9*al+2;ctx.stroke();ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();ctx.restore()}
  else if(p.t==='ck'){ctx.save();ctx.translate(p.x,p.y);ctx.lineJoin='round';ctx.beginPath();p.pts.forEach((q,i)=>i?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1]));ctx.strokeStyle='#070a14';ctx.lineWidth=5;ctx.stroke();ctx.strokeStyle='rgba(159,214,255,.9)';ctx.lineWidth=1.6;ctx.stroke();ctx.restore()}
  else if(p.t==='gh'){ctx.globalAlpha=al*.45;drawF(p.f)}
- else if(p.t==='zz'){ctx.save();ctx.strokeStyle=p.c;ctx.shadowColor=p.c;ctx.shadowBlur=10;ctx.lineWidth=2*al+.6;ctx.lineJoin='round';ctx.beginPath();ctx.moveTo(p.x,p.y);for(let i=1;i<=5;i++)ctx.lineTo(p.x+Math.cos(p.ang)*p.len*i/5+(Math.random()-.5)*10,p.y+Math.sin(p.ang)*p.len*i/5+(Math.random()-.5)*10);ctx.stroke();ctx.restore()}
+ else if(p.t==='zz'){ctx.save();ctx.lineJoin='round';ctx.beginPath();ctx.moveTo(p.x,p.y);for(let i=1;i<=5;i++)ctx.lineTo(p.x+Math.cos(p.ang)*p.len*i/5+(Math.random()-.5)*10,p.y+Math.sin(p.ang)*p.len*i/5+(Math.random()-.5)*10);ctx.globalCompositeOperation='lighter';ctx.strokeStyle=p.c;ctx.globalAlpha=al*.3;ctx.lineWidth=(2*al+.6)*4;ctx.stroke();ctx.globalAlpha=al;ctx.lineWidth=2*al+.6;ctx.stroke();ctx.restore()}
  else if(p.t==='bolt'){bolt(p.x,0,GY,al,p.w||1)}
+ else if(p.t==='fl'){const s2=p.s*(.45+.55*al),w2=Math.max(3,s2*.1),r=s2*.42,rs=raySpr(p.c);ctx.save();ctx.globalCompositeOperation='lighter';ctx.translate(p.x,p.y);ctx.drawImage(glowSpr(p.c),-r,-r,r*2,r*2);ctx.rotate(p.rot);ctx.drawImage(rs,-s2,-w2/2,s2*2,w2);ctx.rotate(Math.PI/2);ctx.drawImage(rs,-s2,-w2/2,s2*2,w2);ctx.restore()}
+ else if(p.t==='sk'){ctx.globalCompositeOperation='lighter';ctx.lineCap='round';ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(p.x-p.vx*3,p.y-p.vy*3);ctx.strokeStyle=p.c;ctx.lineWidth=2.2;ctx.stroke();ctx.globalCompositeOperation='source-over'}
+ else if(p.t==='sh'){ctx.save();ctx.globalCompositeOperation='lighter';ctx.translate(p.x,p.y);ctx.scale(p.dir,1);const r=30+(1-al)*10;ctx.beginPath();ctx.arc(-14,0,r,-1.05,1.05);ctx.strokeStyle=p.c;ctx.globalAlpha=al*.3;ctx.lineWidth=12;ctx.stroke();ctx.globalAlpha=al;ctx.lineWidth=3;ctx.stroke();ctx.strokeStyle='#fff';ctx.lineWidth=1.2;ctx.stroke();ctx.lineWidth=1;ctx.globalAlpha=al*.6;ctx.strokeStyle=p.c;for(let i=-2;i<=2;i++){const a=i*.42;ctx.beginPath();ctx.moveTo(-14+Math.cos(a)*(r-9),Math.sin(a)*(r-9));ctx.lineTo(-14+Math.cos(a)*r,Math.sin(a)*r);ctx.stroke()}ctx.restore()}
  else{ctx.fillStyle=p.c;ctx.fillRect(p.x,p.y,p.s,p.s)}
 }
 
