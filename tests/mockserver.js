@@ -4,6 +4,9 @@ const FILE = process.argv[2], PORT = +process.argv[3] || 8790;
 const ICE = process.env.ICE ? JSON.parse(process.env.ICE) : [];
 const rooms = new Map(); // code -> {host, guest}
 const stats = { opened: 0, msgs: 0 };
+// 和正式版相同的依 IP 限流（GATE 環境變數可調低來測試）
+let gateHit = null; import('../rooms-worker/src/gate.js').then((m) => { gateHit = m.gateHit; });
+const GATE = +process.env.GATE || 40, hits = new Map();
 function frame(str, op = 1) {
   const p = Buffer.from(str); let h;
   if (p.length < 126) h = Buffer.from([0x80 | op, p.length]);
@@ -67,6 +70,8 @@ server.on('upgrade', (req, sock) => {
     if (!R.host && !R.guest) rooms.delete(code);
   });
   const reject = (t) => { S.send({ t }); S.close(4000); };
+  const ip = req.socket.remoteAddress || ''; if (!hits.has(ip)) hits.set(ip, []);
+  if (gateHit && !gateHit(hits.get(ip), Date.now(), GATE)) return reject('slow');
   if (role === 'host') { if (alive(R.host)) return reject('taken'); S.role = 'host'; R.host = S; S.send({ t: 'hosted' }); }
   else if (role === 'guest') { if (!alive(R.host)) return reject('noroom'); if (alive(R.guest)) return reject('full'); S.role = 'guest'; R.guest = S; R.host.send({ t: 'peer', ice: ICE }); S.send({ t: 'joined', ice: ICE }); }
   else reject('bad');

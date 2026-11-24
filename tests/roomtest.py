@@ -45,6 +45,12 @@ with sync_playwright() as p:
     A.wait_for_timeout(2500); play([A, B], 120); A.wait_for_timeout(800)
     ha = A.evaluate("NET.hash"); hb = B.evaluate("NET.hash"); com = [k for k in ha if k in hb]; mm = [k for k in com if ha[k] != hb[k]]
     ok('對戰中兩邊狀態同步', len(com) >= 5 and not mm, f'檢查點 {len(com)} 不一致 {len(mm)}')
+    # 3b. 人為讓房客狀態錯開 → 偵測到不同步 → 自動用房主的快照重新同步
+    B.evaluate("(()=>{p2.hp-=9;p1.x+=11;for(const k in NET.snaps){const o=JSON.parse(NET.snaps[k]);o.b.hp-=9;o.a.x+=11;NET.snaps[k]=JSON.stringify(o)}})()")
+    play([A, B], 80); A.wait_for_timeout(1500)
+    rs = B.evaluate("NET.resyncs"); sf = B.evaluate("NET.syncF"); ha = A.evaluate("NET.hash"); hb = B.evaluate("NET.hash")
+    com = [k for k in hb if k in ha and int(k) >= sf]; mm = [k for k in com if ha[k] != hb[k]]
+    ok('狀態錯開時自動重新同步', rs >= 1 and len(com) >= 2 and not mm and not A.evaluate("NET.desync") and not B.evaluate("NET.desync"), f'重新同步 {rs} 次，之後檢查點 {len(com)} 個、不一致 {len(mm)}')
     # 4. 打完再戰（走資料通道，不需要伺服器）
     for i in range(1200):
         if A.evaluate("G.phase") == 'over' and B.evaluate("G.phase") == 'over': break

@@ -1,4 +1,5 @@
 import { DurableObject } from "cloudflare:workers";
+import { gateHit } from "./gate.js";
 
 // 烈焰對決：房間配對（Durable Object）
 // 每個 4 位數代碼對應一個 Room。房主與房客各一條 WebSocket，
@@ -36,6 +37,11 @@ export class Room extends DurableObject {
   }
 
   async fetch(req) {
+    // 限流計數器：以 "gate:<ip>" 命名的 Room 實例只負責計數，不開房間
+    if (new URL(req.url).pathname === "/__gate") {
+      this.hits = this.hits || [];
+      return new Response(null, { status: gateHit(this.hits, Date.now()) ? 204 : 429 });
+    }
     if (req.headers.get("Upgrade") !== "websocket") return new Response("expected websocket", { status: 426 });
     const role = new URL(req.url).searchParams.get("role");
     const [client, server] = Object.values(new WebSocketPair());

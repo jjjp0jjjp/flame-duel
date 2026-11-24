@@ -157,6 +157,7 @@ function draw(){
  ctx.restore();
  if(p1)hud();
  if(p1&&G.mode===3&&G.phase!=='menu'){if(TUT)tutHud();else trainHud()}
+ overlayDraw();
  const now=performance.now();
  if(G.vs>0&&G.phase!=='menu')vsScreen();
  if(G.mt>0&&G.phase!=='menu'&&!(G.vs>0)){
@@ -165,7 +166,7 @@ function draw(){
  }
  if(now<G.supEnd)supCine((G.supEnd-now)/850);
  if(G.mode===4&&NET.on&&G.phase!=='menu'){
-  ctx.save();ctx.textAlign='right';ctx.font='12px '+FONT;ctx.fillStyle=NET.desync?'#ff6b6b':'#ffffffaa';ctx.fillText('延遲 '+Math.round(NET.rtt)+'ms・輸入延遲 '+(NET.DL|0)+' 幀'+(NET.via==='relay'?'・經由中繼':'')+(NET.desync?'　⚠ 兩邊狀態不同步':''),W-12,H-10);
+  ctx.save();ctx.textAlign='right';ctx.font='12px '+FONT;ctx.fillStyle=NET.desync?'#ff6b6b':'#ffffffaa';ctx.fillText('延遲 '+Math.round(NET.rtt)+'ms・輸入延遲 '+(NET.DL|0)+' 幀'+(NET.via==='relay'?'・經由中繼':'')+(NET.desync?'　⚠ 狀態不同步，重新同步中…':performance.now()-NET.rsT<2500?'　✔ 已重新同步':''),W-12,H-10);
   ctx.textAlign='center';ctx.lineWidth=5;ctx.strokeStyle='#000';ctx.fillStyle='#fff';ctx.font='bold 28px '+FONT;
   const st=NET.stallT?performance.now()-NET.stallT:0,tx=NET.gone?'對手已離開':st>8000?'連線中斷，按 Esc 離開':st>500?'等待對手…':'';
   if(tx){ctx.strokeText(tx,W/2,H/2+90);ctx.fillText(tx,W/2,H/2+90)}ctx.restore()}

@@ -41,6 +41,7 @@ input[type=range]{width:90px;padding:0}
 </style></head><body>
 <noscript><p style="color:#fff;padding:20px;text-align:center">此遊戲需要啟用 JavaScript 才能執行。</p></noscript>
 <canvas id="c" width="960" height="540"></canvas>
+<div id="obar" style="display:none;gap:8px;justify-content:center;padding:6px"><button id="ob-rp">複製重播連結</button><button id="ob-mn">回選單</button></div>
 <div id="tbar"><button id="tb-hb"></button><button id="tb-dm"></button><button id="tb-rec"></button><button id="tb-tr"></button><button id="tb-rs">重置位置</button></div>
 <div id="pad"><div id="stick"><div id="knob"></div></div>
 <div class="a"><button data-k="T0a">輕拳</button><button data-k="T0b">重拳</button><button data-k="T0s">必殺</button><button data-k="T0e,T0a" class="q">升龍</button><button data-k="T0x">輕腳</button><button data-k="T0y">重腳</button><button data-k="T0t">投</button><button data-k="T0e,T0s" class="q">超必</button></div></div>
@@ -49,7 +50,7 @@ input[type=range]{width:90px;padding:0}
 <div id="selbox"><div class="srow"><span class="sl">P1</span><div class="cards" id="g1"></div></div><div class="srow"><span class="sl">P2<br>電腦</span><div class="cards" id="g2"></div></div><div id="sinfo"></div></div>
 <div class="row">難度 <button id="df"></button> 場景 <button id="stg"></button></div>
 <div class="row" id="rec" style="color:#ffe14d"></div>
-<button class="big" id="b1">單人 vs 電腦</button><button class="big" id="b2">雙人對戰</button><button class="big" id="b3">訓練模式</button><button class="big" id="b4">連線對戰</button><button class="big" id="b5" style="background:linear-gradient(#3a8a5a,#1f5a3a);border-color:#8fe8b0">新手教學</button>
+<button class="big" id="b1">單人 vs 電腦</button><button class="big" id="b2">雙人對戰</button><button class="big" id="b3">訓練模式</button><button class="big" id="b4">連線對戰</button><button class="big" id="b6" style="display:none;background:linear-gradient(#4a4a8a,#2a2a5a);border-color:#aab0ff">觀看上一場重播</button><button class="big" id="b5" style="background:linear-gradient(#3a8a5a,#1f5a3a);border-color:#8fe8b0">新手教學</button>
 <div id="net" class="help" style="display:none"><b>連線對戰</b>
 <div id="ns" style="margin:6px 0;color:#ffe14d">房主按「建立房間」，把 4 位數代碼告訴對手；對手輸入代碼按「加入」。</div>
 <div id="rm" class="row"><button id="rh">建立房間</button><input id="rc2" inputmode="numeric" maxlength="4" placeholder="代碼" autocomplete="off"><button id="rj">加入</button><button id="nx">取消</button></div>
@@ -612,8 +613,8 @@ function aiInput(me,op){
 }
 
 function startRound(){G.win=-1;p1.reset();p2.reset();projs=[];parts=[];G.cam={z:1,cx:W/2};G.phase='intro';G.pt=100;G.time=60;G.tf=0;G.msg='ROUND '+G.round;G.mt=G.mm=100;sfx('round')}
-function startGame(m){G.mode=m;G.frame=0;G.hitstop=0;G.shake=0;for(const o of[pv1,pv2])for(const k in o)delete o[k];bg=makeBg(STG[G.stage]);p1=new F(CH[sel[0]],0);p2=new F(CH[sel[1]],1);G.round=1;G.pause=false;document.getElementById('menu').style.display='none';startRound();G.vs=m===3?0:110;if(G.vs)sfx('vs');if(m!==3)TUT=null;TR.rec=0;TR.tr=-1;TR.ok=0;FD=null;tbar()}
-function toMenu(){if(NET.room){netQuit(1);return}G.phase='menu';G.mt=0;TUT=null;lab();tbar();document.getElementById('menu').style.display='flex'}
+function startGame(m){rpSaveLast();REC=(m===1||m===2||m===4)&&!RP?{m,c:[sel[0],sel[1]],g:G.stage,a:[],b:[]}:null;G.mode=m;G.frame=0;G.hitstop=0;G.shake=0;for(const o of[pv1,pv2])for(const k in o)delete o[k];bg=makeBg(STG[G.stage]);p1=new F(CH[sel[0]],0);p2=new F(CH[sel[1]],1);G.round=1;G.si=0;G.pause=false;document.getElementById('menu').style.display='none';startRound();G.vs=m===3?0:110;if(G.vs)sfx('vs');if(m!==3)TUT=null;TR.rec=0;TR.tr=-1;TR.ok=0;FD=null;tbar()}
+function toMenu(){if(NET.room){netQuit(1);return}rpSaveLast();RP=null;REC=null;G.phase='menu';G.mt=0;TUT=null;lab();tbar();rpLastBtn();document.getElementById('menu').style.display='flex'}
 function endRound(why){
  const ko1=p1.st==='ko',ko2=p2.st==='ko';let w=null;
  if(why==='ko'){if(ko1&&!ko2)w=p2;else if(ko2&&!ko1)w=p1}else w=p1.hp>p2.hp?p1:p2.hp>p1.hp?p2:null;
@@ -622,14 +623,15 @@ function endRound(why){
  if(why==='ko'){G.hitstop=14;G.shake=16;sfx('ko')}
 }
 function step(){
- if(G.phase==='menu'||G.pause)return;
+ if(G.phase==='menu'||G.pause||(RP&&RP.end))return;
  if(G.mode===4){d1=dec(NET.inp[0],pv1);d2=dec(NET.inp[1],pv2)}
  if(G.vs>0){G.vs--;if(G.vs===0)sfx('round');return}
+ G.si=(G.si|0)+1;
  if(G.hitstop>0){G.hitstop--;if(G.phase==='fight'){const bf=(p,i)=>{const m=p.pick(i,p.y>=GY);if(m)p.setBuf(m);if(i.u&&!p.pu)p.jb=8;p.pu=i.u;if(i.dash)p.db={d:i.dash,t:8}};const ab=inputs(1);bf(p1,ab[0]);if(ab[1])bf(p2,ab[1])}return}
  G.frame++;G.shake*=.88;if(G.mt>0)G.mt--;
  if(G.phase==='ko'&&G.frame%2)return;
  let i1=NI,i2=NI;
- if(G.phase==='fight'){const ab=inputs(0);i1=ab[0];i2=ab[1];p1.mt=Math.min(100,p1.mt+.03);p2.mt=Math.min(100,p2.mt+.03);if(G.mode===3){p1.mt=100;if(p2.combo===0&&p2.st==='idle'){p2.hp=p2.ch.hp;p2.lag=p2.hp}}}
+ if(G.phase==='fight'){const ab=inputs(0);i1=ab[0];i2=ab[1]||NI;p1.mt=Math.min(100,p1.mt+.03);p2.mt=Math.min(100,p2.mt+.03);if(G.mode===3){p1.mt=100;if(p2.combo===0&&p2.st==='idle'){p2.hp=p2.ch.hp;p2.lag=p2.hp}}}
  p1.update(i1,p2);p2.update(i2,p1);resolveHits();if(G.mode===3)trainTick();
  const dx=p2.x-p1.x;
  if(Math.abs(dx)<44&&Math.abs(p1.y-p2.y)<60&&p1.st!=='ko'&&p2.st!=='ko'&&p1.st!=='down'&&p2.st!=='down'){const pu=(44-Math.abs(dx))/2,s=dx>=0?1:-1;p1.x-=s*pu;p2.x+=s*pu;p1.x=Math.max(40,Math.min(W-40,p1.x));p2.x=Math.max(40,Math.min(W-40,p2.x))}
@@ -655,7 +657,7 @@ function step(){
  }else if(G.phase==='ko'){
   if(--G.pt<=0){
    if(p1.wins>=2||p2.wins>=2){
-    G.phase='over';const w=p1.wins>p2.wins?p1:p2.wins>p1.wins?p2:null;if(G.mode===1&&w)rec(w===p1);
+    G.phase='over';const w=p1.wins>p2.wins?p1:p2.wins>p1.wins?p2:null;if(G.mode===1&&w&&!RP)rec(w===p1);
     G.msg=w?(w===p1?'P1 ':G.mode===1?'電腦 ':'P2 ')+w.ch.n+' 獲勝!':'平手';G.mt=G.mm=1e9;snd(660,.4,'triangle',.07,990)
    }else{G.round++;startRound()}
   }
@@ -821,6 +823,7 @@ function draw(){
  ctx.restore();
  if(p1)hud();
  if(p1&&G.mode===3&&G.phase!=='menu'){if(TUT)tutHud();else trainHud()}
+ overlayDraw();
  const now=performance.now();
  if(G.vs>0&&G.phase!=='menu')vsScreen();
  if(G.mt>0&&G.phase!=='menu'&&!(G.vs>0)){
@@ -829,7 +832,7 @@ function draw(){
  }
  if(now<G.supEnd)supCine((G.supEnd-now)/850);
  if(G.mode===4&&NET.on&&G.phase!=='menu'){
-  ctx.save();ctx.textAlign='right';ctx.font='12px '+FONT;ctx.fillStyle=NET.desync?'#ff6b6b':'#ffffffaa';ctx.fillText('延遲 '+Math.round(NET.rtt)+'ms・輸入延遲 '+(NET.DL|0)+' 幀'+(NET.via==='relay'?'・經由中繼':'')+(NET.desync?'　⚠ 兩邊狀態不同步':''),W-12,H-10);
+  ctx.save();ctx.textAlign='right';ctx.font='12px '+FONT;ctx.fillStyle=NET.desync?'#ff6b6b':'#ffffffaa';ctx.fillText('延遲 '+Math.round(NET.rtt)+'ms・輸入延遲 '+(NET.DL|0)+' 幀'+(NET.via==='relay'?'・經由中繼':'')+(NET.desync?'　⚠ 狀態不同步，重新同步中…':performance.now()-NET.rsT<2500?'　✔ 已重新同步':''),W-12,H-10);
   ctx.textAlign='center';ctx.lineWidth=5;ctx.strokeStyle='#000';ctx.fillStyle='#fff';ctx.font='bold 28px '+FONT;
   const st=NET.stallT?performance.now()-NET.stallT:0,tx=NET.gone?'對手已離開':st>8000?'連線中斷，按 Esc 離開':st>500?'等待對手…':'';
   if(tx){ctx.strokeText(tx,W/2,H/2+90);ctx.fillText(tx,W/2,H/2+90)}ctx.restore()}
@@ -840,11 +843,7 @@ function draw(){
 // ================= 連線對戰(鎖步同步) =================
 const NET={on:false,room:null,lobby:null,slot:0,D:6,tick:0,cap:0,loc:{},rem:{},remHigh:-1,remAck:-1,sendT:{},lastSend:0,stallT:0,rtt:0,hash:{},rh:{},hl:null,desync:false,inp:[0,0],sid:'',started:false,gone:false,remote:null,hb:0,unsub:[],code:'',pings:[],Dsel:6,lastIn:null};
 const setNs=t=>{$('ns').textContent=t};
-NET.sendIv=16; // WebRTC DataChannel 可以送得比較密
-const RTC_CFG={iceServers:[{urls:['stun:stun.l.google.com:19302','stun:stun1.l.google.com:19302']},{urls:'stun:global.stun.twilio.com:3478'}]};
-let PC=null;
-function turnCfg(){try{return JSON.parse(localStorage.getItem('fd_turn')||'null')}catch(e){return null}}
-function rtcCfg(ice){const c={iceServers:(ice&&ice.length?ice:RTC_CFG.iceServers).slice()},t=turnCfg();if(t&&t.u)c.iceServers.push({urls:t.u,username:t.n||'',credential:t.p||''});return c}
+// 壓縮＋base64url 編碼（手動代碼、重播連結共用）
 const b64=u=>{let t='';for(let i=0;i<u.length;i+=8192)t+=String.fromCharCode.apply(null,u.subarray(i,i+8192));return btoa(t).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')};
 const unb64=t=>{t=t.replace(/-/g,'+').replace(/_/g,'/');while(t.length%4)t+='=';const r=atob(t),u=new Uint8Array(r.length);for(let i=0;i<r.length;i++)u[i]=r.charCodeAt(i);return u};
 async function codeEnc(o){
@@ -858,6 +857,11 @@ async function codeDec(t){
  if(k==='z'){const ds=new DecompressionStream('deflate-raw'),w=ds.writable.getWriter();w.write(u).catch(()=>{});w.close().catch(()=>{});return JSON.parse(new TextDecoder().decode(await new Response(ds.readable).arrayBuffer()))}
  throw new Error('bad');
 }
+NET.sendIv=16; // WebRTC DataChannel 可以送得比較密
+const RTC_CFG={iceServers:[{urls:['stun:stun.l.google.com:19302','stun:stun1.l.google.com:19302']},{urls:'stun:global.stun.twilio.com:3478'}]};
+let PC=null;
+function turnCfg(){try{return JSON.parse(localStorage.getItem('fd_turn')||'null')}catch(e){return null}}
+function rtcCfg(ice){const c={iceServers:(ice&&ice.length?ice:RTC_CFG.iceServers).slice()},t=turnCfg();if(t&&t.u)c.iceServers.push({urls:t.u,username:t.n||'',credential:t.p||''});return c}
 function mkPC(ice){
  try{if(PC)PC.close()}catch(e){}
  PC=new RTCPeerConnection(rtcCfg(ice));
@@ -882,7 +886,7 @@ function wrapChannel(ch){
 }
 function attach(R,slot){
  NET.room=R;NET.slot=slot;NET.started=false;NET.gone=false;NET.remote=null;NET.sid='';NET.pings=[];
- NET.unsub=[R.on('hello',m=>onHello(m.data)),R.on('start',m=>onStart(m.data)),R.on('ready',m=>onReady(m.data)),R.on('inp',m=>onInp(m.data)),R.on('bye',()=>onBye()),R.on('png',m=>{if(NET.slot===1&&NET.room)NET.room.emit('pog',{t:m.data&&m.data.t})}),R.on('pog',m=>onPog(m.data)),R.on('rem',m=>onRem(m.data)),R.on('rst',m=>onRst(m.data))];
+ NET.unsub=[R.on('hello',m=>onHello(m.data)),R.on('start',m=>onStart(m.data)),R.on('ready',m=>onReady(m.data)),R.on('inp',m=>onInp(m.data)),R.on('bye',()=>onBye()),R.on('png',m=>{if(NET.slot===1&&NET.room)NET.room.emit('pog',{t:m.data&&m.data.t})}),R.on('pog',m=>onPog(m.data)),R.on('rem',m=>onRem(m.data)),R.on('rst',m=>onRst(m.data)),R.on('srq',m=>onSrq(m.data)),R.on('snp',m=>onSnp(m.data))];
  wsClose();NET.via='';viaInfo();
  setNs(slot?'已連線！等待房主開始…':'已連線！測量連線品質中…');
  clearInterval(NET.hb);NET.hb=setInterval(netHello,300);netHello();
@@ -955,8 +959,8 @@ function rbFnv(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i
 function canon(v){if(Array.isArray(v))return'['+v.map(canon).join(',')+']';if(v&&typeof v==='object')return'{'+Object.keys(v).sort().map(k=>k+':'+canon(v[k])).join(',')+'}';return JSON.stringify(v)}
 function snapF(f){const o={};for(const k in f){if(k==='tr'||k==='lt'||k==='ph')continue;o[k]=k==='ch'?CH.indexOf(f[k]):f[k]}return o}
 function restF(f,o){const tr=f.tr,lt=f.lt;for(const k of Object.keys(f))delete f[k];Object.assign(f,o);f.ch=CH[o.ch];f.tr=tr||[];f.lt=lt;f.ph=null}
-function snapAll(){return JSON.stringify({g:[G.frame,G.hitstop,G.phase,G.round,G.time,G.tf,G.pt,G.msg,G.mt,G.mm,G.vs|0,G.win],a:snapF(p1),b:snapF(p2),pr:projs.map(p=>{const o=Object.assign({},p);o.own=p.own===p1?0:1;return o}),v1:pv1,v2:pv2})}
-function loadAll(s){const o=JSON.parse(s),g=o.g;G.frame=g[0];G.hitstop=g[1];G.phase=g[2];G.round=g[3];G.time=g[4];G.tf=g[5];G.pt=g[6];G.msg=g[7];G.mt=g[8];G.mm=g[9];G.vs=g[10];G.win=g[11];
+function snapAll(){return JSON.stringify({g:[G.frame,G.hitstop,G.phase,G.round,G.time,G.tf,G.pt,G.msg,G.mt,G.mm,G.vs|0,G.win,G.si|0],a:snapF(p1),b:snapF(p2),pr:projs.map(p=>{const o=Object.assign({},p);o.own=p.own===p1?0:1;return o}),v1:pv1,v2:pv2})}
+function loadAll(s){const o=JSON.parse(s),g=o.g;G.frame=g[0];G.hitstop=g[1];G.phase=g[2];G.round=g[3];G.time=g[4];G.tf=g[5];G.pt=g[6];G.msg=g[7];G.mt=g[8];G.mm=g[9];G.vs=g[10];G.win=g[11];G.si=g[12]|0;
  restF(p1,o.a);restF(p2,o.b);projs=o.pr.map(p=>{p.own=p.own?p2:p1;return p});
  for(const k in pv1)delete pv1[k];Object.assign(pv1,o.v1);for(const k in pv2)delete pv2[k];Object.assign(pv2,o.v2)}
 function beginNet(c0,c1,g,D,m){
@@ -964,7 +968,7 @@ function beginNet(c0,c1,g,D,m){
  const sv=[sel[0],sel[1],G.stage];
  NET.DL=Math.max(1,Math.min(4,D|0))||2;NET.m=m||1;NET.c=[c0,c1];NET.g=g;
  NET.started=true;NET.on=true;NET.tick=0;NET.loc={};NET.rem={};NET.used={};NET.snaps={};NET.rbFrom=null;NET.rbCount=0;NET.rbMax=0;
- NET.sendT={};NET.hash={};NET.rh={};NET.hl=null;NET.nextHash=29;NET.desync=false;NET.stallT=0;NET.rtt=NET.rtt||0;NET.gone=false;
+ NET.sendT={};NET.hash={};NET.rh={};NET.hl=null;NET.nextHash=29;NET.desync=false;NET.syncF=0;NET.dsAt=0;NET.resyncs=0;NET.rsT=0;NET.lastSrq=0;NET.stallT=0;NET.rtt=NET.rtt||0;NET.gone=false;
  NET.remHigh=NET.DL-1;NET.remAck=NET.DL-1;NET.remAd=0;NET.skip=0;NET.inp=[0,0];NET.reL=0;NET.reR=0;NET.gotM=0;NET.lastRe=0;NET.rst=null;
  for(let i=0;i<NET.DL;i++){NET.loc[i]=0;NET.rem[i]=0}
  sel[0]=c0;sel[1]=c1;G.stage=g;
@@ -979,6 +983,7 @@ function netSend(){
  for(let k=f;k<=t;k++){b.push(NET.loc[k]|0);if(NET.sendT[k]===undefined)NET.sendT[k]=now}
  NET.room.emit('inp',{f,b,a:NET.remHigh,ad:NET.tick-1-NET.remHigh,h:NET.hl,m:NET.m}).catch(()=>{});
  if(G.phase==='over'&&NET.reL&&now-NET.lastRe>400){NET.lastRe=now;NET.room.emit('rem',{m:NET.m}).catch(()=>{})}
+ if(NET.desync&&NET.slot===1&&now-NET.lastSrq>500){NET.lastSrq=now;NET.room.emit('srq',{m:NET.m}).catch(()=>{})}
  if(NET.slot===0&&NET.rst&&!NET.gotM&&now-NET.lastRe>300){NET.lastRe=now;NET.room.emit('rst',NET.rst).catch(()=>{})}
 }
 function onInp(d){
@@ -992,7 +997,7 @@ function onInp(d){
   for(let t=NET.remAck+1;t<=d.a;t++)if(NET.sendT[t]!==undefined){const r=now-NET.sendT[t];NET.rtt=NET.rtt?NET.rtt*.9+r*.1:r;delete NET.sendT[t]}
   NET.remAck=d.a;
  }
- if(Array.isArray(d.h)&&d.h.length===2){NET.rh[d.h[0]]=d.h[1];if(NET.hash[d.h[0]]!==undefined&&NET.hash[d.h[0]]!==d.h[1])NET.desync=true}
+ if(Array.isArray(d.h)&&d.h.length===2&&d.h[0]>=NET.syncF){NET.rh[d.h[0]]=d.h[1];if(NET.hash[d.h[0]]!==undefined)hashCmp(d.h[0],NET.hash[d.h[0]],d.h[1])}
 }
 function simF(n,re){const r=NET.rem[n]!==undefined?NET.rem[n]:(NET.rem[NET.remHigh]|0),l=NET.loc[n]|0;NET.used[n]=r;NET.inp=NET.slot===0?[l,r]:[r,l];if(re)NOFX++;try{step()}finally{if(re)NOFX--}}
 function netTick(){
@@ -1012,10 +1017,26 @@ function netTick(){
  simF(n,0);
  NET.tick=n+1;
  const C=Math.min(NET.remHigh,NET.tick-1);
- while(NET.nextHash<=C){const c=NET.nextHash,s=c+1<NET.tick?NET.snaps[c+1]:snapAll();if(s){const hv=rbFnv(canon(JSON.parse(s)));NET.hash[c]=hv;NET.hl=[c,hv];if(NET.rh[c]!==undefined&&NET.rh[c]!==hv)NET.desync=true}NET.nextHash+=30}
+ while(NET.nextHash<=C){const c=NET.nextHash,s=c+1<NET.tick?NET.snaps[c+1]:snapAll();if(s){const hv=rbFnv(canon(JSON.parse(s)));NET.hash[c]=hv;NET.hl=[c,hv];if(NET.rh[c]!==undefined)hashCmp(c,hv,NET.rh[c])}NET.nextHash+=30}
  if(n%30===0){const lo=n-60;for(const k in NET.snaps)if(+k<lo)delete NET.snaps[k];for(const k in NET.used)if(+k<lo)delete NET.used[k];
   for(const k in NET.rem)if(+k<Math.min(lo,NET.remHigh-2))delete NET.rem[k];const lo2=Math.min(lo,NET.remAck-2);for(const k in NET.loc)if(+k<lo2)delete NET.loc[k]}
  return 1;
+}
+// ===== 不同步時重新同步：房客請求，房主送出「輸入都已確認」那一幀的完整狀態，房客從那裡回滾重算 =====
+// 比對檢查點：不一致就標記；之後更晚的檢查點一致就解除（避免重新同步前送出的舊檢查點讓警告卡住）
+function hashCmp(c,a,b){if(a!==b){NET.desync=true;NET.dsAt=Math.max(NET.dsAt|0,c)}else if(c>(NET.dsAt|0))NET.desync=false}
+function onSrq(d){
+ if(NET.slot!==0||!NET.on||!d||d.m!==NET.m||NET.rbFrom!==null)return;
+ const T=Math.min(NET.remHigh+1,NET.tick-1);if(!NET.snaps[T])return;
+ NET.syncF=T;NET.rh={};NET.desync=false;NET.rsT=performance.now();NET.resyncs++;
+ NET.room.emit('snp',{m:NET.m,f:T,s:NET.snaps[T]}).catch(()=>{});
+}
+function onSnp(d){
+ if(NET.slot!==1||!NET.on||!NET.desync||!d||d.m!==NET.m||typeof d.f!=='number'||typeof d.s!=='string')return;
+ const T=d.f;if(T>=NET.tick||T<NET.tick-55)return;
+ try{const o=JSON.parse(d.s);if(!o||!Array.isArray(o.g)||!o.a||!o.b)return}catch(e){return}
+ NET.snaps[T]=d.s;if(NET.rbFrom===null||T<NET.rbFrom)NET.rbFrom=T;
+ NET.hash={};NET.rh={};NET.syncF=T;NET.nextHash=T+((29-T%30)+30)%30;NET.desync=false;NET.rsT=performance.now();NET.resyncs++;
 }
 function netRematch(){if(!NET.on||G.phase!=='over'||NET.reL)return;NET.reL=1;NET.lastRe=0;netCheckRe()}
 function onRem(d){if(!NET.on||!d||d.m!==NET.m||G.phase!=='over')return;NET.reR=1;netCheckRe()}
@@ -1040,7 +1061,7 @@ function pads(){if(!padOK)return;let gp=[];try{gp=navigator.getGamepads?navigato
 function loop(ts){requestAnimationFrame(loop);pads();acc+=Math.min(100,ts-last);last=ts;
  if(NET.on){while(acc>=16.667){if(!netTick()){acc=Math.min(acc,33);break}acc-=16.667}netSend()}
  else while(acc>=16.667){step();acc-=16.667}
- draw()}
+ uiTick();draw()}
 requestAnimationFrame(loop);
 
 addEventListener('keydown',e=>{if(KCAP){e.preventDefault();kcapDone(e.code);return}
@@ -1050,6 +1071,8 @@ addEventListener('keydown',e=>{if(KCAP){e.preventDefault();kcapDone(e.code);retu
  keys[e.code]=1;pend[e.code]=1;
  if(G.mode===4&&NET.on&&e.code==='Escape')netQuit(1);else if(((e.code==='KeyP'&&!bound(e.code))||e.code==='Escape')&&G.mode!==4&&G.phase!=='menu'&&G.phase!=='over')G.pause=!G.pause;
  if(G.vs>0&&G.mode!==4&&(e.code==='Enter'||e.code==='Space'))G.vs=1;
+ if(e.code==='Enter'&&RP&&RP.end){toMenu();return}
+ if(e.code==='KeyR'&&G.phase==='over'&&REC&&!bound(e.code))rpCopy();
  if(e.code==='Enter'&&G.phase==='over'){if(G.mode===4&&NET.on)netRematch();else toMenu()}
  if(e.code==='KeyQ'&&G.pause&&!bound(e.code)){G.pause=false;toMenu()}
  if(e.code==='KeyM'&&!bound(e.code))mute=!mute;
@@ -1118,6 +1141,7 @@ const sigSend=(w,o)=>{try{w.send(JSON.stringify(o))}catch(e){}};
 function cleanIce(ice){return Array.isArray(ice)?ice.filter(s=>s&&s.urls).slice(0,6):null}
 function connWatch(rid){setTimeout(()=>{if(rid===NET.rid&&!NET.room){setNs('連線逾時：雙方網路無法建立連線。請按「取消」後重新建立房間再試一次。');wsClose()}},25000)}
 function showCode(code){$('rcode').textContent=code;$('rcode').style.display='block';$('rl').style.display='inline-block';NET.code=code}
+const SLOW='嘗試建立或加入房間的次數太多，請等幾分鐘再試。';
 async function roomHost(){
  if(!SIG){setNs('從檔案直接開啟時沒有配對伺服器，請改用下方「手動交換代碼」。');return}
  if(!window.RTCPeerConnection){setNs('這個瀏覽器不支援 WebRTC，無法連線對戰。');return}
@@ -1129,6 +1153,7 @@ async function roomHost(){
   const m=await wsNext(w,8000);
   if(rid!==NET.rid){try{w.close()}catch(e){}return}
   if(m.t==='hosted'){WS=w;showCode(code);return hostLoop(w,code,rid)}
+  if(m.t==='slow'){try{w.close()}catch(e){}setNs(SLOW);return}
   try{w.close()}catch(e){}
  }
  setNs('目前建立房間的人太多，請稍後再試。');
@@ -1169,6 +1194,7 @@ async function roomJoin(code){
  for(;;){
   const m=await wsNext(w,PC?0:15000);
   if(rid!==NET.rid||NET.room)return;
+  if(m.t==='slow'){setNs(SLOW);wsClose();return}
   if(m.t==='noroom'){setNs('找不到房間 '+code+'。請確認代碼，或請房主重新建立房間。');wsClose();return}
   if(m.t==='full'){setNs('房間 '+code+' 已經有對手了。');wsClose();return}
   if(m.t==='joined'){mkPC(cleanIce(m.ice));NET.role=1;PC.ondatachannel=e=>wrapChannel(e.channel);setNs('已加入房間 '+code+'，建立連線中…')}
@@ -1406,5 +1432,48 @@ function drawBoxes(){
  for(const p of projs){if(p.wait>0||p.life<=0)continue;const r=p.big?28:14;box(p.strike?[p.x-26,0,p.x+26,GY]:[p.x-r,p.y-r,p.x+r,p.y+r],'rgba(255,64,64,.3)','#ff4040')}
  ctx.restore();
 }
-makeThumbs();lab();
+// ===== 重播：記錄每一步雙方的輸入（遊戲是確定性的，輸入相同結果就相同），壓縮成連結分享 =====
+const encI=i=>i?((i.l?1:0)|(i.r?2:0)|(i.u?4:0)|(i.d?8:0)|(i.lp?16:0)|(i.hp?32:0)|(i.lk?64:0)|(i.hk?128:0)|(i.sp?256:0)|(i.th?512:0)|(i.dash<0?1024:i.dash>0?2048:0)):-1;
+const decI=n=>n<0?null:{l:n&1,r:n>>1&1,u:n>>2&1,d:n>>3&1,lp:n>>4&1,hp:n>>5&1,lk:n>>6&1,hk:n>>7&1,sp:n>>8&1,th:n>>9&1,dash:n&1024?-1:n&2048?1:0};
+function recPush(a,b){const k=G.si-1;REC.a[k]=encI(a);REC.b[k]=encI(b)}
+function rpNext(){const k=G.si-1,a=RP.a[k],b=RP.b[k];return[decI(a===undefined?0:a)||NI,decI(b===undefined?0:b)]}
+function rle(arr){const o=[];let v=null,c=0;for(let i=0;i<arr.length;i++){const x=arr[i]===undefined?0:arr[i];if(x===v)c++;else{if(c)o.push(v,c);v=x;c=1}}if(c)o.push(v,c);return o}
+function unrle(o){const a=[];for(let i=0;i+1<o.length;i+=2){const v=o[i]|0,c=Math.min(o[i+1]|0,40000);for(let k=0;k<c&&a.length<40000;k++)a.push(v)}return a}
+const rpPack=()=>({v:1,m:REC.m,c:REC.c,g:REC.g,a:rle(REC.a),b:rle(REC.b)});
+function rpValid(o){return o&&o.v===1&&[1,2,4].includes(o.m)&&Array.isArray(o.c)&&o.c.length===2&&o.c.every(x=>Number.isInteger(x)&&x>=0&&x<CH.length)&&Number.isInteger(o.g)&&o.g>=0&&o.g<STG.length&&Array.isArray(o.a)&&Array.isArray(o.b)&&o.a.concat(o.b).every(Number.isInteger)}
+function rpSaveLast(){if(!REC||RP||G.si<300)return;try{localStorage.setItem('fd_last',JSON.stringify(rpPack()))}catch(e){}}
+function startReplay(o){
+ if(!rpValid(o))return false;
+ const sv=[sel[0],sel[1],G.stage];REC=null;
+ RP={a:unrle(o.a),b:unrle(o.b),end:0,m:o.m};RP.n=Math.max(RP.a.length,RP.b.length);
+ sel[0]=o.c[0];sel[1]=o.c[1];G.stage=o.g;startGame(o.m===4?2:o.m);sel[0]=sv[0];sel[1]=sv[1];G.stage=sv[2];
+ return true;
+}
+const pageURL=()=>location.href.split('#')[0];
+let TOAST=null;
+const toast=t=>{TOAST={t,until:performance.now()+2500}};
+async function rpCopy(){
+ if(!REC)return;const link=pageURL()+'#rp='+await codeEnc(rpPack());rpSaveLast();
+ try{await navigator.clipboard.writeText(link);toast('已複製重播連結（'+link.length+' 字），貼給朋友就能觀看')}catch(e){window.prompt('複製這個重播連結：',link)}
+}
+function rpHash(){const m=location.hash.match(/^#rp=([A-Za-z0-9_\-]+)$/);if(!m)return;history.replaceState(null,'',pageURL());if(G.mode===4&&NET.on)return;
+ codeDec(m[1]).then(o=>{if(!startReplay(o))alert('重播連結格式不正確。')}).catch(()=>alert('重播連結格式不正確，請確認完整複製。'))}
+function rpLastBtn(){let has=false;try{has=!!localStorage.getItem('fd_last')}catch(e){}$('b6').style.display=has?'':'none'}
+$('b6').onclick=()=>{try{const o=JSON.parse(localStorage.getItem('fd_last'));if(!startReplay(o))toast('重播資料損毀')}catch(e){}};
+$('ob-rp').onclick=rpCopy;$('ob-mn').onclick=()=>toMenu();
+let OBAR=false;
+function uiTick(){
+ if(RP&&!RP.end&&G.si>RP.n+2&&G.phase!=='over')RP.end=1;
+ const on=G.phase==='over'&&!!REC&&!(G.mode===4&&NET.on);if(on!==OBAR){OBAR=on;$('obar').style.display=on?'flex':'none'}
+}
+function overlayDraw(){
+ const now=performance.now();ctx.save();ctx.textAlign='center';
+ if(RP&&G.phase!=='menu'){ctx.font='bold 16px '+FONT;ctx.fillStyle='#ff6b6b';ctx.fillText(RP.end?'■ 重播結束　按 Enter 回選單':'▶ 重播中　P 暫停　暫停時 Q 離開',W/2,H-14)}
+ else if(G.phase==='over'&&REC){ctx.font='bold 15px '+FONT;ctx.fillStyle='#ffe14d';ctx.fillText('R：複製這場的重播連結',W/2,H-66)}
+ if(TOAST&&now<TOAST.until){ctx.font='bold 18px '+FONT;const w=ctx.measureText(TOAST.t).width+30;ctx.fillStyle='rgba(0,0,0,.75)';ctx.fillRect(W/2-w/2,H/2+60,w,36);ctx.fillStyle='#3ddc6a';ctx.fillText(TOAST.t,W/2,H/2+84)}
+ ctx.restore();
+}
+addEventListener('hashchange',rpHash);
+// ===== 初始化 =====
+makeThumbs();lab();rpLastBtn();rpHash();
 </script></body></html>

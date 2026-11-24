@@ -39,6 +39,7 @@ input[type=range]{width:90px;padding:0}
 </style></head><body>
 <noscript><p style="color:#fff;padding:20px;text-align:center">此遊戲需要啟用 JavaScript 才能執行。</p></noscript>
 <canvas id="c" width="960" height="540"></canvas>
+<div id="obar" style="display:none;gap:8px;justify-content:center;padding:6px"><button id="ob-rp">複製重播連結</button><button id="ob-mn">回選單</button></div>
 <div id="tbar"><button id="tb-hb"></button><button id="tb-dm"></button><button id="tb-rec"></button><button id="tb-tr"></button><button id="tb-rs">重置位置</button></div>
 <div id="pad"><div id="stick"><div id="knob"></div></div>
 <div class="a"><button data-k="T0a">輕拳</button><button data-k="T0b">重拳</button><button data-k="T0s">必殺</button><button data-k="T0e,T0a" class="q">升龍</button><button data-k="T0x">輕腳</button><button data-k="T0y">重腳</button><button data-k="T0t">投</button><button data-k="T0e,T0s" class="q">超必</button></div></div>
@@ -47,7 +48,7 @@ input[type=range]{width:90px;padding:0}
 <div id="selbox"><div class="srow"><span class="sl">P1</span><div class="cards" id="g1"></div></div><div class="srow"><span class="sl">P2<br>電腦</span><div class="cards" id="g2"></div></div><div id="sinfo"></div></div>
 <div class="row">難度 <button id="df"></button> 場景 <button id="stg"></button></div>
 <div class="row" id="rec" style="color:#ffe14d"></div>
-<button class="big" id="b1">單人 vs 電腦</button><button class="big" id="b2">雙人對戰</button><button class="big" id="b3">訓練模式</button><button class="big" id="b4">連線對戰</button><button class="big" id="b5" style="background:linear-gradient(#3a8a5a,#1f5a3a);border-color:#8fe8b0">新手教學</button>
+<button class="big" id="b1">單人 vs 電腦</button><button class="big" id="b2">雙人對戰</button><button class="big" id="b3">訓練模式</button><button class="big" id="b4">連線對戰</button><button class="big" id="b6" style="display:none;background:linear-gradient(#4a4a8a,#2a2a5a);border-color:#aab0ff">觀看上一場重播</button><button class="big" id="b5" style="background:linear-gradient(#3a8a5a,#1f5a3a);border-color:#8fe8b0">新手教學</button>
 <!--@NETUI-->
 <div class="row"><button id="bset">⚙ 設定（按鍵・音量）</button></div>
 <div id="set" class="help" style="display:none"><b>設定</b>

@@ -77,6 +77,33 @@ const ok = (name, cond, detail) => {
   ok('確定性：同輸入兩次結果相同', det.every((r) => r[1] === r[2]), JSON.stringify(det.map((r) => r.slice(1, 3))));
   ok('回滾一致性：快照載入後重跑結果相同', det.every((r) => r[1] === r[3]));
 
+  // ---- 重播：打完一整局 → 打包成連結 → 解碼重播，最後狀態必須完全相同
+  const rp = await pg.evaluate(async () => {
+    const out = [];
+    const KS = ['KeyA', 'KeyD', 'KeyW', 'KeyS', 'KeyU', 'KeyI', 'KeyJ', 'KeyK', 'KeyO', 'KeyL', 'ArrowLeft', 'ArrowRight', 'KeyZ', 'KeyC'];
+    // 比對遊戲狀態（不含按鍵邊緣偵測 v1/v2 與電腦 AI 的內部計時，重播時兩者都用不到）
+    const hash = () => { const o = JSON.parse(snapAll()); delete o.v1; delete o.v2; delete o.a.ai; delete o.b.ai; return rbFnv(canon(o)) };
+    for (const m of [1, 2]) {
+      for (let c = 0; c < 5; c += 2) {
+        sel[0] = c; sel[1] = (c + 1) % 5; startGame(m); G.vs = 0;
+        for (let i = 0; i < 30000 && G.phase !== 'over'; i++) {
+          for (const k of KS) { if (Math.random() < 0.06) { keys[k] = keys[k] ? 0 : 1; if (keys[k]) pend[k] = 1 } } // 按住一段時間才換，接近真人
+          step();
+        }
+        for (const k in keys) keys[k] = 0;
+        const si = G.si, h = hash(), link = await codeEnc(rpPack());
+        const o = await codeDec(link);
+        startReplay(o); G.vs = 0;
+        while (G.si < si) step();
+        out.push({ m, c, si, len: link.length, same: hash() === h, over: G.phase === 'over' });
+        RP = null; toMenu();
+      }
+    }
+    return out;
+  });
+  ok('重播：重播結果和原本完全相同', rp.every((r) => r.same && r.over), JSON.stringify(rp.map((r) => [r.m, r.si, r.same])));
+  ok('重播連結長度合理（< 12000 字）', rp.every((r) => r.len < 12000), rp.map((r) => r.len).join(','));
+
   // ---- 連段挑戰
   const tr = await pg.evaluate(() => {
     const KM = { lp: ['lp'], hp: ['hp'], lk: ['lk'], hk: ['hk'], jab: ['f', 'lp'], lunge: ['f', 'hp'], push: ['f', 'lk'], spin: ['f', 'hk'], flip: ['b', 'hk'], upper: ['d', 'lp'], sweep: ['d', 'lk'], sp: ['sp'], sp2: ['f', 'sp'], sp3: ['b', 'sp'], ex: ['d', 'sp'], ap: ['lp'], ak: ['lk'], asp: ['sp'] };

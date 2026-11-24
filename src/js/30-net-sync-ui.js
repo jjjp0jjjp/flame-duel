@@ -30,8 +30,8 @@ function rbFnv(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i
 function canon(v){if(Array.isArray(v))return'['+v.map(canon).join(',')+']';if(v&&typeof v==='object')return'{'+Object.keys(v).sort().map(k=>k+':'+canon(v[k])).join(',')+'}';return JSON.stringify(v)}
 function snapF(f){const o={};for(const k in f){if(k==='tr'||k==='lt'||k==='ph')continue;o[k]=k==='ch'?CH.indexOf(f[k]):f[k]}return o}
 function restF(f,o){const tr=f.tr,lt=f.lt;for(const k of Object.keys(f))delete f[k];Object.assign(f,o);f.ch=CH[o.ch];f.tr=tr||[];f.lt=lt;f.ph=null}
-function snapAll(){return JSON.stringify({g:[G.frame,G.hitstop,G.phase,G.round,G.time,G.tf,G.pt,G.msg,G.mt,G.mm,G.vs|0,G.win],a:snapF(p1),b:snapF(p2),pr:projs.map(p=>{const o=Object.assign({},p);o.own=p.own===p1?0:1;return o}),v1:pv1,v2:pv2})}
-function loadAll(s){const o=JSON.parse(s),g=o.g;G.frame=g[0];G.hitstop=g[1];G.phase=g[2];G.round=g[3];G.time=g[4];G.tf=g[5];G.pt=g[6];G.msg=g[7];G.mt=g[8];G.mm=g[9];G.vs=g[10];G.win=g[11];
+function snapAll(){return JSON.stringify({g:[G.frame,G.hitstop,G.phase,G.round,G.time,G.tf,G.pt,G.msg,G.mt,G.mm,G.vs|0,G.win,G.si|0],a:snapF(p1),b:snapF(p2),pr:projs.map(p=>{const o=Object.assign({},p);o.own=p.own===p1?0:1;return o}),v1:pv1,v2:pv2})}
+function loadAll(s){const o=JSON.parse(s),g=o.g;G.frame=g[0];G.hitstop=g[1];G.phase=g[2];G.round=g[3];G.time=g[4];G.tf=g[5];G.pt=g[6];G.msg=g[7];G.mt=g[8];G.mm=g[9];G.vs=g[10];G.win=g[11];G.si=g[12]|0;
  restF(p1,o.a);restF(p2,o.b);projs=o.pr.map(p=>{p.own=p.own?p2:p1;return p});
  for(const k in pv1)delete pv1[k];Object.assign(pv1,o.v1);for(const k in pv2)delete pv2[k];Object.assign(pv2,o.v2)}
 function beginNet(c0,c1,g,D,m){
@@ -39,7 +39,7 @@ function beginNet(c0,c1,g,D,m){
  const sv=[sel[0],sel[1],G.stage];
  NET.DL=Math.max(1,Math.min(4,D|0))||2;NET.m=m||1;NET.c=[c0,c1];NET.g=g;
  NET.started=true;NET.on=true;NET.tick=0;NET.loc={};NET.rem={};NET.used={};NET.snaps={};NET.rbFrom=null;NET.rbCount=0;NET.rbMax=0;
- NET.sendT={};NET.hash={};NET.rh={};NET.hl=null;NET.nextHash=29;NET.desync=false;NET.stallT=0;NET.rtt=NET.rtt||0;NET.gone=false;
+ NET.sendT={};NET.hash={};NET.rh={};NET.hl=null;NET.nextHash=29;NET.desync=false;NET.syncF=0;NET.dsAt=0;NET.resyncs=0;NET.rsT=0;NET.lastSrq=0;NET.stallT=0;NET.rtt=NET.rtt||0;NET.gone=false;
  NET.remHigh=NET.DL-1;NET.remAck=NET.DL-1;NET.remAd=0;NET.skip=0;NET.inp=[0,0];NET.reL=0;NET.reR=0;NET.gotM=0;NET.lastRe=0;NET.rst=null;
  for(let i=0;i<NET.DL;i++){NET.loc[i]=0;NET.rem[i]=0}
  sel[0]=c0;sel[1]=c1;G.stage=g;
@@ -54,6 +54,7 @@ function netSend(){
  for(let k=f;k<=t;k++){b.push(NET.loc[k]|0);if(NET.sendT[k]===undefined)NET.sendT[k]=now}
  NET.room.emit('inp',{f,b,a:NET.remHigh,ad:NET.tick-1-NET.remHigh,h:NET.hl,m:NET.m}).catch(()=>{});
  if(G.phase==='over'&&NET.reL&&now-NET.lastRe>400){NET.lastRe=now;NET.room.emit('rem',{m:NET.m}).catch(()=>{})}
+ if(NET.desync&&NET.slot===1&&now-NET.lastSrq>500){NET.lastSrq=now;NET.room.emit('srq',{m:NET.m}).catch(()=>{})}
  if(NET.slot===0&&NET.rst&&!NET.gotM&&now-NET.lastRe>300){NET.lastRe=now;NET.room.emit('rst',NET.rst).catch(()=>{})}
 }
 function onInp(d){
@@ -67,7 +68,7 @@ function onInp(d){
   for(let t=NET.remAck+1;t<=d.a;t++)if(NET.sendT[t]!==undefined){const r=now-NET.sendT[t];NET.rtt=NET.rtt?NET.rtt*.9+r*.1:r;delete NET.sendT[t]}
   NET.remAck=d.a;
  }
- if(Array.isArray(d.h)&&d.h.length===2){NET.rh[d.h[0]]=d.h[1];if(NET.hash[d.h[0]]!==undefined&&NET.hash[d.h[0]]!==d.h[1])NET.desync=true}
+ if(Array.isArray(d.h)&&d.h.length===2&&d.h[0]>=NET.syncF){NET.rh[d.h[0]]=d.h[1];if(NET.hash[d.h[0]]!==undefined)hashCmp(d.h[0],NET.hash[d.h[0]],d.h[1])}
 }
 function simF(n,re){const r=NET.rem[n]!==undefined?NET.rem[n]:(NET.rem[NET.remHigh]|0),l=NET.loc[n]|0;NET.used[n]=r;NET.inp=NET.slot===0?[l,r]:[r,l];if(re)NOFX++;try{step()}finally{if(re)NOFX--}}
 function netTick(){
@@ -87,10 +88,26 @@ function netTick(){
  simF(n,0);
  NET.tick=n+1;
  const C=Math.min(NET.remHigh,NET.tick-1);
- while(NET.nextHash<=C){const c=NET.nextHash,s=c+1<NET.tick?NET.snaps[c+1]:snapAll();if(s){const hv=rbFnv(canon(JSON.parse(s)));NET.hash[c]=hv;NET.hl=[c,hv];if(NET.rh[c]!==undefined&&NET.rh[c]!==hv)NET.desync=true}NET.nextHash+=30}
+ while(NET.nextHash<=C){const c=NET.nextHash,s=c+1<NET.tick?NET.snaps[c+1]:snapAll();if(s){const hv=rbFnv(canon(JSON.parse(s)));NET.hash[c]=hv;NET.hl=[c,hv];if(NET.rh[c]!==undefined)hashCmp(c,hv,NET.rh[c])}NET.nextHash+=30}
  if(n%30===0){const lo=n-60;for(const k in NET.snaps)if(+k<lo)delete NET.snaps[k];for(const k in NET.used)if(+k<lo)delete NET.used[k];
   for(const k in NET.rem)if(+k<Math.min(lo,NET.remHigh-2))delete NET.rem[k];const lo2=Math.min(lo,NET.remAck-2);for(const k in NET.loc)if(+k<lo2)delete NET.loc[k]}
  return 1;
+}
+// ===== 不同步時重新同步：房客請求，房主送出「輸入都已確認」那一幀的完整狀態，房客從那裡回滾重算 =====
+// 比對檢查點：不一致就標記；之後更晚的檢查點一致就解除（避免重新同步前送出的舊檢查點讓警告卡住）
+function hashCmp(c,a,b){if(a!==b){NET.desync=true;NET.dsAt=Math.max(NET.dsAt|0,c)}else if(c>(NET.dsAt|0))NET.desync=false}
+function onSrq(d){
+ if(NET.slot!==0||!NET.on||!d||d.m!==NET.m||NET.rbFrom!==null)return;
+ const T=Math.min(NET.remHigh+1,NET.tick-1);if(!NET.snaps[T])return;
+ NET.syncF=T;NET.rh={};NET.desync=false;NET.rsT=performance.now();NET.resyncs++;
+ NET.room.emit('snp',{m:NET.m,f:T,s:NET.snaps[T]}).catch(()=>{});
+}
+function onSnp(d){
+ if(NET.slot!==1||!NET.on||!NET.desync||!d||d.m!==NET.m||typeof d.f!=='number'||typeof d.s!=='string')return;
+ const T=d.f;if(T>=NET.tick||T<NET.tick-55)return;
+ try{const o=JSON.parse(d.s);if(!o||!Array.isArray(o.g)||!o.a||!o.b)return}catch(e){return}
+ NET.snaps[T]=d.s;if(NET.rbFrom===null||T<NET.rbFrom)NET.rbFrom=T;
+ NET.hash={};NET.rh={};NET.syncF=T;NET.nextHash=T+((29-T%30)+30)%30;NET.desync=false;NET.rsT=performance.now();NET.resyncs++;
 }
 function netRematch(){if(!NET.on||G.phase!=='over'||NET.reL)return;NET.reL=1;NET.lastRe=0;netCheckRe()}
 function onRem(d){if(!NET.on||!d||d.m!==NET.m||G.phase!=='over')return;NET.reR=1;netCheckRe()}
@@ -115,7 +132,7 @@ function pads(){if(!padOK)return;let gp=[];try{gp=navigator.getGamepads?navigato
 function loop(ts){requestAnimationFrame(loop);pads();acc+=Math.min(100,ts-last);last=ts;
  if(NET.on){while(acc>=16.667){if(!netTick()){acc=Math.min(acc,33);break}acc-=16.667}netSend()}
  else while(acc>=16.667){step();acc-=16.667}
- draw()}
+ uiTick();draw()}
 requestAnimationFrame(loop);
 
 addEventListener('keydown',e=>{if(KCAP){e.preventDefault();kcapDone(e.code);return}
@@ -125,6 +142,8 @@ addEventListener('keydown',e=>{if(KCAP){e.preventDefault();kcapDone(e.code);retu
  keys[e.code]=1;pend[e.code]=1;
  if(G.mode===4&&NET.on&&e.code==='Escape')netQuit(1);else if(((e.code==='KeyP'&&!bound(e.code))||e.code==='Escape')&&G.mode!==4&&G.phase!=='menu'&&G.phase!=='over')G.pause=!G.pause;
  if(G.vs>0&&G.mode!==4&&(e.code==='Enter'||e.code==='Space'))G.vs=1;
+ if(e.code==='Enter'&&RP&&RP.end){toMenu();return}
+ if(e.code==='KeyR'&&G.phase==='over'&&REC&&!bound(e.code))rpCopy();
  if(e.code==='Enter'&&G.phase==='over'){if(G.mode===4&&NET.on)netRematch();else toMenu()}
  if(e.code==='KeyQ'&&G.pause&&!bound(e.code)){G.pause=false;toMenu()}
  if(e.code==='KeyM'&&!bound(e.code))mute=!mute;

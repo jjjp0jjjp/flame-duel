@@ -20,6 +20,8 @@ jobs:
       - run: npm run check
       # 遊戲本體：確定性、回滾一致性、連段挑戰、教學
       - run: node tests/game.test.cjs
+      # 房間限流
+      - run: node tests/gate.test.cjs
       # Pages worker 能正常打包
       - run: npm run pages
       # 連線對戰：本機模擬配對伺服器 + 雙視窗

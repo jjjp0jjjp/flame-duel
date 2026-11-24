@@ -208,4 +208,47 @@ function drawBoxes(){
  for(const p of projs){if(p.wait>0||p.life<=0)continue;const r=p.big?28:14;box(p.strike?[p.x-26,0,p.x+26,GY]:[p.x-r,p.y-r,p.x+r,p.y+r],'rgba(255,64,64,.3)','#ff4040')}
  ctx.restore();
 }
-makeThumbs();lab();
+// ===== 重播：記錄每一步雙方的輸入（遊戲是確定性的，輸入相同結果就相同），壓縮成連結分享 =====
+const encI=i=>i?((i.l?1:0)|(i.r?2:0)|(i.u?4:0)|(i.d?8:0)|(i.lp?16:0)|(i.hp?32:0)|(i.lk?64:0)|(i.hk?128:0)|(i.sp?256:0)|(i.th?512:0)|(i.dash<0?1024:i.dash>0?2048:0)):-1;
+const decI=n=>n<0?null:{l:n&1,r:n>>1&1,u:n>>2&1,d:n>>3&1,lp:n>>4&1,hp:n>>5&1,lk:n>>6&1,hk:n>>7&1,sp:n>>8&1,th:n>>9&1,dash:n&1024?-1:n&2048?1:0};
+function recPush(a,b){const k=G.si-1;REC.a[k]=encI(a);REC.b[k]=encI(b)}
+function rpNext(){const k=G.si-1,a=RP.a[k],b=RP.b[k];return[decI(a===undefined?0:a)||NI,decI(b===undefined?0:b)]}
+function rle(arr){const o=[];let v=null,c=0;for(let i=0;i<arr.length;i++){const x=arr[i]===undefined?0:arr[i];if(x===v)c++;else{if(c)o.push(v,c);v=x;c=1}}if(c)o.push(v,c);return o}
+function unrle(o){const a=[];for(let i=0;i+1<o.length;i+=2){const v=o[i]|0,c=Math.min(o[i+1]|0,40000);for(let k=0;k<c&&a.length<40000;k++)a.push(v)}return a}
+const rpPack=()=>({v:1,m:REC.m,c:REC.c,g:REC.g,a:rle(REC.a),b:rle(REC.b)});
+function rpValid(o){return o&&o.v===1&&[1,2,4].includes(o.m)&&Array.isArray(o.c)&&o.c.length===2&&o.c.every(x=>Number.isInteger(x)&&x>=0&&x<CH.length)&&Number.isInteger(o.g)&&o.g>=0&&o.g<STG.length&&Array.isArray(o.a)&&Array.isArray(o.b)&&o.a.concat(o.b).every(Number.isInteger)}
+function rpSaveLast(){if(!REC||RP||G.si<300)return;try{localStorage.setItem('fd_last',JSON.stringify(rpPack()))}catch(e){}}
+function startReplay(o){
+ if(!rpValid(o))return false;
+ const sv=[sel[0],sel[1],G.stage];REC=null;
+ RP={a:unrle(o.a),b:unrle(o.b),end:0,m:o.m};RP.n=Math.max(RP.a.length,RP.b.length);
+ sel[0]=o.c[0];sel[1]=o.c[1];G.stage=o.g;startGame(o.m===4?2:o.m);sel[0]=sv[0];sel[1]=sv[1];G.stage=sv[2];
+ return true;
+}
+const pageURL=()=>location.href.split('#')[0];
+let TOAST=null;
+const toast=t=>{TOAST={t,until:performance.now()+2500}};
+async function rpCopy(){
+ if(!REC)return;const link=pageURL()+'#rp='+await codeEnc(rpPack());rpSaveLast();
+ try{await navigator.clipboard.writeText(link);toast('已複製重播連結（'+link.length+' 字），貼給朋友就能觀看')}catch(e){window.prompt('複製這個重播連結：',link)}
+}
+function rpHash(){const m=location.hash.match(/^#rp=([A-Za-z0-9_\-]+)$/);if(!m)return;history.replaceState(null,'',pageURL());if(G.mode===4&&NET.on)return;
+ codeDec(m[1]).then(o=>{if(!startReplay(o))alert('重播連結格式不正確。')}).catch(()=>alert('重播連結格式不正確，請確認完整複製。'))}
+function rpLastBtn(){let has=false;try{has=!!localStorage.getItem('fd_last')}catch(e){}$('b6').style.display=has?'':'none'}
+$('b6').onclick=()=>{try{const o=JSON.parse(localStorage.getItem('fd_last'));if(!startReplay(o))toast('重播資料損毀')}catch(e){}};
+$('ob-rp').onclick=rpCopy;$('ob-mn').onclick=()=>toMenu();
+let OBAR=false;
+function uiTick(){
+ if(RP&&!RP.end&&G.si>RP.n+2&&G.phase!=='over')RP.end=1;
+ const on=G.phase==='over'&&!!REC&&!(G.mode===4&&NET.on);if(on!==OBAR){OBAR=on;$('obar').style.display=on?'flex':'none'}
+}
+function overlayDraw(){
+ const now=performance.now();ctx.save();ctx.textAlign='center';
+ if(RP&&G.phase!=='menu'){ctx.font='bold 16px '+FONT;ctx.fillStyle='#ff6b6b';ctx.fillText(RP.end?'■ 重播結束　按 Enter 回選單':'▶ 重播中　P 暫停　暫停時 Q 離開',W/2,H-14)}
+ else if(G.phase==='over'&&REC){ctx.font='bold 15px '+FONT;ctx.fillStyle='#ffe14d';ctx.fillText('R：複製這場的重播連結',W/2,H-66)}
+ if(TOAST&&now<TOAST.until){ctx.font='bold 18px '+FONT;const w=ctx.measureText(TOAST.t).width+30;ctx.fillStyle='rgba(0,0,0,.75)';ctx.fillRect(W/2-w/2,H/2+60,w,36);ctx.fillStyle='#3ddc6a';ctx.fillText(TOAST.t,W/2,H/2+84)}
+ ctx.restore();
+}
+addEventListener('hashchange',rpHash);
+// ===== 初始化 =====
+makeThumbs();lab();rpLastBtn();rpHash();

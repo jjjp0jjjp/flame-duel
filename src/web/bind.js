@@ -48,6 +48,7 @@ const sigSend=(w,o)=>{try{w.send(JSON.stringify(o))}catch(e){}};
 function cleanIce(ice){return Array.isArray(ice)?ice.filter(s=>s&&s.urls).slice(0,6):null}
 function connWatch(rid){setTimeout(()=>{if(rid===NET.rid&&!NET.room){setNs('連線逾時：雙方網路無法建立連線。請按「取消」後重新建立房間再試一次。');wsClose()}},25000)}
 function showCode(code){$('rcode').textContent=code;$('rcode').style.display='block';$('rl').style.display='inline-block';NET.code=code}
+const SLOW='嘗試建立或加入房間的次數太多，請等幾分鐘再試。';
 async function roomHost(){
  if(!SIG){setNs('從檔案直接開啟時沒有配對伺服器，請改用下方「手動交換代碼」。');return}
  if(!window.RTCPeerConnection){setNs('這個瀏覽器不支援 WebRTC，無法連線對戰。');return}
@@ -59,6 +60,7 @@ async function roomHost(){
   const m=await wsNext(w,8000);
   if(rid!==NET.rid){try{w.close()}catch(e){}return}
   if(m.t==='hosted'){WS=w;showCode(code);return hostLoop(w,code,rid)}
+  if(m.t==='slow'){try{w.close()}catch(e){}setNs(SLOW);return}
   try{w.close()}catch(e){}
  }
  setNs('目前建立房間的人太多，請稍後再試。');
@@ -99,6 +101,7 @@ async function roomJoin(code){
  for(;;){
   const m=await wsNext(w,PC?0:15000);
   if(rid!==NET.rid||NET.room)return;
+  if(m.t==='slow'){setNs(SLOW);wsClose();return}
   if(m.t==='noroom'){setNs('找不到房間 '+code+'。請確認代碼，或請房主重新建立房間。');wsClose();return}
   if(m.t==='full'){setNs('房間 '+code+' 已經有對手了。');wsClose();return}
   if(m.t==='joined'){mkPC(cleanIce(m.ice));NET.role=1;PC.ondatachannel=e=>wrapChannel(e.channel);setNs('已加入房間 '+code+'，建立連線中…')}

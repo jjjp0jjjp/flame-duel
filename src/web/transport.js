@@ -3,19 +3,6 @@ const RTC_CFG={iceServers:[{urls:['stun:stun.l.google.com:19302','stun:stun1.l.g
 let PC=null;
 function turnCfg(){try{return JSON.parse(localStorage.getItem('fd_turn')||'null')}catch(e){return null}}
 function rtcCfg(ice){const c={iceServers:(ice&&ice.length?ice:RTC_CFG.iceServers).slice()},t=turnCfg();if(t&&t.u)c.iceServers.push({urls:t.u,username:t.n||'',credential:t.p||''});return c}
-const b64=u=>{let t='';for(let i=0;i<u.length;i+=8192)t+=String.fromCharCode.apply(null,u.subarray(i,i+8192));return btoa(t).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')};
-const unb64=t=>{t=t.replace(/-/g,'+').replace(/_/g,'/');while(t.length%4)t+='=';const r=atob(t),u=new Uint8Array(r.length);for(let i=0;i<r.length;i++)u[i]=r.charCodeAt(i);return u};
-async function codeEnc(o){
- const raw=new TextEncoder().encode(JSON.stringify(o));
- try{if(window.CompressionStream){const cs=new CompressionStream('deflate-raw'),w=cs.writable.getWriter();w.write(raw).catch(()=>{});w.close().catch(()=>{});return 'z'+b64(new Uint8Array(await new Response(cs.readable).arrayBuffer()))}}catch(e){}
- return 'x'+b64(raw);
-}
-async function codeDec(t){
- t=t.replace(/\s+/g,'');const k=t[0],u=unb64(t.slice(1));
- if(k==='x')return JSON.parse(new TextDecoder().decode(u));
- if(k==='z'){const ds=new DecompressionStream('deflate-raw'),w=ds.writable.getWriter();w.write(u).catch(()=>{});w.close().catch(()=>{});return JSON.parse(new TextDecoder().decode(await new Response(ds.readable).arrayBuffer()))}
- throw new Error('bad');
-}
 function mkPC(ice){
  try{if(PC)PC.close()}catch(e){}
  PC=new RTCPeerConnection(rtcCfg(ice));
@@ -40,7 +27,7 @@ function wrapChannel(ch){
 }
 function attach(R,slot){
  NET.room=R;NET.slot=slot;NET.started=false;NET.gone=false;NET.remote=null;NET.sid='';NET.pings=[];
- NET.unsub=[R.on('hello',m=>onHello(m.data)),R.on('start',m=>onStart(m.data)),R.on('ready',m=>onReady(m.data)),R.on('inp',m=>onInp(m.data)),R.on('bye',()=>onBye()),R.on('png',m=>{if(NET.slot===1&&NET.room)NET.room.emit('pog',{t:m.data&&m.data.t})}),R.on('pog',m=>onPog(m.data)),R.on('rem',m=>onRem(m.data)),R.on('rst',m=>onRst(m.data))];
+ NET.unsub=[R.on('hello',m=>onHello(m.data)),R.on('start',m=>onStart(m.data)),R.on('ready',m=>onReady(m.data)),R.on('inp',m=>onInp(m.data)),R.on('bye',()=>onBye()),R.on('png',m=>{if(NET.slot===1&&NET.room)NET.room.emit('pog',{t:m.data&&m.data.t})}),R.on('pog',m=>onPog(m.data)),R.on('rem',m=>onRem(m.data)),R.on('rst',m=>onRst(m.data)),R.on('srq',m=>onSrq(m.data)),R.on('snp',m=>onSnp(m.data))];
  wsClose();NET.via='';viaInfo();
  setNs(slot?'已連線！等待房主開始…':'已連線！測量連線品質中…');
  clearInterval(NET.hb);NET.hb=setInterval(netHello,300);netHello();
