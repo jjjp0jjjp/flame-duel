@@ -22,7 +22,7 @@ function step(){
  const dx=p2.x-p1.x;
  if(Math.abs(dx)<44&&Math.abs(p1.y-p2.y)<60&&p1.st!=='ko'&&p2.st!=='ko'&&p1.st!=='down'&&p2.st!=='down'){const pu=(44-Math.abs(dx))/2,s=dx>=0?1:-1;p1.x-=s*pu;p2.x+=s*pu;p1.x=Math.max(40,Math.min(W-40,p1.x));p2.x=Math.max(40,Math.min(W-40,p2.x))}
  for(const p of projs){
-  if(p.wait>0){p.wait--;p.life--;projFx(p);if(p.wait===0)boltFx(p);continue}
+  if(p.wait>0){p.wait--;p.life--;projFx(p);if(p.wait===0)(li_(p.own)===5?iceBurst(p):boltFx(p));continue}
   if(p.life<=0)continue;
   p.x+=p.vx;p.y+=p.vy||0;if(p.gr)p.vy+=p.gr;p.life--;projFx(p);if(p.vy&&p.y>=GY-14){p.life=0;projEnd(p);spark(p.x,GY-6,p.own.ch.col,8,1)}
   const t=p.own===p1?p2:p1,r=p.big?28:14,bx=p.strike?[p.x-26,0,p.x+26,GY]:[p.x-r,p.y-r,p.x+r,p.y+r];

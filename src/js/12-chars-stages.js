@@ -15,7 +15,29 @@ CH.push(
  sp2:{type:'proj',d:16,su:12,ac:1,rc:22,spd:7,vy:-9,gr:.42,knock:1,cost:50},
  sp3:{d:0,su:3,ac:22,rc:16,r:60,h:-70,st:0,kb:0,counter:1,cost:50},
  asp:{d:16,su:6,ac:40,rc:8,r:66,h:-24,st:26,kb:7,knock:1,air:1,dive:1,quake:1,cost:50}});
-const QUO=['還不夠熱！','堅不可摧。','……影已逝。','雷光，一閃！','大地，不會動搖。'];
+CH.push(
+{n:'霜',ds:'冰結・遠攻',col:'#7fe3ff',col2:'#e0fbff',spd:3.8,jmp:14.5,hp:108,w:.98,
+ mv:{lk:{r:96},hk:{r:116}},
+ sp:{type:'proj',d:14,su:12,ac:1,rc:20,spd:7.5,cost:50},
+ ex:{type:'proj',d:30,su:14,ac:1,rc:28,spd:7,big:1,launch:1,ex:1,cost:100,name:'絕對零度'},
+ sp2:{type:'strike',d:14,su:11,ac:1,rc:24,dist:210,launch:1,cost:50},
+ sp3:{d:13,su:6,ac:10,rc:20,vx:9,r:80,h:-14,st:26,kb:6,knock:1,cost:50},
+ asp:{type:'proj',d:9,su:6,ac:1,rc:14,spd:7,vy:6,n2:1,cost:50}},
+{n:'嵐',ds:'疾風・連腳',col:'#5ee0a0',col2:'#d6ffe9',spd:4.8,jmp:15.5,hp:100,w:.95,
+ mv:{hk:{su:7},spin:{d:15,su:8}},
+ sp:{d:14,su:7,ac:12,rc:18,vx:9,r:96,h:-62,st:22,kb:8,cost:50},
+ ex:{d:30,su:10,ac:14,rc:28,r:110,h:-70,st:30,kb:14,around:1,launch:1,inv:1,ex:1,cost:100,name:'天嵐旋'},
+ sp2:{type:'proj',d:10,su:8,ac:1,rc:16,spd:14,cost:50},
+ sp3:{d:16,su:4,ac:9,rc:24,r:76,h:-110,st:30,kb:4,launch:1,inv:1,lift:-15,cost:50},
+ asp:{d:14,su:5,ac:30,rc:4,r:70,h:-24,st:24,kb:7,knock:1,air:1,dive:1,cost:50}},
+{n:'月',ds:'長棍・間合',col:'#f0c674',col2:'#fff4d6',spd:3.7,jmp:14,hp:98,w:1.05,staff:1,
+ mv:{lp:{r:92,su:4},hp:{r:116,su:9,d:12},lk:{r:90},hk:{r:108,su:10},jab:{r:124,su:6},lunge:{r:120}},
+ sp:{d:14,su:10,ac:6,rc:22,r:150,h:-78,st:22,kb:10,cost:50},
+ ex:{d:30,su:10,ac:16,rc:30,vx:6,r:150,h:-72,st:30,kb:16,launch:1,ex:1,cost:100,name:'千峰棍'},
+ sp2:{d:14,su:10,ac:6,rc:24,r:148,h:-14,st:26,kb:6,knock:1,cost:50},
+ sp3:{d:0,su:3,ac:20,rc:16,r:60,h:-70,st:0,kb:0,counter:1,cost:50},
+ asp:{d:16,su:6,ac:40,rc:8,r:80,h:-24,st:26,kb:7,knock:1,air:1,dive:1,cost:50}});
+const QUO=['還不夠熱！','堅不可摧。','……影已逝。','雷光，一閃！','大地，不會動搖。','凍結吧。','跟得上我的風嗎？','月有圓缺，勝負亦然。'];
 const pp=o=>NOFX||parts.push(o);
 // ---- 同時命中：兩邊都打到就互相命中（不再由 P1 優先）
 function resolveHits(){
@@ -49,12 +71,18 @@ function POSE(li,pz,f){const s=Math.sin(G.frame*.15);
   case 1:return[-52,-99+s,[22,0],[-22,0],[14,-92],[16,-88],0];
   case 2:return[-50,-97,[16,0],[-16,0],[12,-98],[14,-94],-4];
   case 3:return[-52,-99,[18,0],[-18,0],[24,-152+s*4],[-16,-150-s*4],0];
+  case 5:return[-52,-98,[16,0],[-16,0],[30,-128+s*3],[-10,-120],-2];
+  case 6:return[-50,-97,[24,0],[-20,0],[20,-150+s*5],[-26,-96],6];
+  case 7:return[-52,-99,[20,0],[-20,0],[22,-120],[4,-112],0];
   default:return[-44,-92+s*2,[30,0],[-30,0],[34,-114],[-24,-114],0]}
  switch(li){
   case 0:return[-50,-96,[22,0],[-20,0],[22,-146],[26,-76],4];
   case 1:return[-50,-97,[24,0],[-24,0],[12,-92],[16,-88],0];
   case 2:return[-42,-86,[26,0],[-26,0],[14,-112],[18,-106],6];
   case 3:return[-52,-98,[18,0],[-18,0],[8,-150],[30,-80],0];
+  case 5:return[-50,-96,[20,0],[-22,0],[36,-96],[22,-84],2];
+  case 6:return[-44,-88,[30,0],[-28,0],[30,-104],[20,-86],8];
+  case 7:return[-46,-92,[30,0],[-30,0],[40,-92],[16,-84],6];
   default:return[-38,-84,[34,0],[-34,0],[40,-66],[30,-58],4]}}
 // ---- 新特效
 function boltFx(p){P({t:'bolt',x:p.x,l:12,w:p.a.ex?1.6:1});emb(p.x,GY-10,'#fff3b0',10,6,16,4,1);P({ring:1,flat:1,x:p.x,y:GY-2,c:'#ffe680',l:14,rs:6,lw:4});sfx('thunder');G.shake=Math.max(G.shake,p.a.ex?7:4)}
@@ -93,7 +121,8 @@ function supPattern(ci,t,e){
  else if(ci===1){ctx.strokeStyle='rgba(220,235,255,.18)';ctx.lineWidth=1;for(let y=-80;y<82;y+=6){ctx.beginPath();ctx.moveTo(-W,y);ctx.lineTo(W,y);ctx.stroke()}ctx.fillStyle='rgba(20,30,50,.55)';for(let x=-W/2;x<W/2;x+=160){ctx.fillRect(x,-82,4,164)}ctx.fillStyle='#cfe0ff';for(let x=-W/2+20;x<W/2;x+=80){ctx.beginPath();ctx.arc(x,-68,3,0,6.3);ctx.arc(x,68,3,0,6.3);ctx.fill()}ctx.globalCompositeOperation='lighter';ctx.strokeStyle='rgba(127,214,255,.6)';ctx.lineWidth=3;for(let i=0;i<6;i++){const y=-60+i*24,x=((t*900+i*190)%(W+400))-W/2-200;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+180,y-14);ctx.stroke()}}
  else if(ci===2){ctx.fillStyle='rgba(243,232,255,.9)';ctx.beginPath();ctx.arc(120,-10,120,0,6.3);ctx.fill();ctx.fillStyle='rgba(20,10,40,1)';ctx.beginPath();ctx.arc(160,-30,112,0,6.3);ctx.fill();ctx.globalCompositeOperation='lighter';ctx.lineCap='round';for(let i=0;i<7;i++){const p=((t*1.6+i*.21)%1),x=-W/2+p*(W+200)-100;ctx.strokeStyle=i%2?'#e3ccff':'#b46bff';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(x,-70+i*20);ctx.lineTo(x+150,-90+i*20);ctx.stroke()}}
  else if(ci===3){ctx.globalCompositeOperation='lighter';for(let i=0;i<5;i++){if(((t*14+i*3)|0)%3===0)continue;const x0=-W/2+60+i*190+(Math.random()-.5)*30;ctx.strokeStyle='#ffe680';ctx.lineWidth=4;ctx.beginPath();let x=x0;ctx.moveTo(x,-82);for(let y=-60;y<=82;y+=20){x=x0+(Math.random()-.5)*40;ctx.lineTo(x,y)}ctx.stroke();ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.stroke()}}
- else{for(let i=0;i<16;i++){const p=((t*.9+i*.13)%1),a=i*2.4,x=Math.cos(a)*p*W*.6,y=Math.sin(a)*p*120,s=8+((i*7)%14);ctx.save();ctx.translate(x,y);ctx.rotate(t*3+i);ctx.fillStyle=i%2?'#a8784a':'#6a4a2a';ctx.strokeStyle='#1e140c';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-s,0);ctx.lineTo(-s*.3,-s);ctx.lineTo(s,-s*.4);ctx.lineTo(s*.6,s*.8);ctx.closePath();ctx.fill();ctx.stroke();ctx.restore()}ctx.strokeStyle='rgba(30,20,12,.6)';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(-W/2,40);for(let x=-W/2;x<W/2;x+=40)ctx.lineTo(x,40+(((x*13)|0)%17)-8);ctx.stroke()}
+ else if(ci===4){for(let i=0;i<16;i++){const p=((t*.9+i*.13)%1),a=i*2.4,x=Math.cos(a)*p*W*.6,y=Math.sin(a)*p*120,s=8+((i*7)%14);ctx.save();ctx.translate(x,y);ctx.rotate(t*3+i);ctx.fillStyle=i%2?'#a8784a':'#6a4a2a';ctx.strokeStyle='#1e140c';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-s,0);ctx.lineTo(-s*.3,-s);ctx.lineTo(s,-s*.4);ctx.lineTo(s*.6,s*.8);ctx.closePath();ctx.fill();ctx.stroke();ctx.restore()}ctx.strokeStyle='rgba(30,20,12,.6)';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(-W/2,40);for(let x=-W/2;x<W/2;x+=40)ctx.lineTo(x,40+(((x*13)|0)%17)-8);ctx.stroke()}
+ else supPattern2(ci,t,e);
  ctx.restore()}
 function portrait(ch,pose,x,y,sc,dir,side){ctx.save();ctx.translate(x,y);ctx.scale(sc,sc);ctx.translate(0,-GY);drawF({x:0,y:GY,dir,ch,side,st:'idle',pose,mt:0,flash:0,tr:[],ns:1,kt:0,atk:null,t:0,lt:G.frame});ctx.restore()}
 function supCine(k){

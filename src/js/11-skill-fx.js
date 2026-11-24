@@ -18,7 +18,7 @@ function raySpr(c){c=hex6(c);const k='r'+c;let s=GLW.get(k);if(s)return s;s=docu
 const glow=(x,y,r,c,a)=>{const o=ctx.globalCompositeOperation,ga=ctx.globalAlpha;ctx.globalCompositeOperation='lighter';if(a!==undefined)ctx.globalAlpha=ga*a;ctx.drawImage(glowSpr(c),x-r,y-r,r*2,r*2);ctx.globalCompositeOperation=o;ctx.globalAlpha=ga};
 const flare=(x,y,c,s,l)=>P({t:'fl',x,y,c,s,l:l||8,g:0,dr:1,rot:Math.random()*.6-.3});
 const fxLo=()=>QM===3||(QM===0&&QA>=2);
-const PGL=['#ff8a2a','#7fd6ff','#b46bff','#ffe680',null]; // 各角色飛行道具的光色（岩是石頭，不發光）
+const PGL=['#ff8a2a','#7fd6ff','#b46bff','#ffe680',null,'#9fe8ff','#7fffc0',null]; // 各角色飛行道具的光色（岩是石頭，不發光）
 // ---- 招式動作特效(每幀,攻擊進行中)
 function fxMove(f,a,g){
  const li=li_(f),k=a.key,t=f.t,d=f.dir,x=f.x,y=f.y,act=t>a.su&&t<=a.su+a.ac,ex=x+d*a.r*.9,ey=y+(a.h||-70);
@@ -43,13 +43,13 @@ function fxMove(f,a,g){
   if((a.type==='proj'||a.type==='strike')&&t<=a.su&&t%2===0){const tx=x+d*40,ty=y-(a.type==='strike'?120:76);P({t:'zz',x:tx+rr_(-30,30),y:ty+rr_(-30,30),ang:rr_(0,6.28),len:rr_(14,26),c:Math.random()<.5?'#ffe680':'#8fe8ff',l:5,g:0,dr:1})}
   if(a.around&&t===a.su+1){P({ring:1,x,y:y-70,c:'#ffe680',l:14,rs:7,lw:5});for(let i=0;i<10;i++)P({t:'zz',x,y:y-70,ang:i*.628,len:rr_(40,70),c:i%2?'#ffe680':'#8fe8ff',l:8,g:0,dr:1})}
   if(act&&t%2===0&&!a.air&&!a.around&&a.type!=='strike')P({t:'zz',x:ex,y:ey,ang:rr_(0,6.28),len:rr_(10,20),c:'#ffe680',l:5,g:0,dr:1});
- }else{
+ }else if(li===4){
   if(a.counter&&t>a.su&&t<=a.su+a.ac&&t%3===0){P({ring:1,x:x+d*20,y:y-70,c:'#ffe0b8',l:10,rs:2,lw:3,r0:34});rok(x+d*rr_(20,40),y-rr_(40,110),rr_(-1,1),-rr_(0,1),'#a8784a')}
   if(a.vx&&act&&g&&t%2===0)smk(x-d*20,GY-8,12,'#b9967a',22);
   if(a.type==='proj'&&t===a.su-2)for(let i=0;i<5;i++)rok(x+d*20,y-90,rr_(-2,2),-rr_(1,3),'#8a6a4a');
   if(a.dive&&!g&&t>=a.su&&t%2===0)smk(x,y-80,10,'#b9967a',14);
   if(act&&t%3===0&&!a.air&&!a.vx&&a.type!=='proj')smk(ex,ey,8,'#c9a67a',12);
- }
+ }else fxMove2(f,a,g,li,k,t,d,x,y,act,ex,ey);
 }
 // ---- 命中特效
 function hitFx(src,a,v){
@@ -61,7 +61,8 @@ function hitFx(src,a,v){
  else if(li===1){const n=big?9:4;for(let i=0;i<n;i++)rok(x+rr_(-10,10),y,rr_(-3.5,3.5),-2-Math.random()*5);for(let i=0;i<(big?5:2);i++)smk(x+rr_(-15,15),v.y-20,14,'#9aa0b8');if(big)P({ring:1,x,y,c:'#cfe6ff',l:16,rs:6,lw:6});if(a.ex||a.throw)crk(v.x)}
  else if(li===2){const n=a.ex?7:big?4:2;for(let i=0;i<n;i++)slh(x+rr_(-12,12),y+rr_(-17,17),rr_(-1.1,.8)+(i%2?1.6:0),rr_(70,110),i%2?'#e3ccff':'#b46bff',12);smk(x,y+20,12,'#4a3a80',20)}
  else if(li===3){for(let i=0;i<(big?9:5);i++)P({t:'zz',x,y,ang:rr_(0,6.28),len:rr_(20,big?60:38),c:i%2?'#ffe680':'#8fe8ff',l:9,g:0,dr:1});emb(x,y,'#fff3b0',big?14:7,5,14,3,0);if(big)P({ring:1,x,y,c:'#ffe680',l:14,rs:6,lw:4})}
- else{const n=big?10:5;for(let i=0;i<n;i++)rok(x+rr_(-10,10),y+rr_(-10,20),rr_(-4,4),-2-Math.random()*5,i%2?'#a8784a':'#7a5a3a');for(let i=0;i<(big?6:3);i++)smk(x+rr_(-18,18),v.y-15,15,'#b9967a');if(a.throw||a.ex){crk(v.x);P({ring:1,flat:1,x:v.x,y:GY-2,c:'#ffe0b8',l:20,rs:8,lw:6})}}
+ else if(li===4){const n=big?10:5;for(let i=0;i<n;i++)rok(x+rr_(-10,10),y+rr_(-10,20),rr_(-4,4),-2-Math.random()*5,i%2?'#a8784a':'#7a5a3a');for(let i=0;i<(big?6:3);i++)smk(x+rr_(-18,18),v.y-15,15,'#b9967a');if(a.throw||a.ex){crk(v.x);P({ring:1,flat:1,x:v.x,y:GY-2,c:'#ffe0b8',l:20,rs:8,lw:6})}}
+ else hitFx2(src,a,v,li,x,y,big);
 }
 function landFx(f){
  const a=f.atk;
@@ -75,6 +76,7 @@ function projFx(p){
  else if(li===1){if(G.frame%2===0)smk(p.x-sg*6,GY-6,9,'#9aa0b8',22);if(G.frame%3===0)rok(p.x,GY-14,rr_(-1,1),-2-Math.random()*3)}
  else if(li===3){if(p.wait>0){if(p.wait%3===0)P({t:'zz',x:p.x+rr_(-20,20),y:GY-rr_(4,20),ang:-1.57+rr_(-.6,.6),len:rr_(10,24),c:'#ffe680',l:5,g:0,dr:1})}else if(!p.strike){P({t:'e',x:p.x-sg*rr_(0,10),y:p.y+rr_(-6,6),vx:-p.vx*.1,vy:rr_(-.5,.5),l:10,s:rr_(2,4),c:Math.random()<.5?'#ffe680':'#8fe8ff',g:0,dr:.9});if(G.frame%2===0)P({t:'zz',x:p.x,y:p.y,ang:rr_(0,6.28),len:rr_(12,22),c:'#fff3b0',l:4,g:0,dr:1})}}
  else if(li===4){if(p.k==='qk'){if(G.frame%2===0)rok(p.x,GY-10,rr_(-1,1),-2-Math.random()*3,'#8a6a4a')}else if(G.frame%3===0)smk(p.x-sg*8,p.y,8,'#b9967a',16)}
+ else projFx2(p,li,sg);
 }
 function projEnd(p){
  const li=li_(p.own),x=p.x,y=p.y;
@@ -82,7 +84,8 @@ function projEnd(p){
  else if(li===0){emb(x,y,'#ffb347',p.big?30:14,p.big?8:5,28,p.big?7:5,1);P({ring:1,x,y,c:'#ff7a2a',l:16,rs:p.big?6:4,lw:5})}
  else if(li===1){for(let i=0;i<8;i++)rok(x,GY-12,rr_(-3,3),-2-Math.random()*5);for(let i=0;i<4;i++)smk(x,GY-10,14,'#9aa0b8');P({ring:1,flat:1,x,y:GY-4,c:'#cfe6ff',l:16,rs:6,lw:4})}
  else if(li===3){emb(x,y,'#ffe680',12,5,16,3,0);for(let i=0;i<6;i++)P({t:'zz',x,y,ang:i*1.05,len:rr_(18,34),c:'#8fe8ff',l:7,g:0,dr:1})}
- else{for(let i=0;i<(p.k==='qk'?4:12);i++)rok(x,Math.min(y,GY-12),rr_(-4,4),-2-Math.random()*6,i%2?'#a8784a':'#6a4a2a');smk(x,GY-12,16,'#b9967a');if(p.k!=='qk')P({ring:1,flat:1,x,y:GY-4,c:'#ffe0b8',l:16,rs:6,lw:4})}
+ else if(li===4){for(let i=0;i<(p.k==='qk'?4:12);i++)rok(x,Math.min(y,GY-12),rr_(-4,4),-2-Math.random()*6,i%2?'#a8784a':'#6a4a2a');smk(x,GY-12,16,'#b9967a');if(p.k!=='qk')P({ring:1,flat:1,x,y:GY-4,c:'#ffe0b8',l:16,rs:6,lw:4})}
+ else projEnd2(p,li,x,y);
 }
 // ---- 投射物外觀
 function shuriken(x,y,r,rot,al){
@@ -141,7 +144,7 @@ function drawProj(p){
  else if(li===1)quake(p);
  else if(li===3)drawRai(p);
  else if(li===4)drawIwa(p);
- else fireball(p,12);
+ else drawProj2(p,li,k,t);
 }
 // 批次繪製：火星（e）與光痕（sk）都是加亮混合，結果與順序無關，
 // 所以同色、同透明度（分 4 級）的合併成一條路徑一次畫完，其他粒子照舊逐顆畫
@@ -172,6 +175,7 @@ function drawParticle(p){
  else if(p.t==='fl'){const s2=p.s*(.45+.55*al),w2=Math.max(3,s2*.1),r=s2*.42,rs=raySpr(p.c);ctx.save();ctx.globalCompositeOperation='lighter';ctx.translate(p.x,p.y);ctx.drawImage(glowSpr(p.c),-r,-r,r*2,r*2);ctx.rotate(p.rot);ctx.drawImage(rs,-s2,-w2/2,s2*2,w2);ctx.rotate(Math.PI/2);ctx.drawImage(rs,-s2,-w2/2,s2*2,w2);ctx.restore()}
  else if(p.t==='sk'){ctx.globalCompositeOperation='lighter';ctx.lineCap='round';ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(p.x-p.vx*3,p.y-p.vy*3);ctx.strokeStyle=p.c;ctx.lineWidth=2.2;ctx.stroke();ctx.globalCompositeOperation='source-over'}
  else if(p.t==='sh'){ctx.save();ctx.globalCompositeOperation='lighter';ctx.translate(p.x,p.y);ctx.scale(p.dir,1);const r=30+(1-al)*10;ctx.beginPath();ctx.arc(-14,0,r,-1.05,1.05);ctx.strokeStyle=p.c;ctx.globalAlpha=al*.3;ctx.lineWidth=12;ctx.stroke();ctx.globalAlpha=al;ctx.lineWidth=3;ctx.stroke();ctx.strokeStyle='#fff';ctx.lineWidth=1.2;ctx.stroke();ctx.lineWidth=1;ctx.globalAlpha=al*.6;ctx.strokeStyle=p.c;for(let i=-2;i<=2;i++){const a=i*.42;ctx.beginPath();ctx.moveTo(-14+Math.cos(a)*(r-9),Math.sin(a)*(r-9));ctx.lineTo(-14+Math.cos(a)*r,Math.sin(a)*r);ctx.stroke()}ctx.restore()}
+ else if(p.t==='icep')icePillar(p,al);
  else{ctx.fillStyle=p.c;ctx.fillRect(p.x,p.y,p.s,p.s)}
 }
 

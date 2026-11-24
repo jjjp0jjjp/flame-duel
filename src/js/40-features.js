@@ -61,7 +61,10 @@ const TRIALS=[
  [['lp','hp'],['lk','hk','sp'],['lp','lk','spin'],['lk','hp','sp','ex']],
  [['lp','hp'],['lp','lk','hk','sp'],['jab','spin','sp'],['lp','hp','sp','ex']],
  [['lp','hp'],['lk','hk','sp'],['jab','lunge','sp'],['lp','upper','ak']],
- [['lp','hp'],['lp','lk','hk'],['lk','push'],['lp','hk','sp2']]];
+ [['lp','hp'],['lp','lk','hk'],['lk','push'],['lp','hk','sp2']],
+ [['lp','hp'],['lp','lk','hk'],['lk','hk','sp3'],['lp','hp','ex']],
+ [['lp','hp'],['lk','hk','sp'],['jab','spin','sp'],['lp','hp','ex']],
+ [['lp','hp'],['lk','hk','sp'],['jab','lunge','sp2'],['lp','hp','ex']]];
 const trialList=()=>TRIALS[CH.indexOf(p1.ch)]||TRIALS[0];
 function trHit(a,combo){
  const k=a.mk||a.key;
@@ -159,7 +162,10 @@ const CHM=[
  {p:'重攻擊起手有霸體',m:[['必殺','衝擊拳'],['→+必殺','震地波（下段）'],['←+必殺','爆裂摔（指令投）'],['空中 必殺','墜地重砸'],['↓+必殺','崩山拳']]},
  {p:'二段跳、輕攻擊起手更快',m:[['必殺','疾風斬'],['→+必殺','瞬移斬'],['←+必殺','影遁手裏劍（退後無敵）'],['空中 必殺','雙苦無'],['↓+必殺','影分身斬']]},
  {p:'集氣更快、重攻擊較長',m:[['必殺','雷球'],['→+必殺','落雷（定點對空）'],['←+必殺','電磁場（無敵）'],['空中 必殺','雷矢'],['↓+必殺','天雷陣']]},
- {p:'投技範圍與傷害提升、不易被擊退',m:[['必殺','突進抓（指令投）'],['→+必殺','岩石投擲'],['←+必殺','岩壁反擊（擋下攻擊後自動反擊）'],['空中 必殺','隕石墜（落地震波）'],['↓+必殺','大地崩壞']]}];
+ {p:'投技範圍與傷害提升、不易被擊退',m:[['必殺','突進抓（指令投）'],['→+必殺','岩石投擲'],['←+必殺','岩壁反擊（擋下攻擊後自動反擊）'],['空中 必殺','隕石墜（落地震波）'],['↓+必殺','大地崩壞']]},
+ {p:'腿技範圍較長',m:[['必殺','冰錐（慢速）'],['→+必殺','冰柱（定點冒出）'],['←+必殺','冰滑步（下段擊倒）'],['空中 必殺','冰霰（兩發）'],['↓+必殺','絕對零度']]},
+ {p:'迴旋踢更快更強',m:[['必殺','旋風腳（突進）'],['→+必殺','風刃（高速）'],['←+必殺','昇風（無敵對空）'],['空中 必殺','鷹落（俯衝踢）'],['↓+必殺','天嵐旋（無敵）']]},
+ {p:'長棍：攻擊距離長，但起手較慢',m:[['必殺','棍突（遠距）'],['→+必殺','掃棍（下段擊倒）'],['←+必殺','撥擋（擋下攻擊後反擊）'],['空中 必殺','墜月（落地重擊）'],['↓+必殺','千峰棍']]}];
 let HTAB='基本';
 function helpRender(){
  const k=j=>'<b>'+KN(0,j)+'</b>',q=j=>'<b>'+KN(1,j)+'</b>';
@@ -250,9 +256,9 @@ function overlayDraw(){
  ctx.restore();
 }
 addEventListener('hashchange',rpHash);
-// ===== 街機模式：依序打倒其他 4 位角色（後半難度提高），最後挑戰強化版的自己 =====
+// ===== 街機模式：隨機 4 位對手（後半難度提高），最後挑戰強化版的自己 =====
 let ARC=null;
-function arcStart(){const L=CH.map((_,i)=>i).filter(i=>i!==sel[0]);for(let i=L.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[L[i],L[j]]=[L[j],L[i]]}L.push(sel[0]);
+function arcStart(){let L=CH.map((_,i)=>i).filter(i=>i!==sel[0]);for(let i=L.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[L[i],L[j]]=[L[j],L[i]]}L=L.slice(0,4);L.push(sel[0]);
  ARC={L,i:0,me:sel[0],cont:0,d0:G.diff,g0:G.stage,s1:sel[1],res:null,done:0};arcFight()}
 function arcFight(){const boss=ARC.i===ARC.L.length-1;sel[0]=ARC.me;sel[1]=ARC.L[ARC.i];G.diff=boss?2:Math.min(2,ARC.d0+(ARC.i>=2?1:0));G.stage=ARC.i%STG.length;
  startGame(1);sel[1]=ARC.s1;G.stage=ARC.g0;if(boss){p2.hm=1.3;p2.reset();if(REC)REC.h=[1,1.3]}ARC.res=null}

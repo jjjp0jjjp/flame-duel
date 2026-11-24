@@ -3,7 +3,10 @@ const LOOK=[
  {skin:'#d9a37a',top:'#3c6fd1',dk:'#223f80',top2:'#9db8e8',ua:'#9db8e8',fa:'#7e8aa3',hand:'#7e8aa3',th:'#1d2a44',sn:'#2a3350',shoe:'#2a3350',belt:'#8892a6',hair:'#2b2b35',hb:'#8892a6'},
  {skin:'#e8c9a8',top:'#5a3aa8',dk:'#341f6b',top2:'#b46bff',ua:'#5a3aa8',fa:'#2b1b4f',hand:'#2b1b4f',th:'#5a3aa8',sn:'#2b1b4f',shoe:'#1b1233',belt:'#b46bff',hair:'#1b1233',hb:'#b46bff'},
  {skin:'#f2c79e',top:'#2a2f4a',dk:'#151829',top2:'#ffd23d',ua:'#2a2f4a',fa:'#ffd23d',hand:'#ffe680',th:'#1c2033',sn:'#1c2033',shoe:'#ffd23d',belt:'#ffd23d',hair:'#f4f6ff',hb:'#8fe8ff'},
- {skin:'#b97a52',top:'#7a4f2a',dk:'#4a2e16',top2:'#e0b070',ua:'#b97a52',fa:'#b97a52',hand:'#efdcb8',th:'#5a4632',sn:'#5a4632',shoe:'#2a1e14',belt:'#e0b070',hair:'#1e1a16',hb:'#c0392b'}
+ {skin:'#b97a52',top:'#7a4f2a',dk:'#4a2e16',top2:'#e0b070',ua:'#b97a52',fa:'#b97a52',hand:'#efdcb8',th:'#5a4632',sn:'#5a4632',shoe:'#2a1e14',belt:'#e0b070',hair:'#1e1a16',hb:'#c0392b'},
+ {skin:'#f3d6c4',top:'#d6f2ff',dk:'#6fa8cc',top2:'#ffffff',ua:'#d6f2ff',fa:'#9fd8f0',hand:'#e8f8ff',th:'#3a5a7a',sn:'#3a5a7a',shoe:'#e8f8ff',belt:'#7fe3ff',hair:'#eaf6ff',hb:'#7fe3ff'},
+ {skin:'#e6b58c',top:'#2d6a4f',dk:'#1b4332',top2:'#95d5b2',ua:'#e6b58c',fa:'#2d6a4f',hand:'#d8f3dc',th:'#1b2a22',sn:'#d8f3dc',shoe:'#3a2a1a',belt:'#95d5b2',hair:'#1b4332',hb:'#52b788'},
+ {skin:'#e0b48a',top:'#d98c2b',dk:'#8a4f12',top2:'#f6e0a8',ua:'#d98c2b',fa:'#e0b48a',hand:'#f6e0a8',th:'#5a3a1a',sn:'#f6e0a8',shoe:'#3a2412',belt:'#7a1f1f',hair:'#2a1a10',hb:'#f0c674'}
 ];
 // 同角色對戰時 P2 的第二套配色（只影響繪圖，不存在遊戲狀態裡）
 const LOOKA=[
@@ -11,11 +14,14 @@ const LOOKA=[
  {skin:'#d9a37a',top:'#c0392b',dk:'#7a1f17',top2:'#f0b8a8',ua:'#f0b8a8',fa:'#8a6a5a',hand:'#8a6a5a',th:'#3a1d1d',sn:'#4a2525',shoe:'#4a2525',belt:'#c8a88a',hair:'#e8e8f0',hb:'#c8a88a',col:'#ff6a3a',col2:'#ffd0b8',acc:'#ffb070',glow:'#ff7a3a'},
  {skin:'#e8c9a8',top:'#a83a4a',dk:'#5a1a28',top2:'#ff6b7a',ua:'#a83a4a',fa:'#3a0f18',hand:'#3a0f18',th:'#a83a4a',sn:'#3a0f18',shoe:'#1f0810',belt:'#ff6b7a',hair:'#1f0810',hb:'#ff6b7a',col:'#ff4d6a',col2:'#ffc4cc',ring:'#d0566a'},
  {skin:'#f2c79e',top:'#e8ecf8',dk:'#9aa4c0',top2:'#4dd2ff',ua:'#e8ecf8',fa:'#4dd2ff',hand:'#bff0ff',th:'#c8cfe4',sn:'#c8cfe4',shoe:'#4dd2ff',belt:'#4dd2ff',hair:'#2a2f4a',hb:'#ff5a8a',col:'#4dd2ff',col2:'#d4f6ff',acc:'#ff5a8a'},
- {skin:'#b97a52',top:'#2f3a4a',dk:'#1a2230',top2:'#9ab0c8',ua:'#b97a52',fa:'#b97a52',hand:'#efdcb8',th:'#2a3340',sn:'#2a3340',shoe:'#15181f',belt:'#c8a050',hair:'#d8d8d8',hb:'#3a8a5a',col:'#7f9ab8',col2:'#d8e4f0'}];
+ {skin:'#b97a52',top:'#2f3a4a',dk:'#1a2230',top2:'#9ab0c8',ua:'#b97a52',fa:'#b97a52',hand:'#efdcb8',th:'#2a3340',sn:'#2a3340',shoe:'#15181f',belt:'#c8a050',hair:'#d8d8d8',hb:'#3a8a5a',col:'#7f9ab8',col2:'#d8e4f0'},
+ {skin:'#f3d6c4',top:'#e6dcff',dk:'#8a74c8',top2:'#ffffff',ua:'#e6dcff',fa:'#b9a6ff',hand:'#f2eeff',th:'#3a2f5a',sn:'#3a2f5a',shoe:'#f2eeff',belt:'#c8b6ff',hair:'#c8b6ff',hb:'#ff9de0',col:'#c8b6ff',col2:'#f2eeff'},
+ {skin:'#e6b58c',top:'#9c3b1f',dk:'#5a1f0f',top2:'#f4a261',ua:'#e6b58c',fa:'#9c3b1f',hand:'#ffe0c2',th:'#2a1a12',sn:'#ffe0c2',shoe:'#2a1a12',belt:'#f4a261',hair:'#e76f51',hb:'#f4a261',col:'#f4a261',col2:'#ffe0c2'},
+ {skin:'#e0b48a',top:'#2b3a67',dk:'#141c38',top2:'#c8d2f0',ua:'#2b3a67',fa:'#e0b48a',hand:'#c8d2f0',th:'#1a1a2a',sn:'#c8d2f0',shoe:'#1a1a2a',belt:'#c8d2f0',hair:'#1a1a2a',hb:'#c8d2f0',col:'#9fb2ff',col2:'#e6ebff'}];
 const altOf=f=>!!f&&f.side===1&&!!p1&&!!p2&&p1.ch===p2.ch;
 const colOf=f=>altOf(f)?LOOKA[CH.indexOf(f.ch)].col:f.ch.col;
 // 細節配色：褲子寬鬆度、護腕、鞋底、鞋帶／分趾鞋
-const LOOK2=[{bag:1.25,wrap:'#f4f4f4',sole:'#b9bccb',lace:1},{bag:1.05,wrap:'#c8d2e6',sole:'#151a2a'},{bag:1,wrap:'#5a3aa8',sole:'#0c0818',tabi:1},{bag:1,wrap:'#2a2f4a',sole:'#11131f'},{bag:1.3,wrap:'#efdcb8',sole:'#1a120c'}];
+const LOOK2=[{bag:1.25,wrap:'#f4f4f4',sole:'#b9bccb',lace:1},{bag:1.05,wrap:'#c8d2e6',sole:'#151a2a'},{bag:1,wrap:'#5a3aa8',sole:'#0c0818',tabi:1},{bag:1,wrap:'#2a2f4a',sole:'#11131f'},{bag:1.3,wrap:'#efdcb8',sole:'#1a120c'},{bag:1.15,wrap:'#ffffff',sole:'#9fc8e0'},{bag:1,wrap:'#95d5b2',sole:'#1a120c',tabi:1},{bag:1.3,wrap:'#f6e0a8',sole:'#1a120c'}];
 // 顏色變亮（k>0）或變暗（k<0），結果快取
 const SHC=new Map();
 function shade(c,k){const key=c+k;let v=SHC.get(key);if(v)return v;const n=parseInt(c.slice(1),16);let r=n>>16,g=n>>8&255,b=n&255;if(k<0){r*=1+k;g*=1+k;b*=1+k}else{r+=(255-r)*k;g+=(255-g)*k;b+=(255-b)*k}v='rgb('+(r|0)+','+(g|0)+','+(b|0)+')';SHC.set(key,v);return v}
@@ -50,6 +56,7 @@ function drawF(f){
   else{ln=22*e;hip=-48;fh=[30+(a.r-30)*e,-90];bh=[10,-70];ff=[22,0];bf=[-22,0]}
   if(a.type!=='proj'&&a.type!=='strike'&&!a.counter&&f.t>=a.su-1&&f.t<=tot+3){const E=kl?ff:fh;trk=[f.x+E[0]*d,f.y+E[1]]}
  }
+ let stR=0;if(ch.staff&&f.st==='atk'&&a&&!kl&&!a.counter&&!a.throw&&!a.dive&&a.key!=='upper'&&a.key!=='sp3'&&a.type!=='proj'){const tt=a.su+a.ac,e2=f.t<=a.su?f.t/a.su*.7:f.t<=tt?1:Math.max(0,1-(f.t-tt)/a.rc),rch=24+(a.r-24)*e2,yy=Math.max(-104,Math.min(-24,a.h||-80));fh=[Math.min(rch,60),yy];bh=[fh[0]-24,yy+4];stR=Math.max(0,rch-60)}
  {const pz=f.pose||(f.st==='win'?'win':(G.phase==='intro'&&f.st==='idle'&&G.pt>20?'intro':null));if(pz){const q=POSE(li,pz,f);hip=q[0];sh=q[1];ff=q[2];bf=q[3];fh=q[4];bh=q[5];ln=q[6]}}
  if(f.st==='atk'&&f.hit&&a&&a.cn&&f.t>a.su){ctx.save();ctx.strokeStyle='#7fe3ff';ctx.globalAlpha=.35+.3*Math.sin(G.frame*.9);ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(0,-58,40,76,0,0,6.3);ctx.stroke();ctx.restore()}
  // 氣槽光環
@@ -104,6 +111,8 @@ function drawF(f){
   ctx.fill();ctx.strokeStyle=OUT;ctx.lineWidth=1.8;ctx.stroke()};
  // 影的圍巾(在身後)
  if(li===2){const sx0=SHl[0],sy0=sh+2,wv=G.frame*.25-(f.vx||0)*.1;ctx.strokeStyle=OUT;ctx.lineWidth=9;ctx.beginPath();ctx.moveTo(sx0,sy0);ctx.quadraticCurveTo(sx0-d*22,sy0+8+Math.sin(wv)*4,sx0-d*44,sy0+2+Math.sin(wv+1)*7);ctx.stroke();ctx.strokeStyle=C(L.belt);ctx.lineWidth=6;ctx.stroke();if(!fl){ctx.strokeStyle=shade(L.belt,.35);ctx.lineWidth=1.5;ctx.stroke()}}
+ if(li===5){const wv=Math.sin(G.frame*.12)*2;limb([hx-d*hr*.55,hy-2],[hx-d*(hr+3+wv),hy+30],6.5,2.2,1.5,L.hair)} // 霜的長髮（在身後，上粗下細）
+ if(li===6){const wv=G.frame*.3-(f.vx||0)*.12;for(const[o,c2]of[[0,OUT],[1,C(L.hb)]]){ctx.strokeStyle=c2;ctx.lineWidth=o?3.5:6;ctx.beginPath();ctx.moveTo(hx-d*12,hy-7);ctx.quadraticCurveTo(hx-d*30,hy-4+Math.sin(wv)*5,hx-d*(52+Math.sin(wv*.7)*4),hy-10+Math.sin(wv+1)*8);ctx.stroke()}}
  // 後側手腳（稍暗，做出前後層次）
  ctx.globalAlpha=GA*.82;arm(-3,bh);leg(bf,1);ctx.globalAlpha=GA;
  // 骨盆（褲頭），讓兩腿接得自然
@@ -136,10 +145,20 @@ function drawF(f){
    ctx.strokeStyle=L.top2;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(tp[1][0],tp[1][1]);ctx.lineTo(tp[2][0],tp[2][1]);ctx.stroke();
    ctx.strokeStyle='#cfd3e6';ctx.lineWidth=1.3;ctx.setLineDash([2,2]);ctx.beginPath();const z1=sp(.98,fs*3*w),z2=sp(.05,fs*3*w);ctx.moveTo(z1[0],z1[1]);ctx.lineTo(z2[0],z2[1]);ctx.stroke();ctx.setLineDash([]);
    glow(cx,cy,17,L.acc||'#ffd23d',.55);ctx.save();ctx.strokeStyle=L.acc||'#ffd23d';ctx.lineWidth=3;ctx.lineJoin='miter';ctx.beginPath();ctx.moveTo(cx+d*4,cy-13);ctx.lineTo(cx-d*3,cy-1);ctx.lineTo(cx+d*3,cy-1);ctx.lineTo(cx-d*4,cy+12);ctx.stroke();ctx.restore()}
-  else{ // 敞開的背心，露出胸肌、腹肌
+  else if(li===4){ // 敞開的背心，露出胸肌、腹肌
    const a=sp(1,fs*7*w),b=sp(.02,fs*5*w);ctx.lineCap='round';ctx.strokeStyle=OUT;ctx.lineWidth=17*w;ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);ctx.stroke();ctx.strokeStyle=L.skin;ctx.lineWidth=14*w;ctx.stroke();
    ctx.strokeStyle=shade(L.skin,-.35);ctx.lineWidth=1.4;ctx.beginPath();const p1=sp(.78,fs*1*w),p2=sp(.7,fs*11*w),p3=sp(.62,fs*6*w);ctx.moveTo(p1[0],p1[1]);ctx.quadraticCurveTo(p3[0],p3[1],p2[0],p2[1]);
    for(const t of[.25,.4,.53]){const q1=sp(t,fs*3*w),q2=sp(t,fs*9*w);ctx.moveTo(q1[0],q1[1]);ctx.lineTo(q2[0],q2[1])}const m1=sp(.6,fs*6*w),m2=sp(.15,fs*6*w);ctx.moveTo(m1[0],m1[1]);ctx.lineTo(m2[0],m2[1]);ctx.stroke()}
+  else if(li===5){ // 霜：斜披白紗、毛領、雪花紋
+   ctx.strokeStyle='rgba(255,255,255,.85)';ctx.lineWidth=5*w;ctx.beginPath();const s1=sp(1,fs*10*w),s2=sp(.08,-fs*8*w);ctx.moveTo(s1[0],s1[1]);ctx.lineTo(s2[0],s2[1]);ctx.stroke();
+   ctx.fillStyle='#ffffff';for(let i=-2;i<=2;i++){const q=sp(1.02,i*5*w);ctx.beginPath();ctx.arc(q[0],q[1],3.4*w,0,6.3);ctx.fill()}
+   const c0=sp(.68,fs*4*w);ctx.strokeStyle='#5fb8e0';ctx.lineWidth=1.4;ctx.beginPath();for(let k=0;k<3;k++){const an=k*Math.PI/3;ctx.moveTo(c0[0]-Math.cos(an)*5,c0[1]-Math.sin(an)*5);ctx.lineTo(c0[0]+Math.cos(an)*5,c0[1]+Math.sin(an)*5)}ctx.stroke()}
+  else if(li===6){ // 嵐：敞開的短背心、斜綁腰帶
+   const a1=sp(1,fs*6*w),b1=sp(.05,fs*4*w);ctx.lineCap='round';ctx.strokeStyle=OUT;ctx.lineWidth=12*w;ctx.beginPath();ctx.moveTo(a1[0],a1[1]);ctx.lineTo(b1[0],b1[1]);ctx.stroke();ctx.strokeStyle=L.skin;ctx.lineWidth=9*w;ctx.stroke();
+   ctx.strokeStyle=L.top2;ctx.lineWidth=4*w;ctx.beginPath();const q1=sp(.95,-fs*12*w),q2=sp(.2,fs*10*w);ctx.moveTo(q1[0],q1[1]);ctx.lineTo(q2[0],q2[1]);ctx.stroke()}
+  else if(li===7){ // 月：僧袍交領、佛珠
+   ctx.strokeStyle=L.top2;ctx.lineWidth=3.2;ctx.beginPath();const c1=sp(1,fs*9*w),c2=sp(1,-fs*4*w),v=sp(.42,fs*3*w);ctx.moveTo(c1[0],c1[1]);ctx.lineTo(v[0],v[1]);ctx.moveTo(c2[0],c2[1]);ctx.lineTo(sp(.55,fs*6*w)[0],sp(.55,fs*6*w)[1]);ctx.stroke();
+   ctx.fillStyle='#5a2a1a';ctx.strokeStyle=OUT;ctx.lineWidth=1;for(let i=0;i<7;i++){const q=sp(.98-i*.1,-fs*(10-i*3.2)*w);ctx.beginPath();ctx.arc(q[0],q[1],2.6,0,6.3);ctx.fill();ctx.stroke()}}
   ctx.restore();
  }
  ctx.strokeStyle=OUT;ctx.lineWidth=2.2;ctx.stroke(tpath);
@@ -175,10 +194,21 @@ function drawF(f){
   ctx.fillStyle=C(L.hair);ctx.strokeStyle=OUT;ctx.lineWidth=1.8;ctx.beginPath();ctx.arc(hx-d*4,hy-hr-4,6.5,0,6.3);ctx.fill();ctx.stroke();
   poly([[-16,-2],[-15,-12],[-6,-18],[8,-18],[16,-10],[16,-4],[9,-9],[-9,-9]],L.hair,hx,hy);
   seg([hx-d*15,hy-7],[hx+d*15,hy-7],4,L.hb)
- }else{
+ }else if(li===2){
   const wv=Math.sin(G.frame*.25);seg([hx-d*11,hy-7],[hx-d*(24+wv*3),hy-4+wv*3],5,L.hair);seg([hx-d*(24+wv*3),hy-4+wv*3],[hx-d*(32+wv*4),hy+5+wv*4],4,L.hair);
   seg([hx-d*13,hy-6],[hx+d*13,hy-6],4,L.hb);
   ctx.strokeStyle=C(L.skin);ctx.lineWidth=7;ctx.beginPath();ctx.moveTo(hx+d*2,hy-1);ctx.lineTo(hx+d*12,hy-1);ctx.stroke()
+ }else if(li===5){ // 霜：齊瀏海、冰晶頭冠
+  poly([[-15,4],[-16,-10],[-8,-18],[6,-19],[15,-11],[14,-3],[7,-9],[0,-8],[-7,-5],[-10,6]],L.hair,hx,hy);
+  if(!fl)glow(hx,hy-20,12,'#9fe8ff',.6);
+  for(const[o,h]of[[-6,9],[0,13],[6,9]]){ctx.fillStyle=C('#e8fbff');ctx.strokeStyle=OUT;ctx.lineWidth=1.3;ctx.beginPath();ctx.moveTo(hx+d*(o-3),hy-16);ctx.lineTo(hx+d*o,hy-16-h);ctx.lineTo(hx+d*(o+3),hy-16);ctx.closePath();ctx.fill();ctx.stroke()}
+ }else if(li===6){ // 嵐：後梳尖髮、頭帶
+  poly([[-14,2],[-30,-6],[-16,-10],[-32,-18],[-12,-17],[-22,-30],[-2,-20],[8,-24],[12,-14],[16,-8],[8,-10],[-8,-8]],L.hair,hx,hy);
+  seg([hx-d*14,hy-7],[hx+d*14,hy-7],4,L.hb)
+ }else if(li===7){ // 月：短髮、額頭月紋頭帶
+  poly([[-14,-2],[-14,-10],[-7,-16],[7,-16],[14,-9],[13,-4],[7,-9],[-8,-9]],L.hair,hx,hy);
+  seg([hx-d*14,hy-6],[hx+d*14,hy-6],4,L.hb);
+  if(!fl){ctx.strokeStyle='#fff4d6';ctx.lineWidth=2;ctx.beginPath();ctx.arc(hx+d*5,hy-6,3,-1.2*d+(d<0?Math.PI:0),1.2*d+(d<0?Math.PI:0),d<0);ctx.stroke()}
  }
  if(!fl){
   const ex=hx+d*(li===2?9:7),ey=hy-1;
@@ -192,6 +222,10 @@ function drawF(f){
  // 肩甲(鋼)
  if(li===1){const px=SHl[0],py=sh+3;let fs2=C(L.top2);if(!fl){fs2=ctx.createRadialGradient(px-4,py-5,1,px,py,12);fs2.addColorStop(0,shade(L.top2,.45));fs2.addColorStop(.6,L.top2);fs2.addColorStop(1,shade(L.top2,-.3))}ctx.fillStyle=fs2;ctx.strokeStyle=OUT;ctx.lineWidth=2;ctx.beginPath();ctx.arc(px,py,11,0,6.3);ctx.fill();ctx.stroke();if(!fl){ctx.strokeStyle=shade(L.top2,-.4);ctx.lineWidth=1.2;ctx.beginPath();ctx.arc(px,py,7.5,Math.PI*.9,Math.PI*2.1);ctx.stroke();ctx.fillStyle='#eef4ff';for(const q of[-1,1]){ctx.beginPath();ctx.arc(px+q*6,py+4,1.3,0,6.3);ctx.fill()}}}
  // 前側手
+ if(ch.staff){const A=R(bh),B=R(fh);let ux=B[0]-A[0],uy=B[1]-A[1];const l=Math.hypot(ux,uy);if(l<6){ux=d;uy=0}else{ux/=l;uy/=l}
+  const tip=[B[0]+ux*(52+stR),B[1]+uy*(52+stR)],but=[A[0]-ux*30,A[1]-uy*30];ctx.lineCap='round';ctx.beginPath();ctx.moveTo(but[0],but[1]);ctx.lineTo(tip[0],tip[1]);
+  ctx.strokeStyle=OUT;ctx.lineWidth=7.5;ctx.stroke();ctx.strokeStyle=C('#8a5a2a');ctx.lineWidth=4.5;ctx.stroke();if(dt){ctx.strokeStyle='#c08a4a';ctx.lineWidth=1.4;ctx.stroke()}
+  for(const q of[tip,but]){ctx.fillStyle=C(L.hb);ctx.strokeStyle=OUT;ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(q[0],q[1],3.8,0,6.3);ctx.fill();ctx.stroke()}}
  arm(3,fh);
  ctx.restore();
  // 攻擊揮動軌跡
