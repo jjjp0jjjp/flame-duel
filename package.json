@@ -1,0 +1,15 @@
+{
+  "name": "flame-duel",
+  "private": true,
+  "description": "烈焰對決：瀏覽器格鬥遊戲",
+  "scripts": {
+    "build": "node tools/build.mjs",
+    "check": "node tools/build.mjs --check",
+    "test": "node tools/build.mjs --check && node tests/game.test.cjs",
+    "test:net": "python tests/roomtest.py",
+    "pages": "node pages/build.mjs"
+  },
+  "devDependencies": {
+    "playwright": "1.63.0"
+  }
+}

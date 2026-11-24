@@ -15,12 +15,29 @@
 
 | 路徑 | 內容 |
 |---|---|
-| `index.html` | 遊戲本體（獨立網頁版） |
+| `src/page.html` | 頁面外框（HTML／CSS），`<!--@HEAD-->`、`<!--@NETUI-->`、`/*@JS*/` 由建置填入 |
+| `src/js/` | 兩個版本共用的遊戲程式，依檔名順序串接（資料與音效、特效、角色、`class F`、輸入與 AI、遊戲流程、繪圖、連線同步、訓練／教學／設定） |
+| `src/web/` | 獨立網頁版專屬：head、連線 UI、WebRTC 傳輸層、房間代碼配對 |
+| `src/artifact/` | claude.ai artifact 版專屬：head、連線 UI、artifact room 傳輸層 |
+| `tools/build.mjs` | 從 `src/` 產生 `index.html` 與 `claude-artifact/fighter_v2.html` |
+| `index.html` | 遊戲本體（獨立網頁版，產生的檔案） |
+| `claude-artifact/fighter_v2.html` | claude.ai artifact 版（產生的檔案，使用 artifact 的 room 功能，不走下面的伺服器） |
 | `rooms-worker/` | 房間配對 Worker + Durable Object（`Room`） |
 | `pages/_worker.template.js` | Pages 進階模式 worker：送出頁面、把 `/api/ws` 轉給 `ROOMS` |
 | `pages/build.mjs` | 把 `index.html` 壓縮嵌入，產生 `dist/_worker.js` |
-| `tests/` | 本機模擬伺服器 + Playwright 雙視窗連線測試 |
-| `claude-artifact/fighter_v2.html` | claude.ai artifact 版（使用 artifact 的 room 功能，不走上面的伺服器） |
+| `tests/` | 遊戲本體測試、本機模擬伺服器 + Playwright 雙視窗連線測試 |
+
+## 開發
+
+**改程式請改 `src/`，不要直接改 `index.html` 或 `claude-artifact/fighter_v2.html`**，改完執行：
+
+```bash
+npm install            # 只需要一次（裝 Playwright）
+npm run build          # 產生兩個版本
+npm test               # 檢查產生的檔案是否最新 + 遊戲本體測試
+```
+
+`tests/game.test.cjs` 會檢查：兩個版本都能載入並執行各模式、同樣輸入的結果完全一致（確定性）、從快照回滾重跑的結果一致（連線對戰靠這個）、每個角色的連段挑戰都打得出來、新手教學可以完成。GitHub Actions（`.github/workflows/ci.yml`）每次 push 都會跑這些測試和連線測試。
 
 ## 部署
 
@@ -37,11 +54,11 @@ node pages/build.mjs
 wrangler pages deploy dist --project-name flame-duel-fighter
 ```
 
-## 本機測試
+## 連線測試
 
 ```bash
 node tests/mockserver.js index.html 8790 &
-pip install playwright && python tests/roomtest.py
+pip install playwright==1.63.0 && python tests/roomtest.py
 ```
 
 ## 注意

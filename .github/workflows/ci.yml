@@ -1,0 +1,30 @@
+name: CI
+on:
+  push:
+  pull_request:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      # 產生的檔案必須和 src/ 一致
+      - run: npm run check
+      # 遊戲本體：確定性、回滾一致性、連段挑戰、教學
+      - run: node tests/game.test.cjs
+      # Pages worker 能正常打包
+      - run: npm run pages
+      # 連線對戰：本機模擬配對伺服器 + 雙視窗
+      - run: pip install playwright==1.63.0
+      - run: |
+          node tests/mockserver.js index.html 8790 &
+          sleep 1
+          PLAYWRIGHT_BROWSERS_PATH=$HOME/.cache/ms-playwright python tests/roomtest.py

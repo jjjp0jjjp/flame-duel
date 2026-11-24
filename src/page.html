@@ -1,0 +1,62 @@
+<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!--@HEAD-->
+<style>
+:root{--bg:#05060f;--fg:#f2f2f7;--ac:#ff5a4d;--pn:#161a33;--bd:#3a4080;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--padh:0px;--pb:52px}
+@media (pointer:coarse){:root{--padh:170px}}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);font-family:'Noto Sans TC','Microsoft JhengHei',system-ui,sans-serif}
+body{display:flex;flex-direction:column;align-items:center;justify-content:center}
+canvas{width:100%;max-width:960px;max-width:min(960px,100vw,calc((100vh - var(--padh))*16/9));max-width:min(960px,100vw,calc((100dvh - var(--padh))*16/9));height:auto;display:block;background:#000}
+#menu{position:fixed;top:0;left:0;right:0;bottom:0;overflow:auto;background:radial-gradient(circle at 50% 20%,#3a1850,#0b0b24 70%);display:flex;flex-direction:column;align-items:center;padding:24px 16px;z-index:5}
+#menu>*{flex:none}#menu::before,#menu::after{content:"";margin:auto}
+h1{margin:0;font-size:clamp(40px,9vw,76px);font-weight:900;background:linear-gradient(#ffe14d,#ff4d4d);-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:.1em}
+.sub{margin:0 0 16px;letter-spacing:.5em;color:#ff9db8;font-size:13px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center;margin:5px 0;font-size:15px}
+button{font:inherit;color:var(--fg);background:var(--pn);border:2px solid var(--bd);border-radius:10px;padding:8px 14px;cursor:pointer}
+button:hover{border-color:var(--ac)}
+.big{font-size:20px;font-weight:700;min-width:240px;margin:6px;padding:12px 20px;background:linear-gradient(#ff5a4d,#c0283c);border-color:#ff9db8}
+.help{margin-top:14px;max-width:620px;font-size:13px;line-height:1.8;background:#0008;border:1px solid var(--bd);border-radius:12px;padding:12px 16px;color:#cfd2ff}
+.help b{color:#ffe14d}
+#pad{display:none;width:100%;max-width:620px;justify-content:space-between;align-items:center;padding:8px 12px;gap:8px}
+#pad .a{display:grid;gap:5px;grid-template-columns:repeat(4,var(--pb))}
+#pad button{width:var(--pb);height:var(--pb);padding:0;font-size:14px;user-select:none;-webkit-user-select:none;touch-action:none;border-radius:50%}#pad button.q{background:#3a1830;border-color:#ff9db8;font-size:13px}
+#stick{width:calc(var(--pb)*2.2);height:calc(var(--pb)*2.2);border-radius:50%;background:#161a33cc;border:2px solid var(--bd);position:relative;touch-action:none;flex:none}#knob{position:absolute;left:25%;top:25%;width:50%;height:50%;border-radius:50%;background:var(--ac);opacity:.85;pointer-events:none}
+#tbar{display:none;gap:6px;flex-wrap:wrap;justify-content:center;padding:6px}#tbar button{padding:4px 10px;font-size:13px}
+#selbox{width:100%;max-width:620px}.srow{display:flex;align-items:center;gap:8px;justify-content:center;margin:4px 0}.sl{width:40px;font-size:13px;text-align:right;color:#cfd2ff}.cards{display:flex;gap:6px}.card{display:flex;flex-direction:column;align-items:center;padding:2px 2px 4px;width:64px;font-size:14px;font-weight:700}.card canvas{width:58px;height:70px;max-width:none;background:none}.card.on{box-shadow:0 0 12px currentColor}
+#sinfo{display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:12px;margin:6px 0;background:#0006;border-radius:10px;padding:8px 10px}.st{display:flex;align-items:center;gap:6px;margin:2px 0}.st span:first-child{width:30px;color:#aab}.st i{flex:1;height:7px;background:#fff2;border-radius:4px;overflow:hidden}.st u{display:block;height:100%}.ps{color:#cfd2ff;margin-top:3px}
+@media (pointer:coarse){#pad{display:flex}}
+input{font:inherit;background:var(--pn);color:var(--fg);border:2px solid var(--bd);border-radius:10px;padding:8px 12px;width:130px;text-align:center;text-transform:lowercase}
+textarea{width:100%;font:12px/1.4 ui-monospace,Menlo,Consolas,monospace;background:var(--pn);color:var(--fg);border:2px solid var(--bd);border-radius:10px;padding:8px;resize:none;word-break:break-all;margin:4px 0}
+#net .lb{display:flex;justify-content:space-between;align-items:center;margin-top:6px}
+#net .lb button{padding:4px 12px;font-size:13px}
+#rcode{display:none;font:900 56px/1.1 ui-monospace,Menlo,Consolas,monospace;letter-spacing:.25em;color:#fff;text-align:center;margin:8px 0 2px;text-shadow:0 0 18px #ff5a4d}
+#rc2{width:130px;font-size:20px;letter-spacing:.3em}
+#manual summary,#adv summary{cursor:pointer;color:#ffe14d}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}.tabs button{padding:4px 12px;font-size:13px}.tabs button.on{border-color:var(--ac);background:#3a1830}
+#help{min-height:150px}#keytab table{border-collapse:collapse;margin:6px auto}#keytab td{padding:3px 6px;text-align:center}#keytab button{min-width:74px;padding:4px 8px;font-size:13px}#keytab button.wait{border-color:#ffe14d;color:#ffe14d}
+input[type=range]{width:90px;padding:0}
+</style></head><body>
+<noscript><p style="color:#fff;padding:20px;text-align:center">此遊戲需要啟用 JavaScript 才能執行。</p></noscript>
+<canvas id="c" width="960" height="540"></canvas>
+<div id="tbar"><button id="tb-hb"></button><button id="tb-dm"></button><button id="tb-rec"></button><button id="tb-tr"></button><button id="tb-rs">重置位置</button></div>
+<div id="pad"><div id="stick"><div id="knob"></div></div>
+<div class="a"><button data-k="T0a">輕拳</button><button data-k="T0b">重拳</button><button data-k="T0s">必殺</button><button data-k="T0e,T0a" class="q">升龍</button><button data-k="T0x">輕腳</button><button data-k="T0y">重腳</button><button data-k="T0t">投</button><button data-k="T0e,T0s" class="q">超必</button></div></div>
+<div id="menu">
+<h1>烈焰對決</h1><p class="sub">FLAME DUEL</p>
+<div id="selbox"><div class="srow"><span class="sl">P1</span><div class="cards" id="g1"></div></div><div class="srow"><span class="sl">P2<br>電腦</span><div class="cards" id="g2"></div></div><div id="sinfo"></div></div>
+<div class="row">難度 <button id="df"></button> 場景 <button id="stg"></button></div>
+<div class="row" id="rec" style="color:#ffe14d"></div>
+<button class="big" id="b1">單人 vs 電腦</button><button class="big" id="b2">雙人對戰</button><button class="big" id="b3">訓練模式</button><button class="big" id="b4">連線對戰</button><button class="big" id="b5" style="background:linear-gradient(#3a8a5a,#1f5a3a);border-color:#8fe8b0">新手教學</button>
+<!--@NETUI-->
+<div class="row"><button id="bset">⚙ 設定（按鍵・音量）</button></div>
+<div id="set" class="help" style="display:none"><b>設定</b>
+<div class="row" style="justify-content:flex-start">主音量 <input type="range" min="0" max="1" step=".05" data-v="all"> 音樂 <input type="range" min="0" max="1" step=".05" data-v="mus"> 音效 <input type="range" min="0" max="1" step=".05" data-v="sfx"></div>
+<div id="keytab"></div>
+<div class="row"><button id="psz"></button><button id="kdef">恢復預設按鍵</button><button id="sclose">完成</button></div>
+<div style="font-size:12px;color:#aab">點按鈕後按下想用的鍵（Esc 取消）。同一個鍵只能對應一個動作，重複時會自動從舊的位置移除。設定只存在這個瀏覽器。</div></div>
+<div class="help" id="help"><div class="tabs" id="htabs"></div><div id="hbody"></div></div>
+</div>
+<script>
+/*@JS*/
+</script></body></html>

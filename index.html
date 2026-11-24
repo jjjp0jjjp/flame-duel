@@ -70,6 +70,7 @@ input[type=range]{width:90px;padding:0}
 <div class="help" id="help"><div class="tabs" id="htabs"></div><div id="hbody"></div></div>
 </div>
 <script>
+// 此檔由 tools/build.mjs 從 src/ 產生，請改 src/ 後重新產生，不要直接修改。
 window.addEventListener('error',e=>{try{let d=document.getElementById('errbox');if(!d){d=document.createElement('div');d.id='errbox';d.style.cssText='position:fixed;left:0;right:0;bottom:0;z-index:99;background:#7a1020;color:#fff;font:12px/1.5 monospace;padding:8px 12px;white-space:pre-wrap;max-height:40vh;overflow:auto';document.body.appendChild(d)}d.textContent='⚠ 遊戲發生錯誤（請把這段文字回報）：\n'+(e.message||'')+'\n'+String(e.filename||'').split('/').pop()+':'+(e.lineno||'')+':'+(e.colno||'')}catch(x){}});
 const cv=document.getElementById('c'),ctx=cv.getContext('2d'),W=960,H=540,GY=450;
 const FONT="'Noto Sans TC','Microsoft JhengHei',sans-serif";
@@ -837,8 +838,9 @@ function draw(){
 }
 
 // ================= 連線對戰(鎖步同步) =================
-const NET={sendIv:16,on:false,room:null,lobby:null,slot:0,D:6,tick:0,cap:0,loc:{},rem:{},remHigh:-1,remAck:-1,sendT:{},lastSend:0,stallT:0,rtt:0,hash:{},rh:{},hl:null,desync:false,inp:[0,0],sid:'',started:false,gone:false,remote:null,hb:0,unsub:[],code:'',pings:[],Dsel:6,lastIn:null};
+const NET={on:false,room:null,lobby:null,slot:0,D:6,tick:0,cap:0,loc:{},rem:{},remHigh:-1,remAck:-1,sendT:{},lastSend:0,stallT:0,rtt:0,hash:{},rh:{},hl:null,desync:false,inp:[0,0],sid:'',started:false,gone:false,remote:null,hb:0,unsub:[],code:'',pings:[],Dsel:6,lastIn:null};
 const setNs=t=>{$('ns').textContent=t};
+NET.sendIv=16; // WebRTC DataChannel 可以送得比較密
 const RTC_CFG={iceServers:[{urls:['stun:stun.l.google.com:19302','stun:stun1.l.google.com:19302']},{urls:'stun:global.stun.twilio.com:3478'}]};
 let PC=null;
 function turnCfg(){try{return JSON.parse(localStorage.getItem('fd_turn')||'null')}catch(e){return null}}
@@ -1287,7 +1289,7 @@ function trainHud(){
 // ===== 新手教學 =====
 function tutStart(){TUT={i:0,c:0,hits:[],blk:0,L:[
  [()=>'用 '+KN(0,0)+'／'+KN(0,1)+' 左右走動',()=>p1.st==='walk'&&++TUT.c>40],
- [()=>'按 '+KN(0,2)+' 跳躍',()=>p1.y<GY-60],
+ [()=>'按 '+KN(0,2)+' 跳躍',()=>p1.y<GY-25],
  [()=>'快速連按兩下 '+KN(0,1)+'（或 '+KN(0,0)+'）衝刺',()=>p1.st==='dash'],
  [()=>'走近木樁，按 '+KN(0,4)+' 輕拳打中它',()=>TUT.hits.includes('lp')],
  [()=>'按 '+KN(0,7)+' 重腳打中木樁',()=>TUT.hits.includes('hk')],
