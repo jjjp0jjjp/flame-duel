@@ -19,14 +19,18 @@ function makeThumbs(){CH.forEach((ch,i)=>{const c=document.createElement('canvas
 // ===== 主選單：選角網格、動態預覽、難度、場景 =====
 let PT=0,PVF=0; // PT：目前在選 P1(0) 或 P2(1)
 const STH=[];
+const HEAD=[];
+function makeHeads(){CH.forEach((ch,i)=>{const c=document.createElement('canvas');c.width=c.height=200;
+ ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,240,460);portrait(ch,'',92,356,2.3,1);ctx.restore();
+ c.getContext('2d').drawImage(cv,0,0,200,200,0,0,200,200);HEAD[i]=c});ctx.clearRect(0,0,W,H)}
 function selUI(){
  const g=$('grid');
- if(!g.children.length)CH.forEach((ch,i)=>{const b=document.createElement('button');b.className='card';const c=document.createElement('canvas');c.width=120;c.height=144;c.getContext('2d').drawImage(THUMB[i],0,0);
-  b.appendChild(c);b.insertAdjacentHTML('beforeend','<span>'+ch.n+'</span><small>'+ch.ds+'</small><span class="bd b1">1P</span><span class="bd b2">2P</span>');
+ if(!g.children.length)CH.forEach((ch,i)=>{const b=document.createElement('button');b.className='cell';b.title=ch.n+'・'+ch.ds;b.style.background='radial-gradient(circle at 50% 38%,'+ch.col+'66,#0b0b1e 72%)';
+  const c=document.createElement('canvas');c.width=c.height=200;c.getContext('2d').drawImage(HEAD[i],0,0);
+  b.appendChild(c);b.insertAdjacentHTML('beforeend','<span class="nm">'+ch.n+'</span><span class="bd b1">1P</span><span class="bd b2">2P</span>');
   b.onclick=()=>{sel[PT]=i;snd(600+i*40,.06,'triangle',.05);if(PT===0&&!selUI.p2){selUI.p2=1;PT=1}lab()};
   b.onmouseenter=()=>{selUI.hv=i;selUI()};b.onmouseleave=()=>{selUI.hv=-1;selUI()};g.appendChild(b)});
- [...g.children].forEach((b,i)=>{const a=sel[0]===i,c=sel[1]===i,cur=sel[PT]===i;b.querySelector('.b1').style.display=a?'':'none';b.querySelector('.b2').style.display=c?'':'none';
-  b.style.borderColor=cur?CH[i].col:a||c?CH[i].col+'88':'';b.style.background=cur?CH[i].col+'38':'';b.style.boxShadow=cur?'0 0 14px '+CH[i].col+'88':''});
+ [...g.children].forEach((b,i)=>{const a=sel[0]===i,c=sel[1]===i;b.classList.toggle('p1',a);b.classList.toggle('p2',c);b.classList.toggle('cur',sel[PT]===i);b.querySelector('.b1').style.display=a?'':'none';b.querySelector('.b2').style.display=c?'':'none'});
  [...$('ptabs').querySelectorAll('[data-p]')].forEach(b=>b.classList.toggle('on',+b.dataset.p===PT));
  const i=selUI.hv>=0?selUI.hv:sel[PT],ch=CH[i];
  $('pvinfo').innerHTML='<h3 style="color:'+ch.col+'">'+ch.n+'</h3><div>'+ch.ds+'</div>'+STAT.map(s=>'<div class="st"><span>'+s[0]+'</span><i><u style="width:'+Math.round(100*(ch[s[1]]-s[2])/(s[3]-s[2]))+'%;background:'+ch.col+'"></u></i><span>'+ch[s[1]]+'</span></div>').join('')+'<div class="ps">被動：'+CHM[i].p+'</div><div class="mv">'+CHM[i].m.slice(0,3).map(x=>x[0]+' '+x[1].replace(/（.*）/,'')).join('　')+'</div>';
@@ -301,5 +305,5 @@ function arcInfo(){try{const r=JSON.parse(localStorage.getItem('fd_arc')||'{}'),
 function arcHud(){if(!ARC||G.phase==='menu')return;const n=ARC.L.length,boss=ARC.i===n-1;ctx.save();ctx.textAlign='center';ctx.font='bold 14px '+FONT;ctx.fillStyle=boss?'#ff6b6b':'#ffe14d';ctx.fillText('街機 第 '+(ARC.i+1)+'／'+n+' 戰'+(boss?'　魔王：強化版'+CH[ARC.L[ARC.i]].n+'（體力 ×1.3）':''),W/2,90);ctx.restore()}
 $('b7').onclick=()=>{snd(500,.1);arcStart()};
 // ===== 初始化 =====
-makeThumbs();makeStageThumbs();lab();rpLastBtn();rpHash();fitCanvas();qLabel();
+makeThumbs();makeHeads();makeStageThumbs();lab();rpLastBtn();rpHash();fitCanvas();qLabel();
 $('qbtn').onclick=()=>{QM=(QM+1)%QN.length;QA=0;try{localStorage.setItem('fd_q',QM)}catch(e){}fitCanvas();bg=makeBg(STG[G.stage]);qLabel()};
