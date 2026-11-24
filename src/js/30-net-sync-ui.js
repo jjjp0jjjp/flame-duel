@@ -132,7 +132,7 @@ function pads(){if(!padOK)return;let gp=[];try{gp=navigator.getGamepads?navigato
 function loop(ts){requestAnimationFrame(loop);pads();acc+=Math.min(100,ts-last);last=ts;
  if(NET.on){while(acc>=16.667){if(!netTick()){acc=Math.min(acc,33);break}acc-=16.667}netSend()}
  else while(acc>=16.667){step();acc-=16.667}
- uiTick();draw()}
+ uiTick();draw();qPerf()}
 requestAnimationFrame(loop);
 
 addEventListener('keydown',e=>{if(KCAP){e.preventDefault();kcapDone(e.code);return}

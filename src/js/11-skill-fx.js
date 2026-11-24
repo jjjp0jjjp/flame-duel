@@ -43,6 +43,7 @@ function fxMove(f,a,g){
 // ---- 命中特效
 function hitFx(src,a,v){
  const li=li_(src),x=v.x,y=v.y-75,big=a.d>12||a.ex;
+ if(a.ex)flash(src.ch.col,.35,220);else if(big)flash('#ffffff',.12,90);
  if(li===0){emb(x,y,'#ffb347',big?22:10,big?7:4,26,5,1);emb(x,y,'#fff2b0',big?8:4,3,16,3,0);if(big)P({ring:1,x,y,c:'#ff7a2a',l:18,rs:5,lw:5});if(a.ex||a.launch)for(let i=0;i<10;i++)emb(x+rr_(-15,15),y+rr_(10,60),'#ff5a1a',1,2,30,rr_(4,8),3)}
  else if(li===1){const n=big?9:4;for(let i=0;i<n;i++)rok(x+rr_(-10,10),y,rr_(-3.5,3.5),-2-Math.random()*5);for(let i=0;i<(big?5:2);i++)smk(x+rr_(-15,15),v.y-20,14,'#9aa0b8');if(big)P({ring:1,x,y,c:'#cfe6ff',l:16,rs:6,lw:6});if(a.ex||a.throw)crk(v.x)}
  else if(li===2){const n=a.ex?7:big?4:2;for(let i=0;i<n;i++)slh(x+rr_(-12,12),y+rr_(-17,17),rr_(-1.1,.8)+(i%2?1.6:0),rr_(70,110),i%2?'#e3ccff':'#b46bff',12);smk(x,y+20,12,'#4a3a80',20)}

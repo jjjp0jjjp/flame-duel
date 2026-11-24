@@ -50,7 +50,7 @@ const STG=[
  {n:'竹林道場',k:'bamboo',s:['#0c1a14','#1f4a32','#a8d48a'],b:['#1d4a2a','#123020'],w:'#e8ffb0',g:['#5a4028','#2a1c10'],l:'#c9a36b',m:'#f4ffd8'}
 ];
 function makeBg(S){
- const c=document.createElement('canvas');c.width=W;c.height=H;const b=c.getContext('2d');
+ const c=document.createElement('canvas'),rs=RS||1;c.width=Math.round(W*rs);c.height=Math.round(H*rs);const b=c.getContext('2d');b.scale(rs,rs);
  let g=b.createLinearGradient(0,0,0,GY);g.addColorStop(0,S.s[0]);g.addColorStop(.6,S.s[1]);g.addColorStop(1,S.s[2]);b.fillStyle=g;b.fillRect(0,0,W,H);
  let s=7;const r=()=>(s=(s*16807)%2147483647)/2147483647;
  for(let i=0;i<70;i++){b.fillStyle=`rgba(255,255,255,${r()*.7})`;b.fillRect(r()*W,r()*220,2,2)}
@@ -60,6 +60,7 @@ function makeBg(S){
  g=b.createLinearGradient(0,GY,0,H);g.addColorStop(0,S.g[0]);g.addColorStop(1,S.g[1]);b.fillStyle=g;b.fillRect(0,GY,W,H-GY);
  b.strokeStyle=S.l;b.lineWidth=3;b.beginPath();b.moveTo(0,GY);b.lineTo(W,GY);b.stroke();
  b.globalAlpha=.15;b.lineWidth=1;for(let i=-10;i<=20;i++){b.beginPath();b.moveTo(W/2+(i-5)*20,GY);b.lineTo(W/2+(i-5)*140,H);b.stroke()}
+ if(RS&&qHigh())bgLight(b,S);
  return c;
 }
 const keys={};let mute=false,AC;

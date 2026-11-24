@@ -266,4 +266,5 @@ function arcInfo(){try{const r=JSON.parse(localStorage.getItem('fd_arc')||'{}'),
 function arcHud(){if(!ARC||G.phase==='menu')return;const n=ARC.L.length,boss=ARC.i===n-1;ctx.save();ctx.textAlign='center';ctx.font='bold 14px '+FONT;ctx.fillStyle=boss?'#ff6b6b':'#ffe14d';ctx.fillText('街機 第 '+(ARC.i+1)+'／'+n+' 戰'+(boss?'　魔王：強化版'+CH[ARC.L[ARC.i]].n+'（體力 ×1.3）':''),W/2,90);ctx.restore()}
 $('b7').onclick=()=>{snd(500,.1);arcStart()};
 // ===== 初始化 =====
-makeThumbs();lab();rpLastBtn();rpHash();
+makeThumbs();lab();rpLastBtn();rpHash();fitCanvas();qLabel();
+$('qbtn').onclick=()=>{QM=(QM+1)%QN.length;QA=0;try{localStorage.setItem('fd_q',QM)}catch(e){}fitCanvas();bg=makeBg(STG[G.stage]);qLabel()};

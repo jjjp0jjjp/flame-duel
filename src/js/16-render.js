@@ -141,11 +141,13 @@ function amb(){const t=performance.now(),s=G.stage;ctx.save();for(let i=0;i<46;i
  else if(s===3){x=(i*131+Math.sin(t*.002+i)*24+W)%W;y=GY-((t*.06*k+i*53)%GY);ctx.fillStyle=i%3?'rgba(255,140,40,.8)':'rgba(255,220,120,.9)';ctx.fillRect(x,y,k+.5,k+.5)}
  else{x=(i*131+Math.sin(t*.0015+i)*60+W)%W;y=(t*.035*k+i*47)%GY;ctx.save();ctx.translate(x,y);ctx.rotate(t*.002*k+i);ctx.fillStyle=i%2?'rgba(140,200,110,.75)':'rgba(200,230,140,.7)';ctx.beginPath();ctx.ellipse(0,0,5+k,1.8,0,0,6.3);ctx.fill();ctx.restore()}}ctx.restore()}
 function draw(){
+ ctx.setTransform(RS,0,0,RS,0,0);ctx.imageSmoothingQuality='high';
  ctx.save();
  if(G.shake>.5)ctx.translate((Math.random()-.5)*G.shake,(Math.random()-.5)*G.shake);
  const z=G.cam.z,l=Math.max(0,Math.min(W-W/z,G.cam.cx-W/(2*z)));
  ctx.scale(z,z);ctx.translate(-l,-(H-H/z));
- ctx.drawImage(bg,0,0);amb();
+ ctx.drawImage(bg,0,0,W,H);amb();
+ if(p1&&qHigh())reflect();
  if(p1){
   [p1,p2].sort((a,b)=>(b.st==='ko'||b.st==='down')-(a.st==='ko'||a.st==='down')).forEach(drawF);
   for(const p of projs)drawProj(p);
@@ -155,6 +157,7 @@ function draw(){
   if(G.win>=0&&(G.phase==='over'||(G.phase==='ko'&&G.pt<100))){const wf=G.win?p2:p1;if(wf.st==='win')quote(wf)}
  }
  ctx.restore();
+ if(p1&&qHigh())postFx();
  if(p1)hud();
  if(p1&&G.mode===3&&G.phase!=='menu'){if(TUT)tutHud();else trainHud()}
  overlayDraw();

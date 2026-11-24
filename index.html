@@ -9,7 +9,7 @@
 *{box-sizing:border-box}
 html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);font-family:'Noto Sans TC','Microsoft JhengHei',system-ui,sans-serif}
 body{display:flex;flex-direction:column;align-items:center;justify-content:center}
-canvas{width:100%;max-width:960px;max-width:min(960px,100vw,calc((100vh - var(--padh))*16/9));max-width:min(960px,100vw,calc((100dvh - var(--padh))*16/9));height:auto;display:block;background:#000}
+canvas{width:100%;max-width:1600px;max-width:min(1600px,100vw,calc((100vh - var(--padh))*16/9));max-width:min(1600px,100vw,calc((100dvh - var(--padh))*16/9));height:auto;display:block;background:#000}
 #menu{position:fixed;top:0;left:0;right:0;bottom:0;overflow:auto;background:radial-gradient(circle at 50% 20%,#3a1850,#0b0b24 70%);display:flex;flex-direction:column;align-items:center;padding:24px 16px;z-index:5}
 #menu>*{flex:none}#menu::before,#menu::after{content:"";margin:auto}
 h1{margin:0;font-size:clamp(40px,9vw,76px);font-weight:900;background:linear-gradient(#ffe14d,#ff4d4d);-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:.1em}
@@ -66,7 +66,7 @@ input[type=range]{width:90px;padding:0}
 <div id="set" class="help" style="display:none"><b>設定</b>
 <div class="row" style="justify-content:flex-start">主音量 <input type="range" min="0" max="1" step=".05" data-v="all"> 音樂 <input type="range" min="0" max="1" step=".05" data-v="mus"> 音效 <input type="range" min="0" max="1" step=".05" data-v="sfx"></div>
 <div id="keytab"></div>
-<div class="row"><button id="psz"></button><button id="kdef">恢復預設按鍵</button><button id="sclose">完成</button></div>
+<div class="row"><button id="qbtn"></button><button id="psz"></button><button id="kdef">恢復預設按鍵</button><button id="sclose">完成</button></div>
 <div style="font-size:12px;color:#aab">點按鈕後按下想用的鍵（Esc 取消）。同一個鍵只能對應一個動作，重複時會自動從舊的位置移除。設定只存在這個瀏覽器。</div></div>
 <div class="help" id="help"><div class="tabs" id="htabs"></div><div id="hbody"></div></div>
 </div>
@@ -124,7 +124,7 @@ const STG=[
  {n:'竹林道場',k:'bamboo',s:['#0c1a14','#1f4a32','#a8d48a'],b:['#1d4a2a','#123020'],w:'#e8ffb0',g:['#5a4028','#2a1c10'],l:'#c9a36b',m:'#f4ffd8'}
 ];
 function makeBg(S){
- const c=document.createElement('canvas');c.width=W;c.height=H;const b=c.getContext('2d');
+ const c=document.createElement('canvas'),rs=RS||1;c.width=Math.round(W*rs);c.height=Math.round(H*rs);const b=c.getContext('2d');b.scale(rs,rs);
  let g=b.createLinearGradient(0,0,0,GY);g.addColorStop(0,S.s[0]);g.addColorStop(.6,S.s[1]);g.addColorStop(1,S.s[2]);b.fillStyle=g;b.fillRect(0,0,W,H);
  let s=7;const r=()=>(s=(s*16807)%2147483647)/2147483647;
  for(let i=0;i<70;i++){b.fillStyle=`rgba(255,255,255,${r()*.7})`;b.fillRect(r()*W,r()*220,2,2)}
@@ -134,6 +134,7 @@ function makeBg(S){
  g=b.createLinearGradient(0,GY,0,H);g.addColorStop(0,S.g[0]);g.addColorStop(1,S.g[1]);b.fillStyle=g;b.fillRect(0,GY,W,H-GY);
  b.strokeStyle=S.l;b.lineWidth=3;b.beginPath();b.moveTo(0,GY);b.lineTo(W,GY);b.stroke();
  b.globalAlpha=.15;b.lineWidth=1;for(let i=-10;i<=20;i++){b.beginPath();b.moveTo(W/2+(i-5)*20,GY);b.lineTo(W/2+(i-5)*140,H);b.stroke()}
+ if(RS&&qHigh())bgLight(b,S);
  return c;
 }
 const keys={};let mute=false,AC;
@@ -228,6 +229,7 @@ function fxMove(f,a,g){
 // ---- 命中特效
 function hitFx(src,a,v){
  const li=li_(src),x=v.x,y=v.y-75,big=a.d>12||a.ex;
+ if(a.ex)flash(src.ch.col,.35,220);else if(big)flash('#ffffff',.12,90);
  if(li===0){emb(x,y,'#ffb347',big?22:10,big?7:4,26,5,1);emb(x,y,'#fff2b0',big?8:4,3,16,3,0);if(big)P({ring:1,x,y,c:'#ff7a2a',l:18,rs:5,lw:5});if(a.ex||a.launch)for(let i=0;i<10;i++)emb(x+rr_(-15,15),y+rr_(10,60),'#ff5a1a',1,2,30,rr_(4,8),3)}
  else if(li===1){const n=big?9:4;for(let i=0;i<n;i++)rok(x+rr_(-10,10),y,rr_(-3.5,3.5),-2-Math.random()*5);for(let i=0;i<(big?5:2);i++)smk(x+rr_(-15,15),v.y-20,14,'#9aa0b8');if(big)P({ring:1,x,y,c:'#cfe6ff',l:16,rs:6,lw:6});if(a.ex||a.throw)crk(v.x)}
  else if(li===2){const n=a.ex?7:big?4:2;for(let i=0;i<n;i++)slh(x+rr_(-12,12),y+rr_(-17,17),rr_(-1.1,.8)+(i%2?1.6:0),rr_(70,110),i%2?'#e3ccff':'#b46bff',12);smk(x,y+20,12,'#4a3a80',20)}
@@ -823,11 +825,13 @@ function amb(){const t=performance.now(),s=G.stage;ctx.save();for(let i=0;i<46;i
  else if(s===3){x=(i*131+Math.sin(t*.002+i)*24+W)%W;y=GY-((t*.06*k+i*53)%GY);ctx.fillStyle=i%3?'rgba(255,140,40,.8)':'rgba(255,220,120,.9)';ctx.fillRect(x,y,k+.5,k+.5)}
  else{x=(i*131+Math.sin(t*.0015+i)*60+W)%W;y=(t*.035*k+i*47)%GY;ctx.save();ctx.translate(x,y);ctx.rotate(t*.002*k+i);ctx.fillStyle=i%2?'rgba(140,200,110,.75)':'rgba(200,230,140,.7)';ctx.beginPath();ctx.ellipse(0,0,5+k,1.8,0,0,6.3);ctx.fill();ctx.restore()}}ctx.restore()}
 function draw(){
+ ctx.setTransform(RS,0,0,RS,0,0);ctx.imageSmoothingQuality='high';
  ctx.save();
  if(G.shake>.5)ctx.translate((Math.random()-.5)*G.shake,(Math.random()-.5)*G.shake);
  const z=G.cam.z,l=Math.max(0,Math.min(W-W/z,G.cam.cx-W/(2*z)));
  ctx.scale(z,z);ctx.translate(-l,-(H-H/z));
- ctx.drawImage(bg,0,0);amb();
+ ctx.drawImage(bg,0,0,W,H);amb();
+ if(p1&&qHigh())reflect();
  if(p1){
   [p1,p2].sort((a,b)=>(b.st==='ko'||b.st==='down')-(a.st==='ko'||a.st==='down')).forEach(drawF);
   for(const p of projs)drawProj(p);
@@ -837,6 +841,7 @@ function draw(){
   if(G.win>=0&&(G.phase==='over'||(G.phase==='ko'&&G.pt<100))){const wf=G.win?p2:p1;if(wf.st==='win')quote(wf)}
  }
  ctx.restore();
+ if(p1&&qHigh())postFx();
  if(p1)hud();
  if(p1&&G.mode===3&&G.phase!=='menu'){if(TUT)tutHud();else trainHud()}
  overlayDraw();
@@ -856,6 +861,56 @@ function draw(){
  if(G.pause)pauseScreen();
 }
 
+// ===== 畫質：依實際顯示大小與螢幕像素密度渲染；「高」畫質另加地面倒影、場景光線、暗角、重擊閃光 =====
+// 只影響繪圖，不影響遊戲判定與連線同步。
+// 用 var：makeBg() 在這個檔案載入前就會被呼叫，那時 RS 還是 undefined，makeBg 會當成 1。
+var RS=1,FL=null,FX=null;
+const QN=['自動','高','標準','省電'],QCAP=[2.5,2.5,1.5,1];
+let QM=0,QA=0,QT=0,QN_=0;try{QM=+(localStorage.getItem('fd_q')||0)||0}catch(e){}
+const REFL=[.22,.16,.26,.07,.1]; // 各場景地面的反光程度：濕街、港口、冰原、火山岩、木地板
+const qHigh=()=>QM===1||(QM===0&&QA===0);
+function fitCanvas(){
+ const css=cv.getBoundingClientRect().width||W,dpr=window.devicePixelRatio||1;
+ const cap=QM===0?[2.5,1.5,1][Math.min(2,QA)]:QCAP[QM];
+ const s=Math.max(1,Math.min(cap,Math.round(css*dpr/W*4)/4));
+ if(s!==RS){RS=s;cv.width=Math.round(W*s);cv.height=Math.round(H*s);bg=makeBg(STG[G.stage]);FX=null}
+}
+// 自動畫質：看實際幀間隔（含 GPU 繪製），平均低於約 50fps 就降一級
+let QL=0;
+function qPerf(){
+ const now=performance.now(),dt=now-QL;QL=now;
+ if(QM!==0||G.phase==='menu'||G.pause||QA>=2||dt>100)return;
+ QT=QT?QT*.95+dt*.05:dt;if(++QN_<180)return;
+ if(QT>20){QA++;QN_=0;QT=0;fitCanvas();bg=makeBg(STG[G.stage]);toast('畫面較忙，已自動降低畫質')}
+}
+// 場景光線直接畫進背景（只在生成背景時算一次，並且會跟著鏡頭移動）
+function bgLight(b,S){b.save();b.globalCompositeOperation='lighter';const g=b.createRadialGradient(740,125,10,740,125,620);g.addColorStop(0,rgba(S.m,.16));g.addColorStop(.5,rgba(S.l,.05));g.addColorStop(1,rgba(S.l,0));b.fillStyle=g;b.fillRect(0,0,W,H);b.restore()}
+const rgba=(hex,a)=>{const n=parseInt(hex.slice(1),16);return'rgba('+(n>>16)+','+(n>>8&255)+','+(n&255)+','+a+')'};
+function reflect(){
+ const S=STG[G.stage],a=REFL[G.stage]||.1;
+ ctx.save();ctx.beginPath();ctx.rect(-W,GY,W*3,H);ctx.clip();
+ ctx.save();ctx.translate(0,2*GY);ctx.scale(1,-1);ctx.globalAlpha=a;
+ for(const f of[p1,p2])drawF(Object.assign({},f,{tr:[],lt:-9,mt:0,ns:1}));
+ for(const p of projs)if(!p.strike&&p.life>0)drawProj(p);
+ ctx.restore();
+ // 離腳越遠倒影越淡
+ const g=ctx.createLinearGradient(0,GY,0,GY+110);g.addColorStop(0,rgba(S.g[0],0));g.addColorStop(1,rgba(S.g[0],.9));
+ ctx.fillStyle=g;ctx.fillRect(-W,GY,W*3,H-GY);ctx.restore();
+}
+function mkFX(){
+ const S=STG[G.stage],mk=()=>{const c=document.createElement('canvas');c.width=cv.width;c.height=cv.height;const b=c.getContext('2d');b.scale(RS,RS);return[c,b]};
+ const[v,vb]=mk(),g=vb.createRadialGradient(W/2,H*.55,H*.35,W/2,H*.55,W*.68);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,'rgba(0,0,0,.38)');vb.fillStyle=g;vb.fillRect(0,0,W,H);
+ FX={k:G.stage+'/'+RS,v};
+}
+function postFx(){
+ if(!FX||FX.k!==G.stage+'/'+RS)mkFX();
+ ctx.save();ctx.globalCompositeOperation='lighter';
+ const now=performance.now();if(FL&&now<FL.t){ctx.globalAlpha=Math.min(1,(FL.t-now)/FL.d)*FL.a;ctx.fillStyle=FL.c;ctx.fillRect(0,0,W,H)}
+ ctx.globalCompositeOperation='source-over';ctx.globalAlpha=1;ctx.drawImage(FX.v,0,0,W,H);ctx.restore();
+}
+const flash=(c,a,d)=>{if(!NOFX&&qHigh())FL={c,a,d,t:performance.now()+d}};
+function qLabel(){$('qbtn').textContent='畫質：'+QN[QM]+(QM===0?'（目前'+(QA===0?'高':QA===1?'標準':'省電')+'）':'')}
+addEventListener('resize',fitCanvas);
 // ================= 連線對戰(鎖步同步) =================
 const NET={on:false,room:null,lobby:null,slot:0,D:6,tick:0,cap:0,loc:{},rem:{},remHigh:-1,remAck:-1,sendT:{},lastSend:0,stallT:0,rtt:0,hash:{},rh:{},hl:null,desync:false,inp:[0,0],sid:'',started:false,gone:false,remote:null,hb:0,unsub:[],code:'',pings:[],Dsel:6,lastIn:null};
 const setNs=t=>{$('ns').textContent=t};
@@ -1077,7 +1132,7 @@ function pads(){if(!padOK)return;let gp=[];try{gp=navigator.getGamepads?navigato
 function loop(ts){requestAnimationFrame(loop);pads();acc+=Math.min(100,ts-last);last=ts;
  if(NET.on){while(acc>=16.667){if(!netTick()){acc=Math.min(acc,33);break}acc-=16.667}netSend()}
  else while(acc>=16.667){step();acc-=16.667}
- uiTick();draw()}
+ uiTick();draw();qPerf()}
 requestAnimationFrame(loop);
 
 addEventListener('keydown',e=>{if(KCAP){e.preventDefault();kcapDone(e.code);return}
@@ -1507,5 +1562,6 @@ function arcInfo(){try{const r=JSON.parse(localStorage.getItem('fd_arc')||'{}'),
 function arcHud(){if(!ARC||G.phase==='menu')return;const n=ARC.L.length,boss=ARC.i===n-1;ctx.save();ctx.textAlign='center';ctx.font='bold 14px '+FONT;ctx.fillStyle=boss?'#ff6b6b':'#ffe14d';ctx.fillText('街機 第 '+(ARC.i+1)+'／'+n+' 戰'+(boss?'　魔王：強化版'+CH[ARC.L[ARC.i]].n+'（體力 ×1.3）':''),W/2,90);ctx.restore()}
 $('b7').onclick=()=>{snd(500,.1);arcStart()};
 // ===== 初始化 =====
-makeThumbs();lab();rpLastBtn();rpHash();
+makeThumbs();lab();rpLastBtn();rpHash();fitCanvas();qLabel();
+$('qbtn').onclick=()=>{QM=(QM+1)%QN.length;QA=0;try{localStorage.setItem('fd_q',QM)}catch(e){}fitCanvas();bg=makeBg(STG[G.stage]);qLabel()};
 </script></body></html>
