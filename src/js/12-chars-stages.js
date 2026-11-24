@@ -1,16 +1,16 @@
 // ================= 新角色：雷、岩 =================
 const CTR={d:20,su:2,ac:3,rc:18,r:84,h:-70,st:32,kb:14,launch:1,cn:4};
 CH.push(
-{n:'雷',ds:'遠攻・天雷',col:'#ffd23d',col2:'#fff3b0',spd:3.9,jmp:14.5,hp:96,w:1,mg:1.25,
+{n:'雷',ds:'遠攻・天雷',col:'#ffd23d',col2:'#fff3b0',spd:3.9,jmp:14.5,hp:102,w:1,mg:1.25,
  sp:{type:'proj',d:12,su:12,ac:1,rc:18,spd:13,cost:50},
  ex:{type:'strike',d:14,su:12,ac:1,rc:34,launch:1,ex:1,cost:100,name:'天雷陣',multi:1},
  sp2:{type:'strike',d:14,su:10,ac:1,rc:22,dist:230,launch:1,cost:50},
  mv:{hp:{r:88},hk:{r:116}},
  sp3:{d:13,su:5,ac:8,rc:22,r:72,h:-70,st:22,kb:11,around:1,inv:1,cost:50},
  asp:{type:'proj',d:11,su:5,ac:1,rc:14,spd:11,vy:7,cost:50}},
-{n:'岩',ds:'投技・岩石',col:'#d08a48',col2:'#ffe0b8',spd:3.1,jmp:13,hp:126,w:1.3,kbr:.7,
+{n:'岩',ds:'投技・岩石',col:'#d08a48',col2:'#ffe0b8',spd:3.1,jmp:13,hp:118,w:1.3,kbr:.7,
  mv:{th:{r:78,d:21},th2:{r:78,d:20}},
- sp:{d:22,su:7,ac:14,rc:24,vx:8,r:64,h:-70,st:40,kb:9,throw:1,cost:50},
+ sp:{d:20,su:7,ac:9,rc:24,vx:8,r:64,h:-70,st:40,kb:9,throw:1,cost:50},
  ex:{d:40,su:5,ac:3,rc:32,r:84,h:-70,st:46,kb:12,throw:1,ex:1,cost:100,name:'大地崩壞'},
  sp2:{type:'proj',d:16,su:12,ac:1,rc:22,spd:7,vy:-9,gr:.42,knock:1,cost:50},
  sp3:{d:0,su:3,ac:22,rc:16,r:60,h:-70,st:0,kb:0,counter:1,cost:50},

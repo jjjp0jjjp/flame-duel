@@ -1,11 +1,11 @@
 function startRound(){G.win=-1;p1.reset();p2.reset();projs=[];parts=[];G.cam={z:1,cx:W/2};G.phase='intro';G.pt=100;G.time=60;G.tf=0;G.msg='ROUND '+G.round;G.mt=G.mm=100;sfx('round')}
 function startGame(m){rpSaveLast();REC=(m===1||m===2||m===4)&&!RP?{m,c:[sel[0],sel[1]],g:G.stage,a:[],b:[]}:null;G.mode=m;G.frame=0;G.hitstop=0;G.shake=0;for(const o of[pv1,pv2])for(const k in o)delete o[k];bg=makeBg(STG[G.stage]);p1=new F(CH[sel[0]],0);p2=new F(CH[sel[1]],1);G.round=1;G.si=0;G.pause=false;document.getElementById('menu').style.display='none';startRound();G.vs=m===3?0:110;if(G.vs)sfx('vs');if(m!==3)TUT=null;TR.rec=0;TR.tr=-1;TR.ok=0;FD=null;tbar()}
-function toMenu(){if(NET.room){netQuit(1);return}rpSaveLast();RP=null;REC=null;G.phase='menu';G.mt=0;TUT=null;lab();tbar();rpLastBtn();document.getElementById('menu').style.display='flex'}
+function toMenu(){if(NET.room){netQuit(1);return}rpSaveLast();RP=null;REC=null;arcEnd();G.phase='menu';G.mt=0;TUT=null;lab();tbar();rpLastBtn();document.getElementById('menu').style.display='flex'}
 function endRound(why){
  const ko1=p1.st==='ko',ko2=p2.st==='ko';let w=null;
  if(why==='ko'){if(ko1&&!ko2)w=p2;else if(ko2&&!ko1)w=p1}else w=p1.hp>p2.hp?p1:p2.hp>p1.hp?p2:null;
  G.win=w?(w===p1?0:1):-1;if(w)w.wins++;else{p1.wins++;p2.wins++}
- G.phase='ko';G.pt=140;G.msg=why==='ko'?(w&&w.hp>=w.ch.hp?'PERFECT!':'K.O.!'):'TIME UP';G.mt=G.mm=140;
+ G.phase='ko';G.pt=140;G.msg=why==='ko'?(w&&w.hp>=w.ch.hp*(w.hm||1)?'PERFECT!':'K.O.!'):'TIME UP';G.mt=G.mm=140;
  if(why==='ko'){G.hitstop=14;G.shake=16;sfx('ko')}
 }
 function step(){
@@ -43,7 +43,7 @@ function step(){
  }else if(G.phase==='ko'){
   if(--G.pt<=0){
    if(p1.wins>=2||p2.wins>=2){
-    G.phase='over';const w=p1.wins>p2.wins?p1:p2.wins>p1.wins?p2:null;if(G.mode===1&&w&&!RP)rec(w===p1);
+    G.phase='over';const w=p1.wins>p2.wins?p1:p2.wins>p1.wins?p2:null;if(G.mode===1&&w&&!RP)rec(w===p1);if(ARC&&!RP)ARC.res=w===p1?'win':'lose';
     G.msg=w?(w===p1?'P1 ':G.mode===1?'電腦 ':'P2 ')+w.ch.n+' 獲勝!':'平手';G.mt=G.mm=1e9;snd(660,.4,'triangle',.07,990)
    }else{G.round++;startRound()}
   }

@@ -144,13 +144,14 @@ addEventListener('keydown',e=>{if(KCAP){e.preventDefault();kcapDone(e.code);retu
  if(G.vs>0&&G.mode!==4&&(e.code==='Enter'||e.code==='Space'))G.vs=1;
  if(e.code==='Enter'&&RP&&RP.end){toMenu();return}
  if(e.code==='KeyR'&&G.phase==='over'&&REC&&!bound(e.code))rpCopy();
- if(e.code==='Enter'&&G.phase==='over'){if(G.mode===4&&NET.on)netRematch();else toMenu()}
+ if(e.code==='Escape'&&G.phase==='over'&&ARC){toMenu();return}
+ if(e.code==='Enter'&&G.phase==='over'){if(G.mode===4&&NET.on)netRematch();else if(ARC)arcNext();else toMenu()}
  if(e.code==='KeyQ'&&G.pause&&!bound(e.code)){G.pause=false;toMenu()}
  if(e.code==='KeyM'&&!bound(e.code))mute=!mute;
 });
 addEventListener('keyup',e=>{keys[e.code]=0});
 addEventListener('blur',()=>{for(const k in keys)keys[k]=0;if(G.phase==='fight'&&G.mode!==4)G.pause=true});
-cv.addEventListener('pointerdown',()=>{if(G.phase==='over'){if(G.mode===4&&NET.on)netRematch();else toMenu()}});
+cv.addEventListener('pointerdown',()=>{if(G.phase==='over'){if(G.mode===4&&NET.on)netRematch();else if(ARC)arcNext();else toMenu()}});
 document.querySelectorAll('#pad button').forEach(b=>{
  const ks=b.dataset.k.split(','),on=e=>{e.preventDefault();ks.forEach(k=>{keys[k]=1;pend[k]=1})},off=()=>{ks.forEach(k=>keys[k]=0)};
  b.addEventListener('pointerdown',on);['pointerup','pointercancel','pointerleave'].forEach(n=>b.addEventListener(n,off));
@@ -158,7 +159,7 @@ document.querySelectorAll('#pad button').forEach(b=>{
 });
 const $=id=>document.getElementById(id),DF=['簡單','普通','困難'];
 function rec(win){try{const r=JSON.parse(localStorage.getItem('fd_rec')||'{}');win?r.w=(r.w||0)+1:r.l=(r.l||0)+1;localStorage.setItem('fd_rec',JSON.stringify(r))}catch(e){}}
-function lab(){try{const r=JSON.parse(localStorage.getItem('fd_rec')||'{}');$('rec').textContent='單人戰績：'+(r.w||0)+' 勝 '+(r.l||0)+' 敗'}catch(e){}if(THUMB.length)selUI();$('df').textContent=DF[G.diff];$('stg').textContent=STG[G.stage].n}
+function lab(){try{const r=JSON.parse(localStorage.getItem('fd_rec')||'{}');$('rec').textContent='單人戰績：'+(r.w||0)+' 勝 '+(r.l||0)+' 敗'+arcInfo()}catch(e){}if(THUMB.length)selUI();$('df').textContent=DF[G.diff];$('stg').textContent=STG[G.stage].n}
 $('df').onclick=()=>{G.diff=(G.diff+1)%3;lab()};$('stg').onclick=()=>{G.stage=(G.stage+1)%STG.length;lab()};
 $('b1').onclick=()=>{snd(500,.1);startGame(1)};$('b2').onclick=()=>{snd(500,.1);startGame(2)};$('b3').onclick=()=>{snd(500,.1);startGame(3)};
 $('b4').onclick=()=>{snd(500,.1);$('net').style.display='block';$('net').scrollIntoView&&$('net').scrollIntoView({block:'nearest'})};

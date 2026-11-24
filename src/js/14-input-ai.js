@@ -14,6 +14,19 @@ const K2=[['ArrowLeft','P1l'],['ArrowRight','P1r'],['ArrowUp','P1u'],['ArrowDown
 const pv1={},pv2={};
 function aiInput(me,op){
  const a=me.ai,lv=G.diff,i=Object.assign({},NI),dx=op.x-me.x,ad=Math.abs(dx),to=dx>0?'r':'l',aw=dx>0?'l':'r',sg=dx>0?1:-1;
+ // 學習對手習慣（會慢慢遺忘）：常跳、常投、常放飛行道具、常防禦
+ const h=a.h||(a.h={jmp:0,thr:0,prj:0,blk:0});
+ if(G.frame%10===0)for(const k in h)h[k]*=.985;
+ const oair=op.y<GY-2;if(oair&&!a.oa){h.jmp++;a.jc=(a.jc|0)+1}a.oa=oair;
+ if(op.atk&&op.atk!==a.ok){a.ok=op.atk;a.done=0;if(op.atk.throw)h.thr++;if(op.atk.type==='proj')h.prj++}
+ if(op.st==='block'&&me.st==='atk'&&me.hit&&me.t===me.atk.su+1)h.blk++;
+ // 即時反應（普通以上）：拆投、確反揮空、對空
+ const free=me.y>=GY&&(me.st==='idle'||me.st==='walk'||me.st==='block');
+ if(lv&&free&&op.atk&&!a.done){const oa=op.atk,R=Math.random();
+  if(oa.throw&&(oa.key==='th'||oa.key==='th2')&&op.t<=oa.su&&ad<100){a.done=1;if(R<[0,.35,.7][lv]){i.th=1;return i}}
+  else if(op.st==='atk'&&!op.hit&&!oa.air&&op.t>oa.su+oa.ac&&oa.su+oa.ac+oa.rc-op.t>=10&&ad<115){a.done=1;if(R<[0,.4,.75][lv]){Object.assign(i,lv>1&&me.mt>=100?{d:1,sp:1}:{hp:1});return i}}
+ }
+ if(lv&&free&&oair&&op.vy>-4&&op.y<GY-40&&ad<130&&a.aj!==a.jc){a.aj=a.jc;if(Math.random()<[0,.45,.75][lv]+Math.min(.2,h.jmp*.02)){i.d=1;i.lp=1;return i}}
  if(a.t--<=0){
   a.t=[24,14,7][lv]+rnd(0,10);a.mv=0;a.blk=0;a.act=null;
   const r=Math.random(),pj=me.ch.sp.type==='proj';
@@ -21,6 +34,9 @@ function aiInput(me,op){
   else if(me.ch.sp2.type==='strike'&&me.mt>=50&&ad>170&&ad<300&&(op.y<GY-30||r<.12))a.act={[to]:1,sp:1};
   else if(me.ch.ex.throw&&me.mt>=100&&ad<110&&r<.35)a.act={d:1,sp:1};
   else if(op.y<GY-40&&ad<125&&lv&&r<.6)a.act={d:1,lp:1};
+  else if(lv&&h.blk>2&&ad<90&&r<.3)a.act={th:1};
+  else if(lv>1&&h.thr>2&&ad<90&&r<.25)a.act={dash:-sg};
+  else if(ad>220&&lv&&h.prj>2&&r<.35){a.mv=1;a.act={u:1,[to]:1}}
   else if(ad>220){a.mv=1;if(me.mt>=100&&pj&&r<.3)a.act={d:1,sp:1};else if(me.mt>=50&&pj&&r<.4)a.act={sp:1};else if(r<.12)a.act={dash:sg};else if(r<.18)a.act={u:1}}
   else if(ad>115){a.mv=1;if(r<.14)a.act={dash:sg};else if(r<.22)a.act={u:1}}
   else if(r<.5+.1*lv){const L=op.st==='block'?[{th:1},{th:1},{d:1,lk:1}]:[{lp:1},{lk:1},{hp:1},{hk:1},{d:1,lk:1},{[to]:1,hp:1},{[to]:1,hk:1},{[to]:1,lp:1},{[aw]:1,hk:1}].concat(me.mt>=50?[{[to]:1,sp:1},{[aw]:1,sp:1}]:[]).concat(me.ch.mv&&me.ch.mv.th?[{th:1},{th:1},{sp:1}]:[]);a.act=L[rnd(0,L.length)]}

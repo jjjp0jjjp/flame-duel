@@ -1,6 +1,6 @@
 class F{
 constructor(ch,side){this.ch=ch;this.side=side;this.wins=0;this.ai={t:0,mv:0,blk:0,act:null};this.reset()}
-reset(){this.x=this.side?W/2+170:W/2-170;this.y=GY;this.vx=0;this.vy=0;this.dir=this.side?-1:1;this.hp=this.ch.hp;this.lag=this.hp;this.mt=0;this.st='idle';this.t=0;this.atk=null;this.hit=false;this.stun=0;this.combo=0;this.cd=0;this.walk=0;this.flash=0;this.kt=0;this.kd=0;this.dt=0;this.dd=0;this.inv=0;this.buf=null;this.cl=[];this.db=null;this.jb=0;this.jh=0;this.ph=null}
+reset(){this.x=this.side?W/2+170:W/2-170;this.y=GY;this.vx=0;this.vy=0;this.dir=this.side?-1:1;this.hp=this.ch.hp*(this.hm||1);this.lag=this.hp;this.mt=0;this.st='idle';this.t=0;this.atk=null;this.hit=false;this.stun=0;this.combo=0;this.cd=0;this.walk=0;this.flash=0;this.kt=0;this.kd=0;this.dt=0;this.dd=0;this.inv=0;this.buf=null;this.cl=[];this.db=null;this.jb=0;this.jh=0;this.ph=null}
 pick(i,g){
  const fw=this.dir>0?i.r:i.l,bk=this.dir>0?i.l:i.r,dn=i.d;
  if(i.sp)return dn?'ex':(!g&&this.ch.asp)?'asp':fw?'sp2':bk?'sp3':'sp';
@@ -92,7 +92,7 @@ getHit(src,a,px){
  if(a.throw&&(a.key==='th'||a.key==='th2')&&((this.st==='atk'&&this.atk&&(this.atk.key==='th'||this.atk.key==='th2'))||(this.buf&&(this.buf.m==='th'||this.buf.m==='th2')&&this.buf.t>=5))){
   const sg=this.x>=px?1:-1;this.vx=sg*7;src.vx=-sg*7;this.stun=14;src.stun=14;this.st='hit';src.st='hit';this.atk=null;src.atk=null;this.buf=null;src.buf=null;
   ring(this.x,this.y-70,'#fff');ring(this.x,this.y-70,'#7ec8ff');pp({x:this.x,y:this.y-130,vx:0,vy:-.6,l:50,m:50,txt:'TECH!',c:'#7ec8ff',text:1,big:1});sfx('block');G.hitstop=Math.max(G.hitstop,6);return true}
- if(this.ch.armor&&this.st==='atk'&&this.atk.cn===2&&this.t<=this.atk.su&&!a.throw){this.hp=Math.max(1,this.hp-a.d*.5);spark(this.x,this.y-80,'#ffd23d',8);ring(this.x,this.y-80,'#ffd23d');sfx('block');G.hitstop=Math.max(G.hitstop,4);return true}
+ if(this.ch.armor&&this.st==='atk'&&(this.atk.key==='hp'||this.atk.key==='hk')&&this.t<=this.atk.su&&!a.throw){this.hp=Math.max(1,this.hp-a.d*(this.ch.ar||.5));spark(this.x,this.y-80,'#ffd23d',8);ring(this.x,this.y-80,'#ffd23d');sfx('block');G.hitstop=Math.max(G.hitstop,4);return true}
  const sgn=this.x>=px?1:-1;
  if(!a.throw&&this.st==='block'&&this.y>=GY&&this.dir*(px-this.x)>0){
   if(TUT&&this===p1)TUT.blk++;this.hp=Math.max(1,this.hp-a.d*(a.ex?.2:.1));this.stun=9;this.vx=sgn*a.kb*.9*(this.ch.kbr||1);this.mt=Math.min(100,this.mt+3);

@@ -215,14 +215,14 @@ function recPush(a,b){const k=G.si-1;REC.a[k]=encI(a);REC.b[k]=encI(b)}
 function rpNext(){const k=G.si-1,a=RP.a[k],b=RP.b[k];return[decI(a===undefined?0:a)||NI,decI(b===undefined?0:b)]}
 function rle(arr){const o=[];let v=null,c=0;for(let i=0;i<arr.length;i++){const x=arr[i]===undefined?0:arr[i];if(x===v)c++;else{if(c)o.push(v,c);v=x;c=1}}if(c)o.push(v,c);return o}
 function unrle(o){const a=[];for(let i=0;i+1<o.length;i+=2){const v=o[i]|0,c=Math.min(o[i+1]|0,40000);for(let k=0;k<c&&a.length<40000;k++)a.push(v)}return a}
-const rpPack=()=>({v:1,m:REC.m,c:REC.c,g:REC.g,a:rle(REC.a),b:rle(REC.b)});
-function rpValid(o){return o&&o.v===1&&[1,2,4].includes(o.m)&&Array.isArray(o.c)&&o.c.length===2&&o.c.every(x=>Number.isInteger(x)&&x>=0&&x<CH.length)&&Number.isInteger(o.g)&&o.g>=0&&o.g<STG.length&&Array.isArray(o.a)&&Array.isArray(o.b)&&o.a.concat(o.b).every(Number.isInteger)}
+const rpPack=()=>({v:1,m:REC.m,c:REC.c,g:REC.g,h:REC.h||[1,1],a:rle(REC.a),b:rle(REC.b)});
+function rpValid(o){return o&&o.v===1&&[1,2,4].includes(o.m)&&Array.isArray(o.c)&&o.c.length===2&&o.c.every(x=>Number.isInteger(x)&&x>=0&&x<CH.length)&&Number.isInteger(o.g)&&o.g>=0&&o.g<STG.length&&Array.isArray(o.a)&&Array.isArray(o.b)&&o.a.concat(o.b).every(Number.isInteger)&&(o.h===undefined||Array.isArray(o.h)&&o.h.length===2&&o.h.every(x=>typeof x==='number'&&x>=1&&x<=2))}
 function rpSaveLast(){if(!REC||RP||G.si<300)return;try{localStorage.setItem('fd_last',JSON.stringify(rpPack()))}catch(e){}}
 function startReplay(o){
  if(!rpValid(o))return false;
  const sv=[sel[0],sel[1],G.stage];REC=null;
  RP={a:unrle(o.a),b:unrle(o.b),end:0,m:o.m};RP.n=Math.max(RP.a.length,RP.b.length);
- sel[0]=o.c[0];sel[1]=o.c[1];G.stage=o.g;startGame(o.m===4?2:o.m);sel[0]=sv[0];sel[1]=sv[1];G.stage=sv[2];
+ sel[0]=o.c[0];sel[1]=o.c[1];G.stage=o.g;startGame(o.m===4?2:o.m);if(o.h)[p1,p2].forEach((f,k)=>{if(o.h[k]!==1){f.hm=o.h[k];f.reset()}});sel[0]=sv[0];sel[1]=sv[1];G.stage=sv[2];
  return true;
 }
 const pageURL=()=>location.href.split('#')[0];
@@ -243,12 +243,27 @@ function uiTick(){
  const on=G.phase==='over'&&!!REC&&!(G.mode===4&&NET.on);if(on!==OBAR){OBAR=on;$('obar').style.display=on?'flex':'none'}
 }
 function overlayDraw(){
- const now=performance.now();ctx.save();ctx.textAlign='center';
+ arcHud();const now=performance.now();ctx.save();ctx.textAlign='center';
  if(RP&&G.phase!=='menu'){ctx.font='bold 16px '+FONT;ctx.fillStyle='#ff6b6b';ctx.fillText(RP.end?'■ 重播結束　按 Enter 回選單':'▶ 重播中　P 暫停　暫停時 Q 離開',W/2,H-14)}
  else if(G.phase==='over'&&REC){ctx.font='bold 15px '+FONT;ctx.fillStyle='#ffe14d';ctx.fillText('R：複製這場的重播連結',W/2,H-66)}
  if(TOAST&&now<TOAST.until){ctx.font='bold 18px '+FONT;const w=ctx.measureText(TOAST.t).width+30;ctx.fillStyle='rgba(0,0,0,.75)';ctx.fillRect(W/2-w/2,H/2+60,w,36);ctx.fillStyle='#3ddc6a';ctx.fillText(TOAST.t,W/2,H/2+84)}
  ctx.restore();
 }
 addEventListener('hashchange',rpHash);
+// ===== 街機模式：依序打倒其他 4 位角色（後半難度提高），最後挑戰強化版的自己 =====
+let ARC=null;
+function arcStart(){const L=CH.map((_,i)=>i).filter(i=>i!==sel[0]);for(let i=L.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[L[i],L[j]]=[L[j],L[i]]}L.push(sel[0]);
+ ARC={L,i:0,me:sel[0],cont:0,d0:G.diff,g0:G.stage,s1:sel[1],res:null,done:0};arcFight()}
+function arcFight(){const boss=ARC.i===ARC.L.length-1;sel[0]=ARC.me;sel[1]=ARC.L[ARC.i];G.diff=boss?2:Math.min(2,ARC.d0+(ARC.i>=2?1:0));G.stage=ARC.i%STG.length;
+ startGame(1);sel[1]=ARC.s1;G.stage=ARC.g0;if(boss){p2.hm=1.3;p2.reset();if(REC)REC.h=[1,1.3]}ARC.res=null}
+function arcNext(){if(!ARC||!ARC.res)return;if(ARC.done){toMenu();return}
+ if(ARC.res==='win'){ARC.i++;if(ARC.i>=ARC.L.length){ARC.done=1;G.msg='街機模式 通關！';G.mt=G.mm=1e9;sfx('round');
+  try{const r=JSON.parse(localStorage.getItem('fd_arc')||'{}');r[ARC.me]=Math.min(r[ARC.me]===undefined?99:r[ARC.me],ARC.cont);localStorage.setItem('fd_arc',JSON.stringify(r))}catch(e){}return}}
+ else ARC.cont++;rpSaveLast();arcFight()}
+function arcEnd(){if(!ARC)return;G.diff=ARC.d0;G.stage=ARC.g0;ARC=null}
+function arcTip(){const n=ARC.L.length;return ARC.done?'恭喜通關（接關 '+ARC.cont+' 次）！按 Enter 回選單':ARC.res==='win'?(ARC.i+1>=n?'打倒魔王！按 Enter 繼續':'第 '+(ARC.i+1)+'／'+n+' 戰勝利！按 Enter 進入下一戰'):'輸了…按 Enter 接關再戰　Esc 回選單'}
+function arcInfo(){try{const r=JSON.parse(localStorage.getItem('fd_arc')||'{}'),k=Object.keys(r);return k.length?'　街機通關：'+k.map(i=>(CH[i]||CH[0]).n+(r[i]?'（接關 '+r[i]+'）':'（無接關）')).join('、'):''}catch(e){return''}}
+function arcHud(){if(!ARC||G.phase==='menu')return;const n=ARC.L.length,boss=ARC.i===n-1;ctx.save();ctx.textAlign='center';ctx.font='bold 14px '+FONT;ctx.fillStyle=boss?'#ff6b6b':'#ffe14d';ctx.fillText('街機 第 '+(ARC.i+1)+'／'+n+' 戰'+(boss?'　魔王：強化版'+CH[ARC.L[ARC.i]].n+'（體力 ×1.3）':''),W/2,90);ctx.restore()}
+$('b7').onclick=()=>{snd(500,.1);arcStart()};
 // ===== 初始化 =====
 makeThumbs();lab();rpLastBtn();rpHash();

@@ -104,6 +104,31 @@ const ok = (name, cond, detail) => {
   ok('重播：重播結果和原本完全相同', rp.every((r) => r.same && r.over), JSON.stringify(rp.map((r) => [r.m, r.si, r.same])));
   ok('重播連結長度合理（< 12000 字）', rp.every((r) => r.len < 12000), rp.map((r) => r.len).join(','));
 
+  // ---- 街機模式流程（讓對手直接倒地，檢查關卡順序、魔王、接關、通關紀錄、設定還原）
+  const arc = await pg.evaluate(() => {
+    localStorage.removeItem('fd_arc');
+    sel[0] = 2; sel[1] = 0; G.diff = 0; G.stage = 1;
+    arcStart();
+    const seen = [], log = [];
+    let lost = false;
+    for (let guard = 0; guard < 20 && ARC && !ARC.done; guard++) {
+      G.vs = 0; seen.push(p2.ch.n + (p2.hm ? '×' + p2.hm : '') + '/難度' + G.diff);
+      while (G.phase !== 'over') {
+        if (G.phase === 'fight') { if (!lost && ARC.i === 1) { p1.st = 'ko'; } else p2.st = 'ko'; }
+        step();
+      }
+      log.push(ARC.res);
+      if (ARC.res === 'lose') lost = true;
+      arcNext();
+    }
+    const done = !!(ARC && ARC.done), rec = localStorage.getItem('fd_arc');
+    toMenu();
+    return { seen, log, done, rec, diff: G.diff, stage: G.stage, cont: JSON.parse(rec || '{}')[2] };
+  });
+  ok('街機：5 位對手各一次、最後是強化版的自己', arc.seen.length === 6 && new Set(arc.seen.map((s) => s[0])).size === 5 && /^影×1.3\/難度2$/.test(arc.seen[5]), arc.seen.join(' → '));
+  ok('街機：輸了可以接關再戰同一位', arc.log.join(',') === 'win,lose,win,win,win,win' && arc.seen[1] === arc.seen[2], arc.log.join(','));
+  ok('街機：通關後記錄接關次數，回選單還原難度與場景', arc.done && arc.cont === 1 && arc.diff === 0 && arc.stage === 1, JSON.stringify(arc));
+
   // ---- 連段挑戰
   const tr = await pg.evaluate(() => {
     const KM = { lp: ['lp'], hp: ['hp'], lk: ['lk'], hk: ['hk'], jab: ['f', 'lp'], lunge: ['f', 'hp'], push: ['f', 'lk'], spin: ['f', 'hk'], flip: ['b', 'hk'], upper: ['d', 'lp'], sweep: ['d', 'lk'], sp: ['sp'], sp2: ['f', 'sp'], sp3: ['b', 'sp'], ex: ['d', 'sp'], ap: ['lp'], ak: ['lk'], asp: ['sp'] };
