@@ -11,7 +11,7 @@ pick(i,g){
 }
 cc(a,m){if(this.cl.includes(m))return false;if(a.cn===4)return m==='ex';if(a.cn===3)return m==='ap'||m==='ak'||m==='ex'||m==='asp';return a.cn&&m!==a.key&&m!=='th'&&m!=='th2'&&m!=='ap'&&m!=='ak'&&m!=='dive'&&(m==='sp'||m==='sp2'||m==='sp3'||m==='ex'||m==='upper'||a.cn===1)}
  setBuf(m){const sp=x=>x==='sp'||x==='sp2'||x==='sp3'||x==='ex'||x==='asp'||x==='upper';if(this.buf&&sp(this.buf.m)&&!sp(m)&&this.buf.t>=7)return;this.buf={m,t:10}}
- dashGo(s){gho(this,this.ch.col);this.st='dash';this.dt=13;this.dd=s;this.inv=s!==this.dir?7:0;this.vx=s*8.5;spark(this.x,GY-4,'#b9a8d8',6,1);snd(180,.1,'sine',.04,500)}
+ dashGo(s){gho(this,colOf(this));this.st='dash';this.dt=13;this.dd=s;this.inv=s!==this.dir?7:0;this.vx=s*8.5;spark(this.x,GY-4,'#b9a8d8',6,1);snd(180,.1,'sine',.04,500)}
 start(m,nf){
  if(!nf&&m==='ex'&&this.mt<100&&this.mt>=50)m='sp';
  const a=Object.assign({key:m},MV[m]||this.ch[m],this.ch.mv&&this.ch.mv[m]),air=this.y<GY-2;
@@ -52,7 +52,7 @@ update(i,o){
   }
  }
  else if(this.st==='dash'){
-  this.dt--;if(this.inv>0)this.inv--;if(this.dt%3===0)spark(this.x,GY-4,'#b9a8d8',2,1);if(this.dt%3===1)gho(this,this.ch.col);
+  this.dt--;if(this.inv>0)this.inv--;if(this.dt%3===0)spark(this.x,GY-4,'#b9a8d8',2,1);if(this.dt%3===1)gho(this,colOf(this));
   if(this.dt<=9&&this.buf&&this.start(this.buf.m)){}
   else if(this.dt<=0){this.st='idle';this.vx*=.3}
  }

@@ -12,7 +12,7 @@ const li_=f=>Math.max(0,CH.indexOf(f.ch));
 // ---- 招式動作特效(每幀,攻擊進行中)
 function fxMove(f,a,g){
  const li=li_(f),k=a.key,t=f.t,d=f.dir,x=f.x,y=f.y,act=t>a.su&&t<=a.su+a.ac,ex=x+d*a.r*.9,ey=y+(a.h||-70);
- if(a.vx&&act){if(t%2===0)gho(f,f.ch.col);if(g)smk(x-d*16,GY-8,10,'#9aa0b8',20)}
+ if(a.vx&&act){if(t%2===0)gho(f,colOf(f));if(g)smk(x-d*16,GY-8,10,'#9aa0b8',20)}
  if(li===0){
   if(k==='sp3'&&t>=a.su&&t<=a.su+a.ac+6){for(let i=0;i<6;i++)emb(x+d*rr_(12,32),y-rr_(25,135),Math.random()<.5?'#ffcf4a':'#ff6a1a',1,1.4,20,rr_(6,12),1.8);if(t===a.su)P({ring:1,flat:1,x,y:GY-2,c:'#ff7a2a',l:16,rs:6,lw:5})}
   else if(a.type==='proj'||k==='ex'){if(t<=a.su){const tx=x+d*45,ty=y-72,px=tx+rr_(-60,60),py=ty+rr_(-50,50);P({t:'e',x:px,y:py,vx:(tx-px)*.13,vy:(ty-py)*.13,l:8,s:rr_(3,5),c:k==='ex'?'#ffe060':'#ff8a2a',g:0,dr:1})}if(t===a.su)emb(x+d*45,y-72,'#ffd24a',10,4,18,5,0)}
