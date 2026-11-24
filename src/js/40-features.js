@@ -16,11 +16,40 @@ const THUMB=[];
 function makeThumbs(){CH.forEach((ch,i)=>{const c=document.createElement('canvas');c.width=120;c.height=144;
  ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,240,288);portrait(ch,'idle',120,272,1.25,1);ctx.restore();
  c.getContext('2d').drawImage(cv,0,0,240,288,0,0,120,144);THUMB[i]=c});ctx.clearRect(0,0,W,H)}
+// ===== 主選單：選角網格、動態預覽、難度、場景 =====
+let PT=0,PVF=0; // PT：目前在選 P1(0) 或 P2(1)
+const STH=[];
 function selUI(){
- [0,1].forEach(p=>{const g=$('g'+(p+1));if(!g.children.length)CH.forEach((ch,i)=>{const b=document.createElement('button');b.className='card';const c=document.createElement('canvas');c.width=120;c.height=144;c.getContext('2d').drawImage(THUMB[i],0,0);b.appendChild(c);b.appendChild(document.createTextNode(ch.n));b.onclick=()=>{sel[p]=i;snd(600+i*60,.06,'triangle',.05);lab()};g.appendChild(b)});
-  [...g.children].forEach((b,i)=>{const on=sel[p]===i;b.classList.toggle('on',on);b.style.borderColor=on?CH[i].col:'';b.style.background=on?CH[i].col+'33':''})});
- $('sinfo').innerHTML=[0,1].map(p=>{const ch=CH[sel[p]],i=sel[p];return'<div><b style="color:'+ch.col+'">'+(p?'P2／電腦':'P1')+'：'+ch.n+'・'+ch.ds+'</b>'+STAT.map(s=>'<div class="st"><span>'+s[0]+'</span><i><u style="width:'+Math.round(100*(ch[s[1]]-s[2])/(s[3]-s[2]))+'%;background:'+ch.col+'"></u></i><span>'+ch[s[1]]+'</span></div>').join('')+'<div class="ps">被動：'+CHM[i].p+'</div></div>'}).join('');
+ const g=$('grid');
+ if(!g.children.length)CH.forEach((ch,i)=>{const b=document.createElement('button');b.className='card';const c=document.createElement('canvas');c.width=120;c.height=144;c.getContext('2d').drawImage(THUMB[i],0,0);
+  b.appendChild(c);b.insertAdjacentHTML('beforeend','<span>'+ch.n+'</span><small>'+ch.ds+'</small><span class="bd b1">1P</span><span class="bd b2">2P</span>');
+  b.onclick=()=>{sel[PT]=i;snd(600+i*40,.06,'triangle',.05);if(PT===0&&!selUI.p2){selUI.p2=1;PT=1}lab()};
+  b.onmouseenter=()=>{selUI.hv=i;selUI()};b.onmouseleave=()=>{selUI.hv=-1;selUI()};g.appendChild(b)});
+ [...g.children].forEach((b,i)=>{const a=sel[0]===i,c=sel[1]===i,cur=sel[PT]===i;b.querySelector('.b1').style.display=a?'':'none';b.querySelector('.b2').style.display=c?'':'none';
+  b.style.borderColor=cur?CH[i].col:a||c?CH[i].col+'88':'';b.style.background=cur?CH[i].col+'38':'';b.style.boxShadow=cur?'0 0 14px '+CH[i].col+'88':''});
+ [...$('ptabs').querySelectorAll('[data-p]')].forEach(b=>b.classList.toggle('on',+b.dataset.p===PT));
+ const i=selUI.hv>=0?selUI.hv:sel[PT],ch=CH[i];
+ $('pvinfo').innerHTML='<h3 style="color:'+ch.col+'">'+ch.n+'</h3><div>'+ch.ds+'</div>'+STAT.map(s=>'<div class="st"><span>'+s[0]+'</span><i><u style="width:'+Math.round(100*(ch[s[1]]-s[2])/(s[3]-s[2]))+'%;background:'+ch.col+'"></u></i><span>'+ch[s[1]]+'</span></div>').join('')+'<div class="ps">被動：'+CHM[i].p+'</div><div class="mv">'+CHM[i].m.slice(0,3).map(x=>x[0]+' '+x[1].replace(/（.*）/,'')).join('　')+'</div>';
+ $('vsline').innerHTML='<span style="color:'+CH[sel[0]].col+'">P1 '+CH[sel[0]].n+'</span>　VS　<span style="color:'+CH[sel[1]].col+'">'+CH[sel[1]].n+' P2</span>';
+ [...$('dfseg').children].forEach(b=>b.classList.toggle('on',+b.dataset.v===G.diff));
+ const sg=$('stgs');if(!sg.children.length)STG.forEach((S,k)=>{const b=document.createElement('button');b.title=S.n;const c=document.createElement('canvas');c.width=168;c.height=94;c.getContext('2d').drawImage(STH[k],0,0,168,94);b.appendChild(c);b.insertAdjacentHTML('beforeend','<span>'+S.n+'</span>');b.onclick=()=>{G.stage=k;lab()};sg.appendChild(b)});
+ [...sg.children].forEach((b,k)=>b.classList.toggle('on',k===G.stage));
 }
+function makeStageThumbs(){const rs=RS;RS=1;STG.forEach((S,k)=>{STH[k]=makeBg(S)});RS=rs}
+// 預覽：選單開著時，在（被選單蓋住的）主畫布上畫角色，再複製到預覽框；輪流顯示出場與勝利姿勢
+function menuTick(){
+ if(G.phase!=='menu'||$('menu').style.display==='none')return;
+ PVF++;const i=selUI.hv>=0?selUI.hv:sel[PT],ch=CH[i],f0=G.frame;G.frame=PVF;
+ ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,300,340);portrait(ch,PVF%360<180?'intro':'win',150,320,1.7,1);ctx.restore();G.frame=f0;
+ const pc=$('pv').getContext('2d'),g=pc.createRadialGradient(150,200,10,150,200,200);g.addColorStop(0,ch.col+'66');g.addColorStop(1,'#0b0b1e');pc.fillStyle=g;pc.fillRect(0,0,300,340);pc.drawImage(cv,0,0,300,340,0,0,300,340);
+}
+$('ptabs').querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{PT=+b.dataset.p;selUI.p2=1;lab()});
+$('rnd').onclick=()=>{sel[PT]=Math.random()*CH.length|0;snd(700,.08,'triangle',.05);lab()};
+[...$('dfseg').children].forEach(b=>b.onclick=()=>{G.diff=+b.dataset.v;lab()});
+selUI.hv=-1;
+// 方向鍵在選單上移動選角游標（焦點不在輸入框時）
+addEventListener('keydown',e=>{if(G.phase!=='menu'||$('menu').style.display==='none'||KCAP)return;const t=e.target;if(t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'))return;
+ const mv={ArrowLeft:-1,ArrowRight:1,ArrowUp:-4,ArrowDown:4}[e.code];if(mv===undefined)return;e.preventDefault();sel[PT]=(sel[PT]+mv+CH.length)%CH.length;lab()});
 // ===== 訓練模式 =====
 const DUM=['站立','蹲防','隨機防禦','跳躍','防後反擊','重播錄製'];
 const TR={dm:0,rec:0,buf:[],pi:0,rb:0,ra:null,ps:0,tr:-1,seq:[],ok:0,okT:0};
@@ -121,7 +150,7 @@ function tutHud(){ctx.save();ctx.textAlign='center';ctx.fillStyle='rgba(0,0,0,.6
  $('psz').onclick=()=>{ps=(ps+1)%3;try{localStorage.setItem('fd_pad',ps)}catch(e){}ap()};ap()})();
 // ===== 綁定 =====
 $('b5').onclick=()=>{snd(500,.1);tutStart()};
-try{if(!localStorage.getItem('fd_tut'))$('b5').textContent='新手教學（推薦先玩）'}catch(e){}
+try{if(!localStorage.getItem('fd_tut'))$('b5').classList.add('hot')}catch(e){}
 const tbClick=(id,f)=>{const b=$(id);b.addEventListener('mousedown',e=>e.preventDefault());b.onclick=()=>{f();tbar()}};
 tbClick('tb-hb',()=>{G.hb=!G.hb});tbClick('tb-dm',()=>{if(TR.rec)return;TR.dm=(TR.dm+1)%(TR.buf.length?6:5);TR.pi=0});tbClick('tb-rec',trRec);tbClick('tb-tr',trialNext);tbClick('tb-rs',trReset);
 // ===== 設定：改鍵、音量、說明分頁、判定框 =====
@@ -272,5 +301,5 @@ function arcInfo(){try{const r=JSON.parse(localStorage.getItem('fd_arc')||'{}'),
 function arcHud(){if(!ARC||G.phase==='menu')return;const n=ARC.L.length,boss=ARC.i===n-1;ctx.save();ctx.textAlign='center';ctx.font='bold 14px '+FONT;ctx.fillStyle=boss?'#ff6b6b':'#ffe14d';ctx.fillText('街機 第 '+(ARC.i+1)+'／'+n+' 戰'+(boss?'　魔王：強化版'+CH[ARC.L[ARC.i]].n+'（體力 ×1.3）':''),W/2,90);ctx.restore()}
 $('b7').onclick=()=>{snd(500,.1);arcStart()};
 // ===== 初始化 =====
-makeThumbs();lab();rpLastBtn();rpHash();fitCanvas();qLabel();
+makeThumbs();makeStageThumbs();lab();rpLastBtn();rpHash();fitCanvas();qLabel();
 $('qbtn').onclick=()=>{QM=(QM+1)%QN.length;QA=0;try{localStorage.setItem('fd_q',QM)}catch(e){}fitCanvas();bg=makeBg(STG[G.stage]);qLabel()};

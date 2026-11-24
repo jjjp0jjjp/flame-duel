@@ -23,7 +23,32 @@ button:hover{border-color:var(--ac)}
 #pad button{width:var(--pb);height:var(--pb);padding:0;font-size:14px;user-select:none;-webkit-user-select:none;touch-action:none;border-radius:50%}#pad button.q{background:#3a1830;border-color:#ff9db8;font-size:13px}
 #stick{width:calc(var(--pb)*2.2);height:calc(var(--pb)*2.2);border-radius:50%;background:#161a33cc;border:2px solid var(--bd);position:relative;touch-action:none;flex:none}#knob{position:absolute;left:25%;top:25%;width:50%;height:50%;border-radius:50%;background:var(--ac);opacity:.85;pointer-events:none}
 #tbar{display:none;gap:6px;flex-wrap:wrap;justify-content:center;padding:6px}#tbar button{padding:4px 10px;font-size:13px}
-#selbox{width:100%;max-width:620px}.srow{display:flex;align-items:center;gap:8px;justify-content:center;margin:4px 0}.sl{width:40px;font-size:13px;text-align:right;color:#cfd2ff}.cards{display:flex;gap:6px}.card{display:flex;flex-direction:column;align-items:center;padding:2px 2px 4px;width:64px;font-size:14px;font-weight:700}.card canvas{width:58px;height:70px;max-width:none;background:none}.card.on{box-shadow:0 0 12px currentColor}
+#mhead{text-align:center;margin-bottom:6px}
+h1{filter:drop-shadow(0 0 22px #ff4d4d55);background-size:100% 200%;animation:shine 6s ease-in-out infinite}
+@keyframes shine{0%,100%{background-position:0 0}50%{background-position:0 100%}}
+#mmain{display:grid;gap:14px;width:100%;max-width:1120px;grid-template-columns:1fr}
+@media (min-width:900px){#mmain{grid-template-columns:1.12fr 1fr;align-items:start}}
+.panel{background:linear-gradient(160deg,#151832e6,#0b0b1ee6);border:1px solid #3a4080;border-radius:18px;padding:14px;box-shadow:0 12px 40px #0009}
+#grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.card{position:relative;display:flex;flex-direction:column;align-items:center;padding:4px 2px 6px;font-weight:700;font-size:15px;border-radius:12px;transition:transform .12s}
+.card:hover{transform:translateY(-2px)}.card canvas{width:100%;height:auto;max-width:96px;background:none}.card small{font-weight:400;font-size:11px;color:#aab;line-height:1.2}
+.card .bd{position:absolute;top:4px;font-size:10px;font-weight:900;padding:1px 5px;border-radius:6px;color:#fff}.card .b1{left:4px;background:#ff5a4d}.card .b2{right:4px;background:#3a7dff}
+#pvbox{display:grid;grid-template-columns:150px 1fr;gap:12px;margin-top:12px;align-items:center}
+#pv{width:150px;height:170px;max-width:none;border-radius:14px;background:none}
+#pvinfo{font-size:13px;line-height:1.6}#pvinfo h3{margin:0;font-size:22px}#pvinfo .mv{color:#cfd2ff;font-size:12px}
+#vsline{text-align:center;margin-top:8px;font-weight:900;font-size:18px;letter-spacing:.05em}
+.opt{display:flex;align-items:center;gap:10px;margin:4px 0 10px;flex-wrap:wrap}.opt>span{color:#aab;font-size:13px;width:32px}
+.seg{display:inline-flex;border:2px solid var(--bd);border-radius:10px;overflow:hidden}.seg button{border:0;border-radius:0;padding:6px 14px}.seg button.on{background:var(--ac);color:#fff}
+#stgs{display:flex;gap:6px;flex-wrap:wrap}#stgs button{padding:0;border-radius:8px;overflow:hidden;position:relative;line-height:0}#stgs canvas{width:84px;height:47px;max-width:none;background:none}
+#stgs span{position:absolute;left:0;right:0;bottom:0;font-size:11px;line-height:1.5;background:#0008}#stgs button.on{border-color:#ffe14d;box-shadow:0 0 10px #ffe14d88}
+#mgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.mode{display:grid;grid-template-columns:40px 1fr;column-gap:6px;text-align:left;padding:10px 12px;border-radius:14px;background:linear-gradient(135deg,#2a1a44,#161a33);position:relative}
+.mode i{grid-row:1/3;font-style:normal;font-size:26px;align-self:center}.mode b{font-size:16px}.mode small{color:#aab;font-size:12px;line-height:1.3}
+.mode.main{background:linear-gradient(135deg,#ff5a4d,#a0203a);border-color:#ff9db8}.mode.main small{color:#ffe0e0}
+.mode.hot::after{content:"推薦";position:absolute;top:-8px;right:8px;background:#3ddc6a;color:#06210f;font-size:11px;font-weight:900;padding:1px 7px;border-radius:8px}
+#rec{color:#ffe14d;font-size:13px;text-align:center;margin:10px 0 2px}
+@media (max-width:520px){#mgrid{grid-template-columns:1fr}#pvbox{grid-template-columns:110px 1fr}#pv{width:110px;height:125px}.card{font-size:13px}.card small{display:none}}
+
 #sinfo{display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:12px;margin:6px 0;background:#0006;border-radius:10px;padding:8px 10px}.st{display:flex;align-items:center;gap:6px;margin:2px 0}.st span:first-child{width:30px;color:#aab}.st i{flex:1;height:7px;background:#fff2;border-radius:4px;overflow:hidden}.st u{display:block;height:100%}.ps{color:#cfd2ff;margin-top:3px}
 @media (pointer:coarse){#pad{display:flex}}
 input{font:inherit;background:var(--pn);color:var(--fg);border:2px solid var(--bd);border-radius:10px;padding:8px 12px;width:130px;text-align:center;text-transform:lowercase}
@@ -44,13 +69,31 @@ input[type=range]{width:90px;padding:0}
 <div id="pad"><div id="stick"><div id="knob"></div></div>
 <div class="a"><button data-k="T0a">輕拳</button><button data-k="T0b">重拳</button><button data-k="T0s">必殺</button><button data-k="T0e,T0a" class="q">升龍</button><button data-k="T0x">輕腳</button><button data-k="T0y">重腳</button><button data-k="T0t">投</button><button data-k="T0e,T0s" class="q">超必</button></div></div>
 <div id="menu">
-<h1>烈焰對決</h1><p class="sub">FLAME DUEL</p>
-<div id="selbox"><div class="srow"><span class="sl">P1</span><div class="cards" id="g1"></div></div><div class="srow"><span class="sl">P2<br>電腦</span><div class="cards" id="g2"></div></div><div id="sinfo"></div></div>
-<div class="row">難度 <button id="df"></button> 場景 <button id="stg"></button></div>
-<div class="row" id="rec" style="color:#ffe14d"></div>
-<button class="big" id="b1">單人 vs 電腦</button><button class="big" id="b7">街機模式（連戰 5 場）</button><button class="big" id="b2">雙人對戰</button><button class="big" id="b3">訓練模式</button><button class="big" id="b4">連線對戰</button><button class="big" id="b6" style="display:none;background:linear-gradient(#4a4a8a,#2a2a5a);border-color:#aab0ff">觀看上一場重播</button><button class="big" id="b5" style="background:linear-gradient(#3a8a5a,#1f5a3a);border-color:#8fe8b0">新手教學</button>
+<header id="mhead"><h1>烈焰對決</h1><p class="sub">FLAME DUEL</p></header>
+<div id="mmain">
+ <section id="roster" class="panel">
+  <div class="tabs" id="ptabs"><button data-p="0" class="on">選擇 P1</button><button data-p="1">選擇 P2／電腦</button><button id="rnd" title="隨機選擇">🎲 隨機</button></div>
+  <div id="grid"></div>
+  <div id="pvbox"><canvas id="pv" width="300" height="340"></canvas><div id="pvinfo"></div></div>
+  <div id="vsline"></div>
+ </section>
+ <section id="modes" class="panel">
+  <div class="opt"><span>難度</span><div class="seg" id="dfseg"><button data-v="0">簡單</button><button data-v="1">普通</button><button data-v="2">困難</button></div></div>
+  <div class="opt"><span>場景</span><div id="stgs"></div></div>
+  <div id="mgrid">
+   <button class="mode main" id="b1"><i>🥊</i><b>單人 vs 電腦</b><small>三戰兩勝，挑戰電腦</small></button>
+   <button class="mode" id="b7"><i>🏆</i><b>街機模式</b><small>連戰 5 場，最後挑戰強化版的自己</small></button>
+   <button class="mode" id="b2"><i>👥</i><b>雙人對戰</b><small>同一台裝置兩人對打</small></button>
+   <button class="mode" id="b4"><i>🌐</i><b>連線對戰</b><small>輸入房間代碼和朋友對戰</small></button>
+   <button class="mode" id="b3"><i>🎯</i><b>訓練模式</b><small>判定框、幀數、連段挑戰</small></button>
+   <button class="mode" id="b5"><i>📘</i><b>新手教學</b><small>9 步學會基本操作</small></button>
+   <button class="mode" id="b6" style="display:none"><i>🎬</i><b>觀看上一場重播</b><small>重看最近一場對戰</small></button>
+  </div>
+  <div id="rec"></div>
+  <div class="row"><button id="bset">⚙ 設定（按鍵・音量・畫質）</button></div>
+ </section>
+</div>
 <!--@NETUI-->
-<div class="row"><button id="bset">⚙ 設定（按鍵・音量）</button></div>
 <div id="set" class="help" style="display:none"><b>設定</b>
 <div class="row" style="justify-content:flex-start">主音量 <input type="range" min="0" max="1" step=".05" data-v="all"> 音樂 <input type="range" min="0" max="1" step=".05" data-v="mus"> 音效 <input type="range" min="0" max="1" step=".05" data-v="sfx"></div>
 <div id="keytab"></div>

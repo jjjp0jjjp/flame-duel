@@ -132,7 +132,7 @@ function pads(){if(!padOK)return;let gp=[];try{gp=navigator.getGamepads?navigato
 function loop(ts){requestAnimationFrame(loop);pads();acc+=Math.min(100,ts-last);last=ts;
  if(NET.on){while(acc>=16.667){if(!netTick()){acc=Math.min(acc,33);break}acc-=16.667}netSend()}
  else while(acc>=16.667){step();acc-=16.667}
- uiTick();draw();qPerf()}
+ uiTick();menuTick();draw();qPerf()}
 requestAnimationFrame(loop);
 
 addEventListener('keydown',e=>{if(KCAP){e.preventDefault();kcapDone(e.code);return}
@@ -159,7 +159,6 @@ document.querySelectorAll('#pad button').forEach(b=>{
 });
 const $=id=>document.getElementById(id),DF=['簡單','普通','困難'];
 function rec(win){try{const r=JSON.parse(localStorage.getItem('fd_rec')||'{}');win?r.w=(r.w||0)+1:r.l=(r.l||0)+1;localStorage.setItem('fd_rec',JSON.stringify(r))}catch(e){}}
-function lab(){try{const r=JSON.parse(localStorage.getItem('fd_rec')||'{}');$('rec').textContent='單人戰績：'+(r.w||0)+' 勝 '+(r.l||0)+' 敗'+arcInfo()}catch(e){}if(THUMB.length)selUI();$('df').textContent=DF[G.diff];$('stg').textContent=STG[G.stage].n}
-$('df').onclick=()=>{G.diff=(G.diff+1)%3;lab()};$('stg').onclick=()=>{G.stage=(G.stage+1)%STG.length;lab()};
+function lab(){try{const r=JSON.parse(localStorage.getItem('fd_rec')||'{}');$('rec').textContent='單人戰績：'+(r.w||0)+' 勝 '+(r.l||0)+' 敗'+arcInfo()}catch(e){}if(THUMB.length)selUI()}
 $('b1').onclick=()=>{snd(500,.1);startGame(1)};$('b2').onclick=()=>{snd(500,.1);startGame(2)};$('b3').onclick=()=>{snd(500,.1);startGame(3)};
 $('b4').onclick=()=>{snd(500,.1);$('net').style.display='block';$('net').scrollIntoView&&$('net').scrollIntoView({block:'nearest'})};
