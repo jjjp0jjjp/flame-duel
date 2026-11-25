@@ -152,8 +152,9 @@ function resolveHits(){
  const h1=p1.ph,h2=p2.ph;p1.ph=null;p2.ph=null;
  const r1=h1&&p2.st!=='ko'?p2.getHit(p1,h1.a,h1.x):false;
  const r2=h2&&p1.st!=='ko'?p1.getHit(p2,h2.a,h2.x):false;
- if(r1&&p1.atk===h1.a){p1.hit=true;p1.hc=(p1.hc||0)+1;p1.hlt=p1.t}
- if(r2&&p2.atk===h2.a){p2.hit=true;p2.hc=(p2.hc||0)+1;p2.hlt=p2.t}
+ if(r1==='p'&&p1.atk===h1.a)p1.pd=1;if(r2==='p'&&p2.atk===h2.a)p2.pd=1;
+ if(r1===true&&p1.atk===h1.a){p1.hit=true;p1.hc=(p1.hc||0)+1;p1.hlt=p1.t}
+ if(r2===true&&p2.atk===h2.a){p2.hit=true;p2.hc=(p2.hc||0)+1;p2.hlt=p2.t}
 }
 // ---- 場景
 function bgKind(b,S,r){

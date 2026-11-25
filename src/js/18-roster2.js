@@ -95,3 +95,7 @@ function iceWall(p){const al=Math.min(1,p.life/20);ctx.save();ctx.globalAlpha=al
  ctx.strokeStyle='rgba(255,255,255,.8)';ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(x-8,GY-10);ctx.lineTo(x-3,GY-h*.8);ctx.moveTo(x+6,GY-20);ctx.lineTo(x+9,GY-h*.7);ctx.stroke();glow(x,GY-50,46,'#9fe8ff',.35);ctx.restore()}
 // 回復：綠色光點往上飄＋數字
 function healFx(f,n){for(let i=0;i<14;i++)P({t:'e',x:f.x+rr_(-24,24),y:f.y-rr_(10,110),vx:0,vy:-rr_(.5,2),l:30,s:rr_(3,5),c:'#7dffb0',g:-.01,dr:.98});pp({x:f.x,y:f.y-150,vx:0,vy:-.7,l:45,m:45,txt:'+'+n,c:'#7dffb0',text:1,big:1});snd(520,.3,'triangle',.06,880)}
+// 精準招架、受身、撞牆的特效
+function parryFx(f,px){const x=f.x+(px>=f.x?1:-1)*22;P({ring:1,x,y:f.y-70,c:'#7fe3ff',l:14,rs:6,lw:6});flare(x,f.y-80,'#bff4ff',70,10);pp({x:f.x,y:f.y-150,vx:0,vy:-.6,l:45,m:45,txt:'招架！',c:'#7fe3ff',text:1,big:1});flash('#bff4ff',.18,120);snd(1400,.12,'square',.05,2200);snd(700,.2,'triangle',.05)}
+function techFx(f){for(let i=0;i<5;i++)smk(f.x+rr_(-16,16),GY-6,12,'#9aa0b8',20);pp({x:f.x,y:f.y-120,vx:0,vy:-.6,l:35,m:35,txt:'受身',c:'#cfd2ff',text:1});snd(300,.08,'sine',.04,600)}
+function wallFx(f){const x=f.x<W/2?36:W-36;P({ring:1,x,y:f.y-60,c:'#ffffff',l:16,rs:7,lw:6});for(let i=0;i<8;i++)rok(x,f.y-rr_(30,100),(f.x<W/2?1:-1)*rr_(1,4),-rr_(1,4),'#8a8fa8');pp({x:f.x,y:f.y-150,vx:0,vy:-.6,l:40,m:40,txt:'撞牆！',c:'#ffd23d',text:1,big:1});noise(.3,.18,900,'lowpass',90)}

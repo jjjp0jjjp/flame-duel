@@ -129,6 +129,31 @@ const ok = (name, cond, detail) => {
   ok('街機：輸了可以接關再戰同一位', arc.log.join(',') === 'win,lose,win,win,win,win' && arc.seen[1] === arc.seen[2], arc.log.join(','));
   ok('街機：通關後記錄接關次數，回選單還原難度與場景', arc.done && arc.cont === 1 && arc.diff === 0 && arc.stage === 1, JSON.stringify(arc));
 
+  // ---- 對戰機制（用腳本輸入驗證）
+  const mech = await pg.evaluate(() => {
+    const H0 = human, out = {};
+    const setup = (a, b) => { sel[0] = a; sel[1] = b; startGame(2); G.vs = 0; while (G.phase !== 'fight') step(); p1.x = 400; p2.x = 470; p1.mt = p2.mt = 0 };
+    // f(n) 回傳 [P1 輸入, P2 輸入]
+    const run = (n, f) => { let k = 0; human = (K) => { const r = f(k); return Object.assign({}, NI, K === K1 ? r[0] : r[1]) }; for (let i = 0; i < n; i++) { step(); if (G.hitstop === 0) k++ } human = H0 };
+    // 精準招架：P1 重拳，P2 在快打到前按 →
+    setup(0, 0); run(40, (k) => [k === 0 ? { hp: 1 } : {}, k === 5 ? { l: 1 } : {}]);
+    out.parry = p2.hp === p2.ch.hp && !p1.hit;
+    // 確反：P2 在收招中被打，傷害比平常高
+    setup(0, 0); p2.st = 'atk'; p2.atk = Object.assign({ key: 'hk' }, MV.hk); p2.t = MV.hk.su + MV.hk.ac + 2; const h0 = p2.hp;
+    run(20, (k) => [k === 0 ? { hp: 1 } : {}, {}]); const dPun = h0 - p2.hp;
+    setup(0, 0); const h1 = p2.hp; run(20, (k) => [k === 0 ? { hp: 1 } : {}, {}]); const dNorm = h1 - p2.hp;
+    out.punish = dPun > dNorm * 1.15;
+    // 受身：被升龍打飛時按攻擊鍵 → 很快爬起；掃堂腿是強制倒地不能受身
+    setup(0, 0); let tch = false; run(70, (k) => [k === 0 ? { d: 1, lp: 1 } : {}, k > 12 && k < 30 && k % 2 ? { lk: 1 } : {}]); tch = p2.tch === 1 || (p2.st !== 'down' && p2.y >= GY);
+    setup(0, 0); let hard = false; run(70, (k) => { if (p2.st === 'down') hard = hard || p2.dt > 20; return [k === 0 ? { d: 1, hk: 1 } : {}, k > 4 && k < 30 && k % 2 ? { lk: 1 } : {}] });
+    out.tech = tch && hard;
+    // 撞牆：把對手打飛到牆邊會反彈
+    setup(1, 0); p1.x = 830; p2.x = 900; p1.dir = 1; p2.dir = -1; p1.mt = 100; let wb = false; run(60, (k) => { wb = wb || p2.wb === 1; return [k === 0 ? { sp: 1 } : {}, {}] });
+    out.wall = wb;
+    return out;
+  });
+  for (const [k, v] of Object.entries(mech)) ok('機制：' + { parry: '精準招架', punish: '確反加傷', tech: '受身與強制倒地', wall: '撞牆反彈' }[k], v);
+
   // ---- 連段挑戰
   const tr = await pg.evaluate(() => {
     const KM = { lp: ['lp'], hp: ['hp'], lk: ['lk'], hk: ['hk'], jab: ['f', 'lp'], lunge: ['f', 'hp'], push: ['f', 'lk'], spin: ['f', 'hk'], flip: ['b', 'hk'], upper: ['d', 'lp'], sweep: ['d', 'lk'], sp: ['sp'], sp2: ['f', 'sp'], sp3: ['b', 'sp'], ex: ['d', 'sp'], ap: ['lp'], ak: ['lk'], asp: ['sp'] };
