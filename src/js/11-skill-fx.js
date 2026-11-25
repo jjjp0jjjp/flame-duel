@@ -18,10 +18,11 @@ function raySpr(c){c=hex6(c);const k='r'+c;let s=GLW.get(k);if(s)return s;s=docu
 const glow=(x,y,r,c,a)=>{const o=ctx.globalCompositeOperation,ga=ctx.globalAlpha;ctx.globalCompositeOperation='lighter';if(a!==undefined)ctx.globalAlpha=ga*a;ctx.drawImage(glowSpr(c),x-r,y-r,r*2,r*2);ctx.globalCompositeOperation=o;ctx.globalAlpha=ga};
 const flare=(x,y,c,s,l)=>P({t:'fl',x,y,c,s,l:l||8,g:0,dr:1,rot:Math.random()*.6-.3});
 const fxLo=()=>QM===3||(QM===0&&QA>=2);
-const PGL=['#ff8a2a','#7fd6ff','#b46bff','#ffe680',null,'#9fe8ff','#7fffc0',null]; // 各角色飛行道具的光色（岩是石頭，不發光）
+const PGL=['#ff8a2a','#7fd6ff','#b46bff','#ffe680',null,'#9fe8ff','#7fffc0',null,null,'#a3e635','#ff9ff3','#ff9f1c']; // 各角色飛行道具的光色（岩是石頭，不發光）
 // ---- 招式動作特效(每幀,攻擊進行中)
 function fxMove(f,a,g){
  const li=li_(f),k=a.key,t=f.t,d=f.dir,x=f.x,y=f.y,act=t>a.su&&t<=a.su+a.ac,ex=x+d*a.r*.9,ey=y+(a.h||-70);
+ if(t===1&&(a.ovh||a.low)&&!a.air){const c=a.ovh?'#ffd23d':'#7ec8ff',sg=a.ovh?1:-1,yy=a.ovh?y-150:GY-8;P({t:'fn',x,y:yy,l:16,g:0,dr:1,draw:(p,al)=>{ctx.save();ctx.globalAlpha=al;ctx.fillStyle=c;ctx.strokeStyle='#000';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(p.x-10,p.y-7*sg);ctx.lineTo(p.x+10,p.y-7*sg);ctx.lineTo(p.x,p.y+7*sg);ctx.closePath();ctx.fill();ctx.stroke();ctx.restore()}})}
  if(t===1&&(k==='sp'||k==='sp2'||k==='sp3'||k==='asp'||k==='ex')){const c=colOf(f);flare(x+d*26,y-82,c,k==='ex'?72:40,k==='ex'?10:6);if(k==='ex'){P({ring:1,x,y:y-60,c,l:18,rs:9,lw:6});emb(x,y-60,c,18,6,24,5,1);spark(x,y-60,c,14)}}
  if(a.vx&&act){if(t%2===0)gho(f,colOf(f));if(g)smk(x-d*16,GY-8,10,'#9aa0b8',20)}
  if(li===0){
@@ -176,6 +177,7 @@ function drawParticle(p){
  else if(p.t==='sk'){ctx.globalCompositeOperation='lighter';ctx.lineCap='round';ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(p.x-p.vx*3,p.y-p.vy*3);ctx.strokeStyle=p.c;ctx.lineWidth=2.2;ctx.stroke();ctx.globalCompositeOperation='source-over'}
  else if(p.t==='sh'){ctx.save();ctx.globalCompositeOperation='lighter';ctx.translate(p.x,p.y);ctx.scale(p.dir,1);const r=30+(1-al)*10;ctx.beginPath();ctx.arc(-14,0,r,-1.05,1.05);ctx.strokeStyle=p.c;ctx.globalAlpha=al*.3;ctx.lineWidth=12;ctx.stroke();ctx.globalAlpha=al;ctx.lineWidth=3;ctx.stroke();ctx.strokeStyle='#fff';ctx.lineWidth=1.2;ctx.stroke();ctx.lineWidth=1;ctx.globalAlpha=al*.6;ctx.strokeStyle=p.c;for(let i=-2;i<=2;i++){const a=i*.42;ctx.beginPath();ctx.moveTo(-14+Math.cos(a)*(r-9),Math.sin(a)*(r-9));ctx.lineTo(-14+Math.cos(a)*r,Math.sin(a)*r);ctx.stroke()}ctx.restore()}
  else if(p.t==='icep')icePillar(p,al);
+ else if(p.t==='fn')p.draw(p,al);
  else{ctx.fillStyle=p.c;ctx.fillRect(p.x,p.y,p.s,p.s)}
 }
 

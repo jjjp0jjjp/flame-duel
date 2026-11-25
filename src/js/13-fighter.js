@@ -49,7 +49,7 @@ update(i,o){
    if(a.buff&&this.t===a.su){this.pw=a.buff;if(!NOFX)buffFx(this)}
    if(a.dive&&this.t>=a.su&&!g){this.vy=Math.max(this.vy,12);this.vx=this.dir*5}
    if(a.lift&&this.t===a.su+1&&g){this.vy=a.lift;this.vx=this.dir*2.5;snd(250,.2,'sine',.05,700)}
-   if(a.type==='proj'&&(this.t===a.su||(a.n2&&this.t===a.su+9))){projs.push({k:a.key,low:a.low,gr:a.gr,x:this.x+this.dir*50,y:this.y-(a.low?18:a.vy?60:this.t>a.su?96:72),vx:this.dir*a.spd,vy:a.vy||0,own:this,big:a.big,ret:a.ret,wl:a.wl,ph:a.ph,a:{d:a.d,kb:a.pkb||7,st:22,key:'sp',mk:a.key,launch:a.launch,knock:a.knock,ex:a.ex,psn:a.psn,low:a.low},life:a.life||(a.low?80:140)});sfx('proj')}
+   if(a.type==='proj'&&(this.t===a.su||(a.n2&&this.t===a.su+9))){projs.push({k:a.key,low:a.low,gr:a.gr,x:this.x+this.dir*(a.wl?(a.dist||70):50),y:a.wl?GY-50:this.y-(a.low?18:a.vy?60:this.t>a.su?96:72),vx:this.dir*a.spd,vy:a.vy||0,own:this,big:a.big,ret:a.ret,wl:a.wl,ph:a.ph,a:{d:a.d,kb:a.pkb||7,st:22,key:'sp',mk:a.key,launch:a.launch,knock:a.knock,ex:a.ex,psn:a.psn,low:a.low},life:a.life||(a.low?80:140)});sfx('proj')}
    if(a.type==='strike'&&this.t===a.su){const xs=a.multi?[o.x,o.x-110,o.x+110]:a.line?a.line.map(q=>this.x+this.dir*q):[this.x+this.dir*a.dist],ws=a.multi?[10,18,26]:a.line?a.line.map((q,j)=>12+j*8):[12];xs.forEach((tx,j)=>projs.push({k:a.key,strike:1,x:Math.max(30,Math.min(W-30,tx)),y:GY-60,vx:0,vy:0,own:this,wait:ws[j],life:ws[j]+6,a:{d:a.d,kb:6,st:26,key:'sp',mk:a.key,launch:a.launch,ex:a.ex}}));sfx('charge')}
    if(a.type!=='proj'&&a.type!=='strike'&&!a.counter&&!a.nohit&&this.t>a.su&&this.t<=a.su+a.ac&&(!this.hit||(a.hits&&this.hc<a.hits&&this.t-this.hlt>=(a.gap||4)))&&!this.ph)this.tryHit(o);
    if((a.air&&g&&this.t>a.su+1)||this.t>=a.su+a.ac+a.rc){this.st='idle';this.atk=null}
@@ -68,7 +68,7 @@ update(i,o){
    this.st='idle';
    const mv=i.r-i.l,back=this.dir>0?i.l:i.r;
    if(g&&(i.d||(back&&((o.st==='atk'&&Math.abs(o.x-this.x)<190)||projs.some(p=>p.own!==this&&Math.abs(p.x-this.x)<150))))){this.st='block';this.bc=i.d?1:0;this.vx*=.6}
-   else{this.vx=mv*ch.spd*(g?(mv&&(mv>0)!==(this.dir>0)?.85:1):.9);if(mv&&g){this.st='walk';this.walk+=.25}if((i.u||this.jb>0)&&g){this.jb=0;this.vy=-ch.jmp;this.dj=0;this.jh=1;snd(300,.12,'sine',.04,600)}else if(upE&&ch.dj&&!this.dj&&!g){this.vy=-ch.jmp*.85;this.dj=1;spark(this.x,this.y,'#e3ccff',8,1);ring(this.x,this.y,'#e3ccff');snd(500,.1,'sine',.04,900)}}
+   else{this.vx=mv*ch.spd*(g?(mv&&(mv>0)!==(this.dir>0)?.85:1):.9*(ch.am||1));if(mv&&g){this.st='walk';this.walk+=.25}if((i.u||this.jb>0)&&g){this.jb=0;this.vy=-ch.jmp;this.dj=0;this.jh=1;snd(300,.12,'sine',.04,600)}else if(upE&&ch.dj&&!this.dj&&!g){this.vy=-ch.jmp*.85;this.dj=1;spark(this.x,this.y,'#e3ccff',8,1);ring(this.x,this.y,'#e3ccff');snd(500,.1,'sine',.04,900)}}
   }
  }
  this.x+=this.vx;this.y+=this.vy;
