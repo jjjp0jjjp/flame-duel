@@ -25,7 +25,7 @@ function step(){
   if(p.wait>0){p.wait--;p.life--;projFx(p);if(p.wait===0)strikeFx(p);continue}
   if(p.life<=0)continue;
   p.x+=p.vx;p.y+=p.vy||0;if(p.gr)p.vy+=p.gr;p.life--;projFx(p);if(p.vy&&p.y>=GY-14){p.life=0;projEnd(p);spark(p.x,GY-6,p.own.ch.col,8,1)}
-  if(p.ret&&p.life===p.ret){p.vx=-p.vx;p.rb=1}if(p.rb&&Math.abs(p.x-p.own.x)<28)p.life=0;if(p.cool>0)p.cool--;
+  if(p.ret&&p.life===p.ret){p.vx=-p.vx;p.rb=1}if(p.rb&&Math.abs(p.x-p.own.x)<28)p.life=0;if(p.cool>0)p.cool--;if(p.hm){const tg=p.own===p1?p2:p1,dy=(tg.y-70)-p.y;p.vy=Math.max(-2.5,Math.min(2.5,(p.vy||0)+(dy>0?.12:-.12)))}
   const t=p.own===p1?p2:p1,r=p.big?28:14,bx=p.strike?[p.x-26,0,p.x+26,GY]:p.wl?[p.x-16,GY-110,p.x+16,GY]:[p.x-r,p.y-r,p.x+r,p.y+r];
   if(p.life>0&&!(p.cool>0)&&t.st!=='ko'&&ov(bx,hurt(t))&&t.getHit(p.own,p.a,p.strike?p.own.x:p.x)){if(p.ph>1){p.ph--;p.cool=8}else{p.life=0;projEnd(p);if(p.big)ring(p.x,p.y,'#ffe14d')}}
   for(const q of projs)if(q!==p&&q.own!==p.own&&!p.strike&&!q.strike&&Math.abs(q.x-p.x)<24&&Math.abs(q.y-p.y)<40&&p.life>0&&q.life>0){if(!p.big&&!p.wl)p.life=0;if(!q.big&&!q.wl)q.life=0;spark(p.x,p.y,'#fff',16);ring(p.x,p.y,'#fff');snd(200,.15,'sawtooth',.05,60)}

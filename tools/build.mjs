@@ -14,8 +14,8 @@ function build(v) {
   let js = NOTE;
   for (const f of shared) {
     js += rd('src/js/' + f);
-    if (f.startsWith('20-')) js += rd(`src/${v}/transport.js`);
-    if (f.startsWith('30-')) js += rd(`src/${v}/bind.js`);
+    if (f === '20-net-state.js') js += rd(`src/${v}/transport.js`);
+    if (f === '30-net-sync-ui.js') js += rd(`src/${v}/bind.js`);
   }
   return rd('src/page.html')
     .replace('<!--@HEAD-->\n', () => rd(`src/${v}/head.html`))

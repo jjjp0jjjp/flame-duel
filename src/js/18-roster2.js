@@ -85,7 +85,7 @@ function supPattern2(ci,t,e){
 }
 // ===== 新機制的共用特效 =====
 // 定點攻擊落下時的特效：機的飛彈爆炸，其他（雷）是落雷
-function strikeFx(p){if(li_(p.own)===11)missileFx(p);else boltFx(p)}
+function strikeFx(p){const li=li_(p.own);if(li===11)missileFx(p);else if(li===13)curseFx(p);else if(li===15)arrowRainFx(p);else boltFx(p)}
 function missileFx(p){emb(p.x,GY-20,'#ffb347',16,6,24,5,1);for(let i=0;i<6;i++)smk(p.x+rr_(-20,20),GY-14,16,'#6a6a7a',30);for(let i=0;i<6;i++)rok(p.x,GY-10,rr_(-4,4),-rr_(3,8),'#4a4a5a');
  P({ring:1,flat:1,x:p.x,y:GY-2,c:'#ffb347',l:16,rs:7,lw:5});flare(p.x,GY-30,'#ff9f1c',60,8);noise(.3,.14,1200,'lowpass',120);snd(80,.25,'sawtooth',.08,40);G.shake=Math.max(G.shake,5)}
 // 蓄力強化：發動時的光圈

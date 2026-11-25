@@ -63,6 +63,32 @@ CH.push(
  sp2:{type:'strike',d:10,su:12,ac:1,rc:28,line:[110,190,270],launch:1,cost:50},
  sp3:{d:15,su:10,ac:12,rc:22,vx:11,r:80,h:-70,st:24,kb:12,arm:1,cost:50},
  asp:{d:18,su:8,ac:40,rc:10,r:70,h:-24,st:28,kb:8,knock:1,air:1,dive:1,arm:1,cost:50}});
+CH.push(
+{n:'刃',ds:'居合・一閃',col:'#e9ecef',col2:'#ffffff',spd:4.3,jmp:14.5,hp:100,w:1,blade:1,
+ mv:{hp:{r:100},hk:{r:112}},
+ sp:{d:15,su:12,ac:6,rc:22,vx:16,r:80,h:-78,st:24,kb:6,thru:1,cost:50},
+ ex:{d:40,su:16,ac:6,rc:30,vx:20,r:90,h:-78,st:34,kb:10,thru:1,launch:1,ex:1,cost:100,name:'一閃'},
+ sp2:{type:'proj',d:11,su:9,ac:1,rc:18,spd:12,cost:50},
+ sp3:{d:14,su:14,ac:5,rc:22,r:100,h:-76,st:24,kb:8,gb:1,cost:50},
+ asp:{d:7,su:4,ac:10,rc:6,r:80,h:-50,st:18,kb:4,air:1,hits:2,gap:5,cost:50}},
+{n:'巫',ds:'咒術・吸魂',col:'#2a9d8f',col2:'#b7f0e8',spd:3.6,jmp:14,hp:98,w:.95,ls:.12,
+ sp:{type:'proj',d:12,su:12,ac:1,rc:22,spd:5,hm:1,life:160,cost:50},
+ ex:{d:7,su:12,ac:24,rc:28,r:120,h:-70,st:24,kb:2,around:1,hits:5,gap:4,ls:.6,wk:360,launch:1,ex:1,cost:100,name:'黃泉之門'},
+ sp2:{type:'strike',d:6,su:12,ac:1,rc:24,tgt:1,wk:300,cost:50},
+ sp3:{d:12,su:8,ac:5,rc:20,r:80,h:-80,st:24,kb:4,ls:.8,cost:50},
+ asp:{type:'proj',d:10,su:6,ac:1,rc:14,spd:6,vy:6,hm:1,cost:50}},
+{n:'獸',ds:'狂暴・撲擊',col:'#c1121f',col2:'#ffb3b3',spd:4,jmp:15,hp:120,w:1.2,rg:1,
+ sp:{d:20,su:6,ac:16,rc:22,hop:-10,vx:9,r:70,h:-60,st:36,kb:8,throw:1,cost:50},
+ ex:{d:6,su:8,ac:30,rc:30,vx:6,r:96,h:-70,st:30,kb:3,hits:7,gap:4,launch:1,arm:1,ex:1,cost:100,name:'狂獸亂舞'},
+ sp2:{d:5,su:6,ac:14,rc:18,r:76,h:-80,st:16,kb:2,hits:4,gap:3,cost:50},
+ sp3:{d:0,su:10,ac:8,rc:20,r:140,h:-70,st:20,kb:16,around:1,drain:30,cost:50},
+ asp:{d:18,su:6,ac:40,rc:8,r:76,h:-24,st:28,kb:8,knock:1,air:1,dive:1,cost:50}},
+{n:'羽',ds:'弓術・遠射',col:'#4361ee',col2:'#c7d2fe',spd:4,jmp:15,hp:94,w:.95,
+ sp:{type:'proj',d:9,su:8,ac:1,rc:16,spd:15,sl:120,cost:50},
+ ex:{type:'strike',d:9,su:14,ac:1,rc:30,line:[90,150,210,270,330],launch:1,ex:1,cost:100,name:'天羽箭雨'},
+ sp2:{type:'proj',d:12,su:12,ac:1,rc:20,spd:7,vy:-10,gr:.45,knock:1,cost:50},
+ sp3:{type:'proj',d:9,su:8,ac:1,rc:18,spd:13,hop:-11,hvx:-6,cost:50},
+ asp:{type:'proj',d:8,su:6,ac:1,rc:14,spd:9,vy:7,n2:1,cost:50}});
 // ===== 每個角色專屬的指令技：→+輕拳 jab、→+重拳 lunge、→+輕腳 push、→+重腳 spin、←+重腳 flip、↓+拳 upper =====
 // 特性：ovh 中段（要站著擋）、low 下段（要蹲著擋）、hits 多段、arm 起手霸體、hop 跳起攻擊、kb<0 拉近、psn 中毒、rev 打到身後、nohit 純移動
 const CMD=[
@@ -77,9 +103,13 @@ const CMD=[
  {jab:['刺拳',{d:5,su:3,ac:3,rc:7,r:100,h:-86,st:14,kb:3,cn:1}],lunge:['肝臟拳',{d:12,su:8,ac:4,rc:14,r:86,h:-64,st:24,kb:6,arm:1,cn:2}],push:['左右連拳',{d:4,su:4,ac:10,rc:10,r:96,h:-84,st:14,kb:2,hits:2,gap:5,cn:1}],spin:['重擊鉤拳',{d:14,su:12,ac:4,rc:18,r:90,h:-84,st:22,kb:13,cn:2}],flip:['下砸拳',{d:13,su:13,ac:4,rc:18,r:86,h:-70,st:22,kb:6,ovh:1,cn:2}],upper:['上鉤拳',{d:14,su:4,ac:6,rc:22,r:60,h:-108,st:30,kb:3,launch:1,inv:1,lift:-11,cn:3}]},
  {jab:['毒爪',{d:6,su:4,ac:3,rc:10,r:100,h:-84,st:15,kb:3,psn:90,cn:1}],lunge:['鎖鐮',{d:10,su:10,ac:5,rc:18,r:150,h:-80,st:20,kb:-6,cn:2}],push:['毒蛇腳',{d:7,su:6,ac:4,rc:13,r:104,h:-12,st:17,kb:5,low:1,psn:90,cn:1}],spin:['蠍尾踢',{d:13,su:12,ac:6,rc:18,r:96,h:-70,st:22,kb:6,ovh:1,psn:120,cn:2}],flip:['煙步',{d:0,su:1,ac:14,rc:6,r:0,vx:-9,inv:1,iv:12,nohit:1,cn:0}],upper:['毒針',{d:12,su:5,ac:7,rc:22,r:62,h:-112,st:28,kb:3,launch:1,inv:1,lift:-11,psn:90,cn:3}]},
  {jab:['扇擊',{d:6,su:4,ac:4,rc:9,r:108,h:-84,st:15,kb:4,cn:1}],lunge:['舞扇',{d:5,su:7,ac:10,rc:14,r:96,h:-80,st:17,kb:3,vx:5,hits:2,gap:6,cn:2}],push:['蝶腳',{d:7,su:5,ac:4,rc:12,r:100,h:-14,st:17,kb:5,low:1,cn:1}],spin:['飛燕翻',{d:12,su:9,ac:12,rc:14,r:84,h:-56,st:22,kb:7,hop:-11,vx:4,cn:2}],flip:['翩然退',{d:0,su:2,ac:12,rc:6,r:0,vx:-7,hop:-9,nohit:1,inv:1,iv:10,cn:0}],upper:['扇月',{d:11,su:4,ac:8,rc:20,r:70,h:-110,st:26,kb:3,launch:1,inv:1,lift:-14,cn:3}]},
- {jab:['機械拳',{d:8,su:6,ac:3,rc:12,r:100,h:-84,st:17,kb:6,cn:1}],lunge:['液壓衝拳',{d:14,su:12,ac:5,rc:18,r:96,h:-84,st:23,kb:14,arm:1,vx:5,cn:2}],push:['履帶踢',{d:8,su:8,ac:5,rc:15,r:100,h:-12,st:18,kb:5,low:1,cn:1}],spin:['重錘',{d:15,su:15,ac:4,rc:20,r:96,h:-70,st:24,kb:8,ovh:1,cn:2}],flip:['噴射後退',{d:0,su:2,ac:10,rc:6,r:0,vx:-10,nohit:1,cn:0}],upper:['對空砲',{d:12,su:7,ac:6,rc:24,r:70,h:-130,st:28,kb:3,launch:1,arm:1,cn:3}]}];
+ {jab:['機械拳',{d:8,su:6,ac:3,rc:12,r:100,h:-84,st:17,kb:6,cn:1}],lunge:['液壓衝拳',{d:14,su:12,ac:5,rc:18,r:96,h:-84,st:23,kb:14,arm:1,vx:5,cn:2}],push:['履帶踢',{d:8,su:8,ac:5,rc:15,r:100,h:-12,st:18,kb:5,low:1,cn:1}],spin:['重錘',{d:15,su:15,ac:4,rc:20,r:96,h:-70,st:24,kb:8,ovh:1,cn:2}],flip:['噴射後退',{d:0,su:2,ac:10,rc:6,r:0,vx:-10,nohit:1,cn:0}],upper:['對空砲',{d:12,su:7,ac:6,rc:24,r:70,h:-130,st:28,kb:3,launch:1,arm:1,cn:3}]},
+ {jab:['柄擊',{d:7,su:5,ac:3,rc:10,r:96,h:-84,st:16,kb:5,cn:1}],lunge:['踏込斬',{d:12,su:9,ac:5,rc:16,r:108,h:-80,st:21,kb:8,vx:7,cn:2}],push:['下段斬',{d:8,su:7,ac:4,rc:14,r:108,h:-12,st:18,kb:5,low:1,cn:1}],spin:['唐竹割',{d:15,su:15,ac:4,rc:20,r:104,h:-70,st:23,kb:6,ovh:1,cn:2}],flip:['燕返',{d:6,su:7,ac:10,rc:16,r:100,h:-76,st:19,kb:5,hits:2,gap:5,cn:2}],upper:['逆袈裟',{d:13,su:5,ac:7,rc:22,r:80,h:-110,st:28,kb:3,launch:1,lift:-10,cn:3}]},
+ {jab:['咒指',{d:6,su:5,ac:3,rc:10,r:100,h:-84,st:15,kb:3,wk:120,cn:1}],lunge:['魂肘',{d:10,su:8,ac:5,rc:15,r:90,h:-84,st:20,kb:7,vx:5,ls:.3,cn:2}],push:['鬼腳',{d:7,su:6,ac:4,rc:13,r:100,h:-12,st:17,kb:5,low:1,cn:1}],spin:['降咒',{d:12,su:13,ac:5,rc:18,r:96,h:-70,st:22,kb:6,ovh:1,wk:180,cn:2}],flip:['幽步',{d:0,su:1,ac:14,rc:6,r:0,vx:-8,inv:1,iv:12,nohit:1,cn:0}],upper:['昇魂',{d:12,su:5,ac:7,rc:22,r:62,h:-112,st:28,kb:3,launch:1,inv:1,lift:-11,cn:3}]},
+ {jab:['爪擊',{d:8,su:5,ac:3,rc:10,r:96,h:-84,st:16,kb:4,cn:1}],lunge:['頭鎚',{d:14,su:11,ac:5,rc:18,r:84,h:-90,st:23,kb:12,arm:1,vx:6,cn:2}],push:['低掃爪',{d:8,su:7,ac:4,rc:14,r:100,h:-14,st:18,kb:5,low:1,cn:1}],spin:['熊掌落',{d:16,su:15,ac:4,rc:20,r:92,h:-70,st:24,kb:8,ovh:1,cn:2}],flip:['迴身尾擊',{d:12,su:9,ac:5,rc:16,r:100,h:-60,st:22,kb:15,cn:2}],upper:['撈爪',{d:14,su:6,ac:7,rc:22,r:70,h:-108,st:30,kb:3,launch:1,lift:-10,cn:3}]},
+ {jab:['弓尾擊',{d:6,su:4,ac:3,rc:9,r:110,h:-84,st:15,kb:4,cn:1}],lunge:['肘打',{d:10,su:8,ac:5,rc:14,r:88,h:-84,st:20,kb:8,vx:6,cn:2}],push:['掃腿',{d:7,su:6,ac:4,rc:13,r:104,h:-12,st:17,kb:5,low:1,cn:1}],spin:['鷹落踢',{d:12,su:9,ac:10,rc:14,r:86,h:-58,st:22,kb:7,hop:-10,vx:5,cn:2}],flip:['後躍',{d:0,su:2,ac:10,rc:6,r:0,vx:-7,hop:-10,nohit:1,cn:0}],upper:['弓挑',{d:12,su:5,ac:7,rc:22,r:70,h:-110,st:28,kb:3,launch:1,inv:1,lift:-12,cn:3}]}];
 CMD.forEach((c,i)=>{const ch=CH[i];ch.mv=ch.mv||{};ch.nm={};for(const k in c){ch.nm[k]=c[k][0];ch.mv[k]=Object.assign({rep:1},c[k][1])}});
-const QUO=['還不夠熱！','堅不可摧。','……影已逝。','雷光，一閃！','大地，不會動搖。','凍結吧。','跟得上我的風嗎？','月有圓缺，勝負亦然。','再來一回合！','毒，已經滲透了。','一舞，終幕。','目標，清除完畢。'];
+const QUO=['還不夠熱！','堅不可摧。','……影已逝。','雷光，一閃！','大地，不會動搖。','凍結吧。','跟得上我的風嗎？','月有圓缺，勝負亦然。','再來一回合！','毒，已經滲透了。','一舞，終幕。','目標，清除完畢。','刀已入鞘。','你的魂，我收下了。','吼——！','一箭，就夠了。'];
 const pp=o=>NOFX||parts.push(o);
 // ---- 同時命中：兩邊都打到就互相命中（不再由 P1 優先）
 function resolveHits(){

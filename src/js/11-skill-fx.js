@@ -18,7 +18,7 @@ function raySpr(c){c=hex6(c);const k='r'+c;let s=GLW.get(k);if(s)return s;s=docu
 const glow=(x,y,r,c,a)=>{const o=ctx.globalCompositeOperation,ga=ctx.globalAlpha;ctx.globalCompositeOperation='lighter';if(a!==undefined)ctx.globalAlpha=ga*a;ctx.drawImage(glowSpr(c),x-r,y-r,r*2,r*2);ctx.globalCompositeOperation=o;ctx.globalAlpha=ga};
 const flare=(x,y,c,s,l)=>P({t:'fl',x,y,c,s,l:l||8,g:0,dr:1,rot:Math.random()*.6-.3});
 const fxLo=()=>QM===3||(QM===0&&QA>=2);
-const PGL=['#ff8a2a','#7fd6ff','#b46bff','#ffe680',null,'#9fe8ff','#7fffc0',null,null,'#a3e635','#ff9ff3','#ff9f1c']; // 各角色飛行道具的光色（岩是石頭，不發光）
+const PGL=['#ff8a2a','#7fd6ff','#b46bff','#ffe680',null,'#9fe8ff','#7fffc0',null,null,'#a3e635','#ff9ff3','#ff9f1c','#e9ecef','#2a9d8f',null,'#4361ee']; // 各角色飛行道具的光色（岩是石頭，不發光）
 // ---- 招式動作特效(每幀,攻擊進行中)
 function fxMove(f,a,g){
  const li=li_(f),k=a.key,t=f.t,d=f.dir,x=f.x,y=f.y,act=t>a.su&&t<=a.su+a.ac,ex=x+d*a.r*.9,ey=y+(a.h||-70);

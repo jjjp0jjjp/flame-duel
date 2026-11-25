@@ -1,3 +1,5 @@
+// 穿身：攻擊者移到被攻擊者的另一側
+function passThru(s,t){const sg=t.x>=s.x?1:-1;s.x=Math.max(40,Math.min(W-40,t.x+sg*62));s.vx=0}
 class F{
 constructor(ch,side){this.ch=ch;this.side=side;this.wins=0;this.ai={t:0,mv:0,blk:0,act:null};this.reset()}
 reset(){this.x=this.side?W/2+170:W/2-170;this.y=GY;this.vx=0;this.vy=0;this.dir=this.side?-1:1;this.hp=this.ch.hp*(this.hm||1);this.lag=this.hp;this.mt=0;this.st='idle';this.t=0;this.atk=null;this.hit=false;this.stun=0;this.combo=0;this.cd=0;this.walk=0;this.flash=0;this.kt=0;this.kd=0;this.dt=0;this.dd=0;this.inv=0;this.buf=null;this.cl=[];this.db=null;this.jb=0;this.jh=0;this.ph=null}
@@ -27,7 +29,7 @@ update(i,o){
  const ch=this.ch,g=this.y>=GY,wasAir=!g;
  if(this.flash>0)this.flash--;const upE=i.u&&!this.pu;this.pu=i.u;if(this.jb>0)this.jb--;if(upE)this.jb=8;if(i.dash)this.db={d:i.dash,t:8};else if(this.db&&--this.db.t<=0)this.db=null;
  if(this.lag>this.hp)this.lag=Math.max(this.hp,this.lag-.35);
- if(this.pz>0){this.pz--;if(this.hp>1)this.hp=Math.max(1,this.hp-.07)}if(this.pw>0)this.pw--;
+ if(this.pz>0){this.pz--;if(this.hp>1)this.hp=Math.max(1,this.hp-.07)}if(this.pw>0)this.pw--;if(this.wk>0)this.wk--;if(this.sl>0)this.sl--;
  if(this.st!=='ko'){const m=this.pick(i,g);if(m)this.setBuf(m);else if(this.buf&&!(this.st==='down'&&this.dt<=14)&&--this.buf.t<=0)this.buf=null}
  if(this.jh){if(g&&this.vy>=0)this.jh=0;else if(!i.u&&this.vy<-6){this.vy*=.6;this.jh=0}}
  if(this.st==='ko')this.kt++;
@@ -44,13 +46,13 @@ update(i,o){
    if(a.vx&&this.t>a.su&&this.t<=a.su+a.ac&&!this.hit)this.vx=this.dir*a.vx;else if(g)this.vx*=.8;
    if(a.back&&this.t===1){const aw=o.x>=this.x?-1:1;spark(this.x,this.y-60,'#e3ccff',12);ring(this.x,this.y-60,'#b46bff');this.x=Math.max(50,Math.min(W-50,this.x+aw*200));spark(this.x,this.y-60,'#e3ccff',12);snd(600,.15,'sine',.06,200)}
    if(a.tele&&this.t===a.su){spark(this.x,this.y-60,'#e3ccff',14);ring(this.x,this.y-60,'#b46bff');this.x=Math.max(50,Math.min(W-50,o.x+this.dir*50));this.dir=-this.dir;spark(this.x,this.y-60,'#e3ccff',14);ring(this.x,this.y-60,'#b46bff');snd(700,.15,'sine',.06,200)}
-   if(a.hop&&this.t===2&&g)this.vy=a.hop;
+   if(a.hop&&this.t===2&&g){this.vy=a.hop;if(a.hvx)this.vx=this.dir*a.hvx}
    if(a.float&&!g&&this.t>a.su&&this.t<=a.su+a.ac)this.vy=Math.min(this.vy,.6);
    if(a.buff&&this.t===a.su){this.pw=a.buff;if(!NOFX)buffFx(this)}
    if(a.dive&&this.t>=a.su&&!g){this.vy=Math.max(this.vy,12);this.vx=this.dir*5}
    if(a.lift&&this.t===a.su+1&&g){this.vy=a.lift;this.vx=this.dir*2.5;snd(250,.2,'sine',.05,700)}
-   if(a.type==='proj'&&(this.t===a.su||(a.n2&&this.t===a.su+9))){projs.push({k:a.key,low:a.low,gr:a.gr,x:this.x+this.dir*(a.wl?(a.dist||70):50),y:a.wl?GY-50:this.y-(a.low?18:a.vy?60:this.t>a.su?96:72),vx:this.dir*a.spd,vy:a.vy||0,own:this,big:a.big,ret:a.ret,wl:a.wl,ph:a.ph,a:{d:a.d,kb:a.pkb||7,st:22,key:'sp',mk:a.key,launch:a.launch,knock:a.knock,ex:a.ex,psn:a.psn,low:a.low},life:a.life||(a.low?80:140)});sfx('proj')}
-   if(a.type==='strike'&&this.t===a.su){const xs=a.multi?[o.x,o.x-110,o.x+110]:a.line?a.line.map(q=>this.x+this.dir*q):[this.x+this.dir*a.dist],ws=a.multi?[10,18,26]:a.line?a.line.map((q,j)=>12+j*8):[12];xs.forEach((tx,j)=>projs.push({k:a.key,strike:1,x:Math.max(30,Math.min(W-30,tx)),y:GY-60,vx:0,vy:0,own:this,wait:ws[j],life:ws[j]+6,a:{d:a.d,kb:6,st:26,key:'sp',mk:a.key,launch:a.launch,ex:a.ex}}));sfx('charge')}
+   if(a.type==='proj'&&(this.t===a.su||(a.n2&&this.t===a.su+9))){projs.push({k:a.key,low:a.low,gr:a.gr,x:this.x+this.dir*(a.wl?(a.dist||70):50),y:a.wl?GY-50:this.y-(a.low?18:a.vy?60:this.t>a.su?96:72),vx:this.dir*a.spd,vy:a.vy||0,own:this,big:a.big,ret:a.ret,hm:a.hm,wl:a.wl,ph:a.ph,a:{d:a.d,kb:a.pkb||7,st:22,key:'sp',mk:a.key,launch:a.launch,knock:a.knock,ex:a.ex,psn:a.psn,low:a.low,wk:a.wk,sl:a.sl,ls:a.ls},life:a.life||(a.low?80:140)});sfx('proj')}
+   if(a.type==='strike'&&this.t===a.su){const xs=a.tgt?[o.x]:a.multi?[o.x,o.x-110,o.x+110]:a.line?a.line.map(q=>this.x+this.dir*q):[this.x+this.dir*a.dist],ws=a.multi?[10,18,26]:a.line?a.line.map((q,j)=>12+j*8):[12];xs.forEach((tx,j)=>projs.push({k:a.key,strike:1,x:Math.max(30,Math.min(W-30,tx)),y:GY-60,vx:0,vy:0,own:this,wait:ws[j],life:ws[j]+6,a:{d:a.d,kb:6,st:26,key:'sp',mk:a.key,launch:a.launch,ex:a.ex,wk:a.wk}}));sfx('charge')}
    if(a.type!=='proj'&&a.type!=='strike'&&!a.counter&&!a.nohit&&this.t>a.su&&this.t<=a.su+a.ac&&(!this.hit||(a.hits&&this.hc<a.hits&&this.t-this.hlt>=(a.gap||4)))&&!this.ph)this.tryHit(o);
    if((a.air&&g&&this.t>a.su+1)||this.t>=a.su+a.ac+a.rc){this.st='idle';this.atk=null}
   }
@@ -68,7 +70,7 @@ update(i,o){
    this.st='idle';
    const mv=i.r-i.l,back=this.dir>0?i.l:i.r;
    if(g&&(i.d||(back&&((o.st==='atk'&&Math.abs(o.x-this.x)<190)||projs.some(p=>p.own!==this&&Math.abs(p.x-this.x)<150))))){this.st='block';this.bc=i.d?1:0;this.vx*=.6}
-   else{this.vx=mv*ch.spd*(g?(mv&&(mv>0)!==(this.dir>0)?.85:1):.9*(ch.am||1));if(mv&&g){this.st='walk';this.walk+=.25}if((i.u||this.jb>0)&&g){this.jb=0;this.vy=-ch.jmp;this.dj=0;this.jh=1;snd(300,.12,'sine',.04,600)}else if(upE&&ch.dj&&!this.dj&&!g){this.vy=-ch.jmp*.85;this.dj=1;spark(this.x,this.y,'#e3ccff',8,1);ring(this.x,this.y,'#e3ccff');snd(500,.1,'sine',.04,900)}}
+   else{this.vx=mv*ch.spd*(this.sl>0?.55:1)*(g?(mv&&(mv>0)!==(this.dir>0)?.85:1):.9*(ch.am||1));if(mv&&g){this.st='walk';this.walk+=.25}if((i.u||this.jb>0)&&g){this.jb=0;this.vy=-ch.jmp;this.dj=0;this.jh=1;snd(300,.12,'sine',.04,600)}else if(upE&&ch.dj&&!this.dj&&!g){this.vy=-ch.jmp*.85;this.dj=1;spark(this.x,this.y,'#e3ccff',8,1);ring(this.x,this.y,'#e3ccff');snd(500,.1,'sine',.04,900)}}
   }
  }
  this.x+=this.vx;this.y+=this.vy;
@@ -102,11 +104,16 @@ getHit(src,a,px){
  const hi=a.ovh||(src.y<GY-2&&!a.mk),lo=a.low||a.key==='sweep',mis=this.st==='block'&&((hi&&this.bc)||(lo&&!this.bc));
  if(mis&&!NOFX)pp({x:this.x,y:this.y-150,vx:0,vy:-.6,l:45,m:45,txt:hi?'中段！':'下段！',c:hi?'#ffd23d':'#7ec8ff',text:1,big:1});
  if(!a.throw&&!mis&&this.st==='block'&&this.y>=GY&&this.dir*(px-this.x)>0){
-  if(TUT&&this===p1)TUT.blk++;this.hp=Math.max(1,this.hp-a.d*(a.ex?.2:.1));this.stun=9;this.vx=sgn*a.kb*.9*(this.ch.kbr||1);this.mt=Math.min(100,this.mt+3);
+  if(TUT&&this===p1)TUT.blk++;if(a.drain)this.mt=Math.max(0,this.mt-a.drain);if(a.thru)passThru(src,this);
+  if(a.gb){this.mt=Math.max(0,this.mt-10);if(!NOFX)pp({x:this.x,y:this.y-150,vx:0,vy:-.6,l:45,m:45,txt:'破防！',c:'#ff6b6b',text:1,big:1})}
+  this.hp=Math.max(1,this.hp-a.d*(a.ex?.2:.1));this.stun=a.gb?28:9;this.vx=sgn*a.kb*.9*(this.ch.kbr||1);this.mt=Math.min(100,this.mt+3);
   spark(this.x+this.dir*24,this.y-85,'#7ec8ff',8);if(!NOFX)P({t:'sh',x:this.x+this.dir*26,y:this.y-70,dir:this.dir,c:'#7ec8ff',l:12,g:0,dr:1});sfx('block');G.hitstop=Math.max(G.hitstop,3);return true}
- const ct=this.st==='atk'&&this.atk&&this.t<=this.atk.su&&!a.throw,dm=a.d*Math.max(.4,1-.12*this.combo)*(ct?1.3:1)*(src.pw>0?1.25:1)*(a.mk?(this.ch.pr||1):1),last=!a.hits||(src.hc||0)+1>=a.hits;if(ct){pp({x:this.x,y:this.y-150,vx:0,vy:-.6,l:55,m:55,txt:'COUNTER!',c:'#ff7a3d',text:1,big:1});sfx('cancel')}
+ const ct=this.st==='atk'&&this.atk&&this.t<=this.atk.su&&!a.throw,dm=a.d*Math.max(.4,1-.12*this.combo)*(ct?1.3:1)*(src.pw>0?1.25:1)*(a.mk?(this.ch.pr||1):1)*(src.wk>0?.75:1)*(src.ch.rg&&src.hp<src.ch.hp*(src.hm||1)*.35?1.3:1),last=!a.hits||(src.hc||0)+1>=a.hits;if(ct){pp({x:this.x,y:this.y-150,vx:0,vy:-.6,l:55,m:55,txt:'COUNTER!',c:'#ff7a3d',text:1,big:1});sfx('cancel')}
  this.jh=0;this.hp-=dm;this.cd+=dm;this.combo++;if(G.mode===3&&this===p2&&src===p1)trHit(a,this.combo);this.stun=Math.max(10,a.st-Math.min(8,Math.max(0,this.combo-4)*2));this.st='hit';this.atk=null;this.flash=5;if(a.rev)this.x=Math.max(50,Math.min(W-50,2*px-this.x));this.vx=(this.x>=px?1:-1)*a.kb*(this.ch.kbr||1);if(a.su&&a.kb>0&&(this.x<=42||this.x>=W-42))src.vx=-sgn*Math.min(7,a.kb*.7);
  if(a.psn)this.pz=Math.max(this.pz||0,a.psn);
+ if(a.wk)this.wk=Math.max(this.wk||0,a.wk);if(a.sl)this.sl=Math.max(this.sl||0,a.sl);if(a.drain)this.mt=Math.max(0,this.mt-a.drain);
+ {const ls=(a.ls||0)+(src.ch.ls||0);if(ls)src.hp=Math.min(src.ch.hp*(src.hm||1),src.hp+dm*ls)}
+ if(a.thru)passThru(src,this);
  if(last&&(a.launch||a.knock||a.throw)){this.vy=a.throw?-8:a.knock?-6:-10;this.kd=1}
  else if(this.y<GY){this.vy=Math.min(this.vy,-3);this.kd=1}
  src.mt=Math.min(100,src.mt+dm*1.3*(src.ch.mg||1));this.mt=Math.min(100,this.mt+dm*.7);
