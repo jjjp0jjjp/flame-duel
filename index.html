@@ -422,14 +422,14 @@ function drawParticle(p){
 // ================= 新角色：雷、岩 =================
 const CTR={d:20,su:2,ac:3,rc:18,r:84,h:-70,st:32,kb:14,launch:1,cn:4};
 CH.push(
-{n:'雷',ds:'遠攻・天雷',col:'#ffd23d',col2:'#fff3b0',spd:3.9,jmp:14.5,hp:110,w:1,mg:1.25,
+{n:'雷',ds:'遠攻・天雷',col:'#ffd23d',col2:'#fff3b0',spd:3.9,jmp:14.5,hp:113,w:1,mg:1.25,
  sp:{type:'proj',d:12,su:12,ac:1,rc:18,spd:13,cost:50},
  ex:{type:'strike',d:14,su:12,ac:1,rc:34,launch:1,ex:1,cost:100,name:'天雷陣',multi:1},
  sp2:{type:'strike',d:14,su:10,ac:1,rc:22,dist:230,launch:1,cost:50},
  mv:{hp:{r:88},hk:{r:116}},
  sp3:{d:13,su:5,ac:8,rc:22,r:72,h:-70,st:22,kb:11,around:1,inv:1,cost:50},
  asp:{type:'proj',d:11,su:5,ac:1,rc:14,spd:11,vy:7,cost:50}},
-{n:'岩',ds:'投技・岩石',col:'#d08a48',col2:'#ffe0b8',spd:3.1,jmp:13,hp:112,w:1.3,kbr:.7,
+{n:'岩',ds:'投技・岩石',col:'#d08a48',col2:'#ffe0b8',spd:3.1,jmp:13,hp:108,w:1.3,kbr:.7,
  mv:{th:{r:78,d:21},th2:{r:78,d:20}},
  sp:{d:20,su:7,ac:9,rc:24,vx:8,r:64,h:-70,st:40,kb:9,throw:1,cost:50},
  ex:{d:40,su:5,ac:3,rc:32,r:84,h:-70,st:46,kb:12,throw:1,ex:1,cost:100,name:'大地崩壞'},
@@ -472,7 +472,7 @@ CH.push(
  sp2:{type:'proj',d:8,su:10,ac:1,rc:18,spd:0,low:1,life:240,psn:180,cost:50},
  sp3:{d:4,su:8,ac:18,rc:20,r:90,h:-70,st:12,kb:1,around:1,hits:3,gap:6,psn:200,cost:50},
  asp:{d:9,su:6,ac:6,rc:10,r:150,h:-20,st:22,kb:-8,air:1,cost:50}},
-{n:'蝶',ds:'舞扇・迴旋',col:'#ff9ff3',col2:'#ffe3fb',spd:4.4,jmp:16,hp:104,w:.92,am:1.35,
+{n:'蝶',ds:'舞扇・迴旋',col:'#ff9ff3',col2:'#ffe3fb',spd:4.4,jmp:16,hp:108,w:.92,am:1.35,
  sp:{type:'proj',d:11,su:10,ac:1,rc:22,spd:9,ret:28,life:70,cost:50},
  ex:{type:'proj',d:26,su:12,ac:1,rc:26,spd:10,ret:30,life:80,big:1,launch:1,ex:1,cost:100,name:'百花繚亂'},
  sp2:{d:5,su:6,ac:18,rc:18,vx:5,r:84,h:-76,st:16,kb:3,hits:3,gap:6,cost:50},
@@ -485,7 +485,7 @@ CH.push(
  sp3:{d:15,su:10,ac:12,rc:22,vx:11,r:80,h:-70,st:24,kb:12,arm:1,cost:50},
  asp:{d:18,su:8,ac:40,rc:10,r:70,h:-24,st:28,kb:8,knock:1,air:1,dive:1,arm:1,cost:50}});
 CH.push(
-{n:'刃',ds:'居合・一閃',col:'#e9ecef',col2:'#ffffff',spd:4.3,jmp:14.5,hp:100,w:1,blade:1,
+{n:'刃',ds:'居合・一閃',col:'#e9ecef',col2:'#ffffff',spd:4.3,jmp:14.5,hp:96,w:1,blade:1,
  mv:{hp:{r:100},hk:{r:112}},
  sp:{d:15,su:12,ac:6,rc:22,vx:16,r:80,h:-78,st:24,kb:6,thru:1,cost:50},
  ex:{d:40,su:16,ac:6,rc:30,vx:20,r:90,h:-78,st:34,kb:10,thru:1,launch:1,ex:1,cost:100,name:'一閃'},
@@ -498,7 +498,7 @@ CH.push(
  sp2:{type:'strike',d:6,su:12,ac:1,rc:24,tgt:1,wk:300,cost:50},
  sp3:{d:12,su:8,ac:5,rc:20,r:80,h:-80,st:24,kb:4,ls:.8,cost:50},
  asp:{type:'proj',d:10,su:6,ac:1,rc:14,spd:6,vy:6,hm:1,cost:50}},
-{n:'獸',ds:'狂暴・撲擊',col:'#c1121f',col2:'#ffb3b3',spd:4,jmp:15,hp:100,w:1.2,rg:1,
+{n:'獸',ds:'狂暴・撲擊',col:'#c1121f',col2:'#ffb3b3',spd:4,jmp:15,hp:97,w:1.2,rg:1,
  sp:{d:16,su:6,ac:16,rc:22,hop:-10,vx:9,r:70,h:-60,st:36,kb:8,throw:1,cost:50},
  ex:{d:6,su:8,ac:30,rc:30,vx:6,r:96,h:-70,st:30,kb:3,hits:7,gap:4,launch:1,arm:1,ex:1,cost:100,name:'狂獸亂舞'},
  sp2:{d:5,su:6,ac:14,rc:18,r:76,h:-80,st:16,kb:2,hits:4,gap:3,cost:50},
