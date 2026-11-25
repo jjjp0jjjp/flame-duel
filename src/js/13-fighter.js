@@ -2,7 +2,7 @@
 function passThru(s,t){const sg=t.x>=s.x?1:-1;s.x=Math.max(40,Math.min(W-40,t.x+sg*62));s.vx=0}
 class F{
 constructor(ch,side){this.ch=ch;this.side=side;this.wins=0;this.ai={t:0,mv:0,blk:0,act:null};this.reset()}
-reset(){this.x=this.side?W/2+170:W/2-170;this.y=GY;this.vx=0;this.vy=0;this.dir=this.side?-1:1;this.hp=this.ch.hp*(this.hm||1);this.lag=this.hp;this.mt=0;this.st='idle';this.t=0;this.atk=null;this.hit=false;this.stun=0;this.combo=0;this.cd=0;this.walk=0;this.flash=0;this.kt=0;this.kd=0;this.dt=0;this.dd=0;this.inv=0;this.buf=null;this.cl=[];this.db=null;this.jb=0;this.jh=0;this.ph=null}
+reset(){this.x=this.side?W/2+170:W/2-170;this.y=GY;this.vx=0;this.vy=0;this.dir=this.side?-1:1;this.hp=this.ch.hp*(this.hm||1);this.lag=this.hp;this.mt=0;this.st='idle';this.t=0;this.atk=null;this.hit=false;this.stun=0;this.combo=0;this.cd=0;this.walk=0;this.flash=0;this.kt=0;this.kd=0;this.dt=0;this.dd=0;this.inv=0;this.buf=null;this.cl=[];this.db=null;this.jb=0;this.jh=0;this.ph=null;this.bu=1;this.gd=100;this.gbt=99}
 pick(i,g){
  const fw=this.dir>0?i.r:i.l,bk=this.dir>0?i.l:i.r,dn=i.d;
  if(i.sp)return dn?'ex':(!g&&this.ch.asp)?'asp':fw?'sp2':bk?'sp3':'sp';
@@ -18,7 +18,7 @@ start(m,nf){
  if(!nf&&m==='ex'&&this.mt<100&&this.mt>=50)m='sp';
  const ov=this.ch.mv&&this.ch.mv[m],a=Object.assign({key:m},ov&&ov.rep?{}:(MV[m]||this.ch[m]),ov),air=this.y<GY-2;
  if(a.cn===undefined&&(m==='sp'||m==='sp2'||m==='sp3'||m==='sp4'||m==='asp'))a.cn=4;
- if(MV[m]&&!!MV[m].air!==air){this.buf=null;return false}
+ if(m!=='burst'&&MV[m]&&!!MV[m].air!==air){this.buf=null;return false}
  if(a.cost){if(this.mt<a.cost){this.buf=null;return false}this.mt-=a.cost}
  this.st='atk';this.atk=a;this.t=0;this.hit=false;this.hc=0;this.hlt=0;this.pd=0;this.buf=null;if(nf)this.cl.push(m);else this.cl=[m];if(!air)this.vx=0;
  if(a.ex){G.hitstop=24;G.supEnd=performance.now()+850;G.supName=a.name;G.supCol=this.ch.col;G.supCh=CH.indexOf(this.ch);G.supSide=this===p1?0:1;G.shake=10;snd(100,.5,'sawtooth',.1,800)}
@@ -32,6 +32,8 @@ update(i,o){
  if(this.pz>0){this.pz--;if(this.hp>1)this.hp=Math.max(1,this.hp-.07)}if(this.pw>0)this.pw--;if(this.wk>0)this.wk--;if(this.sl>0)this.sl--;
  {const fwN=this.dir>0?i.r:i.l;if(fwN&&!this.pfw&&g&&(this.st==='idle'||this.st==='walk'||(this.st==='block'&&this.stun===0)))this.pf=7;else if(this.pf>0)this.pf--;this.pfw=fwN}
  if(this.kd&&!g&&(i.lp||i.hp||i.lk||i.hk))this.tb=10;else if(this.tb>0)this.tb--;
+ if(this.st==='block')this.gbt=0;else if(++this.gbt>60&&this.gd<100)this.gd=Math.min(100,this.gd+.25);
+ if(this.bu&&this.st==='hit'&&i.th&&i.sp){this.bu=0;this.stun=0;this.kd=0;this.st='idle';this.vy=Math.min(this.vy,0);this.buf=null;this.start('burst');this.buf=null;if(!NOFX)burstFx(this)}
  if(this.st!=='ko'){const m=this.pick(i,g);if(m)this.setBuf(m);else if(this.buf&&!(this.st==='down'&&this.dt<=14)&&--this.buf.t<=0)this.buf=null}
  if(this.jh){if(g&&this.vy>=0)this.jh=0;else if(!i.u&&this.vy<-6){this.vy*=.6;this.jh=0}}
  if(this.st==='ko')this.kt++;
@@ -111,7 +113,7 @@ getHit(src,a,px){
  const hi=a.ovh||(src.y<GY-2&&!a.mk),lo=a.low||a.key==='sweep',mis=this.st==='block'&&((hi&&this.bc)||(lo&&!this.bc));
  if(mis&&!NOFX)pp({x:this.x,y:this.y-150,vx:0,vy:-.6,l:45,m:45,txt:hi?'中段！':'下段！',c:hi?'#ffd23d':'#7ec8ff',text:1,big:1});
  if(!a.throw&&!mis&&this.st==='block'&&this.y>=GY&&this.dir*(px-this.x)>0){
-  if(TUT&&this===p1)TUT.blk++;if(a.drain)this.mt=Math.max(0,this.mt-a.drain);if(a.thru)passThru(src,this);
+  if(TUT&&this===p1)TUT.blk++;this.gd-=a.d*2.2*(a.gb?2:1);if(this.gd<=0){this.gd=60;this.stun=40;this.st='hit';this.vx=sgn*4;if(!NOFX){pp({x:this.x,y:this.y-150,vx:0,vy:-.6,l:50,m:50,txt:'防禦崩潰！',c:'#ff6b6b',text:1,big:1});P({ring:1,x:this.x,y:this.y-70,c:'#ff6b6b',l:18,rs:8,lw:7});sfx('ko')}G.hitstop=Math.max(G.hitstop,12);return true}if(a.drain)this.mt=Math.max(0,this.mt-a.drain);if(a.thru)passThru(src,this);
   if(a.gb){this.mt=Math.max(0,this.mt-10);if(!NOFX)pp({x:this.x,y:this.y-150,vx:0,vy:-.6,l:45,m:45,txt:'破防！',c:'#ff6b6b',text:1,big:1})}
   this.hp=Math.max(1,this.hp-a.d*(a.ex?.2:.1));this.stun=a.gb?28:9;this.vx=sgn*a.kb*.9*(this.ch.kbr||1);this.mt=Math.min(100,this.mt+3);
   spark(this.x+this.dir*24,this.y-85,'#7ec8ff',8);if(!NOFX)P({t:'sh',x:this.x+this.dir*26,y:this.y-70,dir:this.dir,c:'#7ec8ff',l:12,g:0,dr:1});sfx('block');G.hitstop=Math.max(G.hitstop,3);return true}

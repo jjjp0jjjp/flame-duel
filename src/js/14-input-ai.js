@@ -15,6 +15,7 @@ const pv1={},pv2={};
 function aiInput(me,op){
  const a=me.ai,lv=G.diff,i=Object.assign({},NI),dx=op.x-me.x,ad=Math.abs(dx),to=dx>0?'r':'l',aw=dx>0?'l':'r',sg=dx>0?1:-1;
  if(me.kd&&me.y<GY){if(!a.tk){a.tk=1;if(Math.random()<[.1,.4,.7][lv]){i.lp=1;return i}}}else a.tk=0;
+ if(me.st==='hit'&&me.combo>=3&&me.bu){if(!a.bd){a.bd=1;if(Math.random()<[0,.4,.7][lv]){i.th=1;i.sp=1;return i}}}else if(me.combo===0)a.bd=0;
  // 學習對手習慣（會慢慢遺忘）：常跳、常投、常放飛行道具、常防禦
  const h=a.h||(a.h={jmp:0,thr:0,prj:0,blk:0});
  if(G.frame%10===0)for(const k in h)h[k]*=.985;

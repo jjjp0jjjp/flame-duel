@@ -22,7 +22,8 @@ const MV={
  dlk:{d:5,su:4,ac:3,rc:9,r:96,h:-14,st:14,kb:3,low:1,cn:1},
  blp:{d:6,su:4,ac:3,rc:8,r:66,h:-84,st:14,kb:3,cn:1},
  bhp:{d:12,su:9,ac:5,rc:16,r:84,h:-80,st:21,kb:9,cn:2},
- ahp:{d:9,su:4,ac:8,rc:3,r:72,h:-56,st:18,kb:5,air:1,cn:0}
+ ahp:{d:9,su:4,ac:8,rc:3,r:72,h:-56,st:18,kb:5,air:1,cn:0},
+ burst:{d:0,su:3,ac:6,rc:22,r:140,h:-70,st:30,kb:18,around:1,knock:1,inv:1,iv:16,cn:0}
 };
 const CH=[
 {n:'烈',ds:'迅捷・波動彈',col:'#ff5a4d',col2:'#ffc4b3',spd:4.4,jmp:15,hp:100,w:1,

@@ -150,9 +150,17 @@ const ok = (name, cond, detail) => {
     // 撞牆：把對手打飛到牆邊會反彈
     setup(1, 0); p1.x = 830; p2.x = 900; p1.dir = 1; p2.dir = -1; p1.mt = 100; let wb = false; run(60, (k) => { wb = wb || p2.wb === 1; return [k === 0 ? { sp: 1 } : {}, {}] });
     out.wall = wb;
+    // 爆氣：被連段時按投技＋必殺，震開對手、每回合只能一次
+    setup(0, 0); let bursted = false;
+    run(80, (k) => { if (p2.st === 'hit' && p2.combo >= 2 && p2.bu) return [{}, { th: 1, sp: 1 }]; if (!p2.bu) bursted = true; return [[0, 6, 12, 18].includes(k) ? (k % 12 ? { hp: 1 } : { lp: 1 }) : {}, {}] });
+    out.burst = bursted && p2.bu === 0 && (p1.kd === 1 || p1.st === 'down' || p1.st === 'hit');
+    // 防禦耐久：一直擋重攻擊會破防
+    setup(1, 0); let crushed = false;
+    for (let r = 0; r < 12 && !crushed; r++) { p1.x = 400; p2.x = 470; run(40, (k) => { crushed = crushed || (p2.st === 'hit' && p2.stun > 30); return [k === 0 ? { hp: 1 } : {}, { d: 1 }] }) }
+    out.guard = crushed;
     return out;
   });
-  for (const [k, v] of Object.entries(mech)) ok('機制：' + { parry: '精準招架', punish: '確反加傷', tech: '受身與強制倒地', wall: '撞牆反彈' }[k], v);
+  for (const [k, v] of Object.entries(mech)) ok('機制：' + { parry: '精準招架', punish: '確反加傷', tech: '受身與強制倒地', wall: '撞牆反彈', burst: '爆氣', guard: '防禦崩潰' }[k], v);
 
   // ---- 連段挑戰
   const tr = await pg.evaluate(() => {

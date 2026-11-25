@@ -70,7 +70,7 @@ input[type=range]{width:90px;padding:0}
 <div id="obar" style="display:none;gap:8px;justify-content:center;padding:6px"><button id="ob-rp">複製重播連結</button><button id="ob-mn">回選單</button></div>
 <div id="tbar"><button id="tb-hb"></button><button id="tb-dm"></button><button id="tb-rec"></button><button id="tb-tr"></button><button id="tb-rs">重置位置</button></div>
 <div id="pad"><div id="stick"><div id="knob"></div></div>
-<div class="a"><button data-k="T0a">輕拳</button><button data-k="T0b">重拳</button><button data-k="T0s">必殺</button><button data-k="T0e,T0a" class="q">升龍</button><button data-k="T0x">輕腳</button><button data-k="T0y">重腳</button><button data-k="T0t">投</button><button data-k="T0e,T0s" class="q">超必</button></div></div>
+<div class="a"><button data-k="T0a">輕拳</button><button data-k="T0b">重拳</button><button data-k="T0s">必殺</button><button data-k="T0e,T0a" class="q">升龍</button><button data-k="T0x">輕腳</button><button data-k="T0y">重腳</button><button data-k="T0t">投</button><button data-k="T0e,T0s" class="q">超必</button><button data-k="T0t,T0s" class="q">爆氣</button></div></div>
 <div id="menu">
 <header id="mhead"><h1>烈焰對決</h1><p class="sub">FLAME DUEL</p></header>
 <div id="mmain">
@@ -133,7 +133,8 @@ const MV={
  dlk:{d:5,su:4,ac:3,rc:9,r:96,h:-14,st:14,kb:3,low:1,cn:1},
  blp:{d:6,su:4,ac:3,rc:8,r:66,h:-84,st:14,kb:3,cn:1},
  bhp:{d:12,su:9,ac:5,rc:16,r:84,h:-80,st:21,kb:9,cn:2},
- ahp:{d:9,su:4,ac:8,rc:3,r:72,h:-56,st:18,kb:5,air:1,cn:0}
+ ahp:{d:9,su:4,ac:8,rc:3,r:72,h:-56,st:18,kb:5,air:1,cn:0},
+ burst:{d:0,su:3,ac:6,rc:22,r:140,h:-70,st:30,kb:18,around:1,knock:1,inv:1,iv:16,cn:0}
 };
 const CH=[
 {n:'烈',ds:'迅捷・波動彈',col:'#ff5a4d',col2:'#ffc4b3',spd:4.4,jmp:15,hp:100,w:1,
@@ -687,7 +688,7 @@ function quote(f){
 function passThru(s,t){const sg=t.x>=s.x?1:-1;s.x=Math.max(40,Math.min(W-40,t.x+sg*62));s.vx=0}
 class F{
 constructor(ch,side){this.ch=ch;this.side=side;this.wins=0;this.ai={t:0,mv:0,blk:0,act:null};this.reset()}
-reset(){this.x=this.side?W/2+170:W/2-170;this.y=GY;this.vx=0;this.vy=0;this.dir=this.side?-1:1;this.hp=this.ch.hp*(this.hm||1);this.lag=this.hp;this.mt=0;this.st='idle';this.t=0;this.atk=null;this.hit=false;this.stun=0;this.combo=0;this.cd=0;this.walk=0;this.flash=0;this.kt=0;this.kd=0;this.dt=0;this.dd=0;this.inv=0;this.buf=null;this.cl=[];this.db=null;this.jb=0;this.jh=0;this.ph=null}
+reset(){this.x=this.side?W/2+170:W/2-170;this.y=GY;this.vx=0;this.vy=0;this.dir=this.side?-1:1;this.hp=this.ch.hp*(this.hm||1);this.lag=this.hp;this.mt=0;this.st='idle';this.t=0;this.atk=null;this.hit=false;this.stun=0;this.combo=0;this.cd=0;this.walk=0;this.flash=0;this.kt=0;this.kd=0;this.dt=0;this.dd=0;this.inv=0;this.buf=null;this.cl=[];this.db=null;this.jb=0;this.jh=0;this.ph=null;this.bu=1;this.gd=100;this.gbt=99}
 pick(i,g){
  const fw=this.dir>0?i.r:i.l,bk=this.dir>0?i.l:i.r,dn=i.d;
  if(i.sp)return dn?'ex':(!g&&this.ch.asp)?'asp':fw?'sp2':bk?'sp3':'sp';
@@ -703,7 +704,7 @@ start(m,nf){
  if(!nf&&m==='ex'&&this.mt<100&&this.mt>=50)m='sp';
  const ov=this.ch.mv&&this.ch.mv[m],a=Object.assign({key:m},ov&&ov.rep?{}:(MV[m]||this.ch[m]),ov),air=this.y<GY-2;
  if(a.cn===undefined&&(m==='sp'||m==='sp2'||m==='sp3'||m==='sp4'||m==='asp'))a.cn=4;
- if(MV[m]&&!!MV[m].air!==air){this.buf=null;return false}
+ if(m!=='burst'&&MV[m]&&!!MV[m].air!==air){this.buf=null;return false}
  if(a.cost){if(this.mt<a.cost){this.buf=null;return false}this.mt-=a.cost}
  this.st='atk';this.atk=a;this.t=0;this.hit=false;this.hc=0;this.hlt=0;this.pd=0;this.buf=null;if(nf)this.cl.push(m);else this.cl=[m];if(!air)this.vx=0;
  if(a.ex){G.hitstop=24;G.supEnd=performance.now()+850;G.supName=a.name;G.supCol=this.ch.col;G.supCh=CH.indexOf(this.ch);G.supSide=this===p1?0:1;G.shake=10;snd(100,.5,'sawtooth',.1,800)}
@@ -717,6 +718,8 @@ update(i,o){
  if(this.pz>0){this.pz--;if(this.hp>1)this.hp=Math.max(1,this.hp-.07)}if(this.pw>0)this.pw--;if(this.wk>0)this.wk--;if(this.sl>0)this.sl--;
  {const fwN=this.dir>0?i.r:i.l;if(fwN&&!this.pfw&&g&&(this.st==='idle'||this.st==='walk'||(this.st==='block'&&this.stun===0)))this.pf=7;else if(this.pf>0)this.pf--;this.pfw=fwN}
  if(this.kd&&!g&&(i.lp||i.hp||i.lk||i.hk))this.tb=10;else if(this.tb>0)this.tb--;
+ if(this.st==='block')this.gbt=0;else if(++this.gbt>60&&this.gd<100)this.gd=Math.min(100,this.gd+.25);
+ if(this.bu&&this.st==='hit'&&i.th&&i.sp){this.bu=0;this.stun=0;this.kd=0;this.st='idle';this.vy=Math.min(this.vy,0);this.buf=null;this.start('burst');this.buf=null;if(!NOFX)burstFx(this)}
  if(this.st!=='ko'){const m=this.pick(i,g);if(m)this.setBuf(m);else if(this.buf&&!(this.st==='down'&&this.dt<=14)&&--this.buf.t<=0)this.buf=null}
  if(this.jh){if(g&&this.vy>=0)this.jh=0;else if(!i.u&&this.vy<-6){this.vy*=.6;this.jh=0}}
  if(this.st==='ko')this.kt++;
@@ -796,7 +799,7 @@ getHit(src,a,px){
  const hi=a.ovh||(src.y<GY-2&&!a.mk),lo=a.low||a.key==='sweep',mis=this.st==='block'&&((hi&&this.bc)||(lo&&!this.bc));
  if(mis&&!NOFX)pp({x:this.x,y:this.y-150,vx:0,vy:-.6,l:45,m:45,txt:hi?'中段！':'下段！',c:hi?'#ffd23d':'#7ec8ff',text:1,big:1});
  if(!a.throw&&!mis&&this.st==='block'&&this.y>=GY&&this.dir*(px-this.x)>0){
-  if(TUT&&this===p1)TUT.blk++;if(a.drain)this.mt=Math.max(0,this.mt-a.drain);if(a.thru)passThru(src,this);
+  if(TUT&&this===p1)TUT.blk++;this.gd-=a.d*2.2*(a.gb?2:1);if(this.gd<=0){this.gd=60;this.stun=40;this.st='hit';this.vx=sgn*4;if(!NOFX){pp({x:this.x,y:this.y-150,vx:0,vy:-.6,l:50,m:50,txt:'防禦崩潰！',c:'#ff6b6b',text:1,big:1});P({ring:1,x:this.x,y:this.y-70,c:'#ff6b6b',l:18,rs:8,lw:7});sfx('ko')}G.hitstop=Math.max(G.hitstop,12);return true}if(a.drain)this.mt=Math.max(0,this.mt-a.drain);if(a.thru)passThru(src,this);
   if(a.gb){this.mt=Math.max(0,this.mt-10);if(!NOFX)pp({x:this.x,y:this.y-150,vx:0,vy:-.6,l:45,m:45,txt:'破防！',c:'#ff6b6b',text:1,big:1})}
   this.hp=Math.max(1,this.hp-a.d*(a.ex?.2:.1));this.stun=a.gb?28:9;this.vx=sgn*a.kb*.9*(this.ch.kbr||1);this.mt=Math.min(100,this.mt+3);
   spark(this.x+this.dir*24,this.y-85,'#7ec8ff',8);if(!NOFX)P({t:'sh',x:this.x+this.dir*26,y:this.y-70,dir:this.dir,c:'#7ec8ff',l:12,g:0,dr:1});sfx('block');G.hitstop=Math.max(G.hitstop,3);return true}
@@ -834,6 +837,7 @@ const pv1={},pv2={};
 function aiInput(me,op){
  const a=me.ai,lv=G.diff,i=Object.assign({},NI),dx=op.x-me.x,ad=Math.abs(dx),to=dx>0?'r':'l',aw=dx>0?'l':'r',sg=dx>0?1:-1;
  if(me.kd&&me.y<GY){if(!a.tk){a.tk=1;if(Math.random()<[.1,.4,.7][lv]){i.lp=1;return i}}}else a.tk=0;
+ if(me.st==='hit'&&me.combo>=3&&me.bu){if(!a.bd){a.bd=1;if(Math.random()<[0,.4,.7][lv]){i.th=1;i.sp=1;return i}}}else if(me.combo===0)a.bd=0;
  // 學習對手習慣（會慢慢遺忘）：常跳、常投、常放飛行道具、常防禦
  const h=a.h||(a.h={jmp:0,thr:0,prj:0,blk:0});
  if(G.frame%10===0)for(const k in h)h[k]*=.985;
@@ -1255,6 +1259,9 @@ function hud(){
   ctx.fillStyle='#000a';ctx.fillRect(mx-2,my-2,mw+4,14);
   ctx.fillStyle=f.mt>=100?(fl?'#fff27a':'#ff9d2e'):f.mt>=50?(fl?'#ffb347':'#ff8a2e'):'#4dd2ff';const mbw=mw*f.mt/100;ctx.fillRect(k?mx+mw-mbw:mx,my,mbw,10);
   ctx.fillStyle='#fff8';ctx.fillRect(mx+mw/2-1,my,2,10);
+  // 防禦耐久條（血條下方）與爆氣（氣槽旁）
+  {const gw=w*.45,gx=k?x+w-gw:x,gy=y+h+2,gr=Math.max(0,f.gd??100)/100;ctx.fillStyle='#000a';ctx.fillRect(gx,gy,gw,5);ctx.fillStyle=gr<.35?(fl?'#ff6b6b':'#ff9f9f'):'#7ec8ff';ctx.fillRect(k?gx+gw-gw*gr:gx,gy,gw*gr,5)}
+  {const bx2=k?mx-16:mx+mw+16,by2=my+5;ctx.beginPath();ctx.arc(bx2,by2,9,0,6.3);ctx.fillStyle=f.bu?'#ff4d6d':'#333a';ctx.fill();ctx.strokeStyle=f.bu?'#ffe14d':'#555';ctx.lineWidth=2;ctx.stroke();ctx.fillStyle=f.bu?'#fff':'#777';ctx.font='bold 11px '+FONT;ctx.textAlign='center';ctx.fillText('爆',bx2,by2+4);ctx.textAlign=k?'right':'left'}
   ctx.font='bold 18px '+FONT;ctx.textAlign=k?'right':'left';ctx.fillStyle='#fff';
   ctx.fillText((k?(G.mode===1?'電腦 ':G.mode===3?'木樁 ':'P2 '):'P1 ')+f.ch.n+(G.mode===4&&k===NET.slot?'（你）':''),k?x+w:x,24);
   for(let j=0;j<2;j++){ctx.fillStyle=j<f.wins?'#ffe14d':'#fff3';ctx.beginPath();ctx.arc(k?x+w-8-j*20:x+8+j*20,my+30,7,0,6.3);ctx.fill()}
@@ -1458,6 +1465,8 @@ function healFx(f,n){for(let i=0;i<14;i++)P({t:'e',x:f.x+rr_(-24,24),y:f.y-rr_(1
 function parryFx(f,px){const x=f.x+(px>=f.x?1:-1)*22;P({ring:1,x,y:f.y-70,c:'#7fe3ff',l:14,rs:6,lw:6});flare(x,f.y-80,'#bff4ff',70,10);pp({x:f.x,y:f.y-150,vx:0,vy:-.6,l:45,m:45,txt:'招架！',c:'#7fe3ff',text:1,big:1});flash('#bff4ff',.18,120);snd(1400,.12,'square',.05,2200);snd(700,.2,'triangle',.05)}
 function techFx(f){for(let i=0;i<5;i++)smk(f.x+rr_(-16,16),GY-6,12,'#9aa0b8',20);pp({x:f.x,y:f.y-120,vx:0,vy:-.6,l:35,m:35,txt:'受身',c:'#cfd2ff',text:1});snd(300,.08,'sine',.04,600)}
 function wallFx(f){const x=f.x<W/2?36:W-36;P({ring:1,x,y:f.y-60,c:'#ffffff',l:16,rs:7,lw:6});for(let i=0;i<8;i++)rok(x,f.y-rr_(30,100),(f.x<W/2?1:-1)*rr_(1,4),-rr_(1,4),'#8a8fa8');pp({x:f.x,y:f.y-150,vx:0,vy:-.6,l:40,m:40,txt:'撞牆！',c:'#ffd23d',text:1,big:1});noise(.3,.18,900,'lowpass',90)}
+// 爆氣：震開對手
+function burstFx(f){const c=colOf(f);P({ring:1,x:f.x,y:f.y-70,c:'#ffffff',l:20,rs:11,lw:8});P({ring:1,x:f.x,y:f.y-70,c,l:16,rs:8,lw:5});flare(f.x,f.y-70,c,120,12);pp({x:f.x,y:f.y-150,vx:0,vy:-.7,l:50,m:50,txt:'爆氣！',c:'#ffe14d',text:1,big:1});flash(c,.3,180);G.shake=Math.max(G.shake,10);snd(120,.5,'sawtooth',.1,600);noise(.4,.2,2000,'lowpass',200)}
 // ===== 新角色（拳、蠍、蝶、機）的招式特效、飛行道具與超必殺背景（純視覺，不影響判定）=====
 // 由 18-roster2.js 的 fxMove2／hitFx2／projFx2／projEnd2／drawProj2／supPattern2 在 li>=8 時呼叫
 // 自訂繪圖粒子：每幀重畫一次的形狀（鎖鏈、光束）
