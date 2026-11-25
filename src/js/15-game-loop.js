@@ -22,12 +22,13 @@ function step(){
  const dx=p2.x-p1.x;
  if(Math.abs(dx)<44&&Math.abs(p1.y-p2.y)<60&&p1.st!=='ko'&&p2.st!=='ko'&&p1.st!=='down'&&p2.st!=='down'){const pu=(44-Math.abs(dx))/2,s=dx>=0?1:-1;p1.x-=s*pu;p2.x+=s*pu;p1.x=Math.max(40,Math.min(W-40,p1.x));p2.x=Math.max(40,Math.min(W-40,p2.x))}
  for(const p of projs){
-  if(p.wait>0){p.wait--;p.life--;projFx(p);if(p.wait===0)(li_(p.own)===5?iceBurst(p):boltFx(p));continue}
+  if(p.wait>0){p.wait--;p.life--;projFx(p);if(p.wait===0)strikeFx(p);continue}
   if(p.life<=0)continue;
   p.x+=p.vx;p.y+=p.vy||0;if(p.gr)p.vy+=p.gr;p.life--;projFx(p);if(p.vy&&p.y>=GY-14){p.life=0;projEnd(p);spark(p.x,GY-6,p.own.ch.col,8,1)}
-  const t=p.own===p1?p2:p1,r=p.big?28:14,bx=p.strike?[p.x-26,0,p.x+26,GY]:[p.x-r,p.y-r,p.x+r,p.y+r];
-  if(p.life>0&&t.st!=='ko'&&ov(bx,hurt(t))&&t.getHit(p.own,p.a,p.strike?p.own.x:p.x)){p.life=0;projEnd(p);if(p.big)ring(p.x,p.y,'#ffe14d')}
-  for(const q of projs)if(q!==p&&q.own!==p.own&&!p.strike&&!q.strike&&Math.abs(q.x-p.x)<24&&Math.abs(q.y-p.y)<40&&p.life>0&&q.life>0){if(!p.big)p.life=0;if(!q.big)q.life=0;spark(p.x,p.y,'#fff',16);ring(p.x,p.y,'#fff');snd(200,.15,'sawtooth',.05,60)}
+  if(p.ret&&p.life===p.ret){p.vx=-p.vx;p.rb=1}if(p.rb&&Math.abs(p.x-p.own.x)<28)p.life=0;if(p.cool>0)p.cool--;
+  const t=p.own===p1?p2:p1,r=p.big?28:14,bx=p.strike?[p.x-26,0,p.x+26,GY]:p.wl?[p.x-16,GY-110,p.x+16,GY]:[p.x-r,p.y-r,p.x+r,p.y+r];
+  if(p.life>0&&!(p.cool>0)&&t.st!=='ko'&&ov(bx,hurt(t))&&t.getHit(p.own,p.a,p.strike?p.own.x:p.x)){if(p.ph>1){p.ph--;p.cool=8}else{p.life=0;projEnd(p);if(p.big)ring(p.x,p.y,'#ffe14d')}}
+  for(const q of projs)if(q!==p&&q.own!==p.own&&!p.strike&&!q.strike&&Math.abs(q.x-p.x)<24&&Math.abs(q.y-p.y)<40&&p.life>0&&q.life>0){if(!p.big&&!p.wl)p.life=0;if(!q.big&&!q.wl)q.life=0;spark(p.x,p.y,'#fff',16);ring(p.x,p.y,'#fff');snd(200,.15,'sawtooth',.05,60)}
   if(p.x<-40||p.x>W+40)p.life=0;
  }
  projs=projs.filter(p=>p.life>0);

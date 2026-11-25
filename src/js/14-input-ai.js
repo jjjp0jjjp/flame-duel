@@ -30,7 +30,7 @@ function aiInput(me,op){
  if(a.t--<=0){
   a.t=[24,14,7][lv]+rnd(0,10);a.mv=0;a.blk=0;a.act=null;
   const r=Math.random(),pj=me.ch.sp.type==='proj';
-  if(op.st==='atk'&&ad<150&&r<[.25,.5,.78][lv])a.blk=16;
+  if(op.st==='atk'&&ad<150&&r<[.25,.5,.78][lv]){a.blk=16;a.bw=Math.random()<[.35,.12,0][lv]}
   else if(me.ch.sp2.type==='strike'&&me.mt>=50&&ad>170&&ad<300&&(op.y<GY-30||r<.12))a.act={[to]:1,sp:1};
   else if(me.ch.ex.throw&&me.mt>=100&&ad<110&&r<.35)a.act={d:1,sp:1};
   else if(op.y<GY-40&&ad<125&&lv&&r<.6)a.act={d:1,lp:1};
@@ -43,7 +43,7 @@ function aiInput(me,op){
   else if(r<.6)a.mv=-1;
   else if(r<.75&&me.mt>=50)a.act={sp:1};
  }
- if(a.blk>0){a.blk--;i.d=1}else{if(a.mv>0)i[to]=1;if(a.mv<0)i[aw]=1}
+ if(a.blk>0){a.blk--;const oa=op.atk,hi=op.y<GY-2||!!(oa&&oa.ovh);if(hi!==!!a.bw)i[aw]=1;else i.d=1}else{if(a.mv>0)i[to]=1;if(a.mv<0)i[aw]=1}
  if(a.act){Object.assign(i,a.act);a.act=null}
  if(i.u)a.uh=12;else if(a.uh>0){a.uh--;i.u=1}
  if(me.st==='atk'&&me.hit&&me.atk.cn&&Math.random()<[0,.1,.25][lv]){if(me.atk.cn===4){if(me.mt>=100){i.d=1;i.sp=1}}else if(me.atk.cn===1)i.hk=1;else if(me.mt>=50)i.sp=1}

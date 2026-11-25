@@ -78,3 +78,10 @@ function supPattern2(ci,t,e){
  else{ctx.fillStyle='rgba(255,244,214,.85)';ctx.beginPath();ctx.arc(-170,-10,110,0,6.3);ctx.fill();ctx.fillStyle='rgba(20,14,30,1)';ctx.beginPath();ctx.arc(-130,-30,104,0,6.3);ctx.fill();
   ctx.strokeStyle='rgba(240,198,116,.35)';ctx.lineWidth=2;for(let i=0;i<4;i++){ctx.beginPath();ctx.arc(-170,-10,130+i*28+((t*40)%28),0,6.3);ctx.stroke()}}
 }
+// ===== 新機制的共用特效 =====
+// 定點攻擊落下時的特效：機的飛彈爆炸，其他（雷）是落雷
+function strikeFx(p){if(li_(p.own)===11)missileFx(p);else boltFx(p)}
+function missileFx(p){emb(p.x,GY-20,'#ffb347',16,6,24,5,1);for(let i=0;i<6;i++)smk(p.x+rr_(-20,20),GY-14,16,'#6a6a7a',30);for(let i=0;i<6;i++)rok(p.x,GY-10,rr_(-4,4),-rr_(3,8),'#4a4a5a');
+ P({ring:1,flat:1,x:p.x,y:GY-2,c:'#ffb347',l:16,rs:7,lw:5});flare(p.x,GY-30,'#ff9f1c',60,8);noise(.3,.14,1200,'lowpass',120);snd(80,.25,'sawtooth',.08,40);G.shake=Math.max(G.shake,5)}
+// 蓄力強化：發動時的光圈
+function buffFx(f){const c=colOf(f);P({ring:1,x:f.x,y:f.y-60,c,l:20,rs:8,lw:6});emb(f.x,f.y-60,c,20,5,26,5,1.5);flare(f.x,f.y-80,c,70,10);snd(200,.4,'sawtooth',.08,600)}

@@ -37,7 +37,7 @@ function drawF(f){
  const a=f.atk;
  if(f.st==='walk'){const s=Math.sin(f.walk)*16,c=Math.cos(f.walk);ff=[14+s,-Math.max(0,c)*8];bf=[-14-s,-Math.max(0,-c)*8];sh+=Math.abs(Math.sin(f.walk))*-1.5}
  if(f.y<GY-2){ff=[24,-28];bf=[-4,-14]}
- if(f.st==='block'){hip=-42;sh=-84;ff=[26,0];bf=[-22,0];fh=[24,-104];bh=[14,-92]}
+ if(f.st==='block'){if(f.bc){hip=-42;sh=-84;ff=[26,0];bf=[-22,0];fh=[24,-104];bh=[14,-92]}else{ff=[22,0];bf=[-20,0];fh=[20,-110];bh=[12,-98]}}
  if(f.st==='hit'){ln=-14;fh=[-6,-86];bh=[-20,-70];ff=[10,0];bf=[-20,0]}
  if(f.st==='ko'||f.st==='down'){fh=[-10,-60];bh=[-24,-70]}
  if(f.st==='dash'){ln=f.dd===d?10:-10;ff=[26,0];bf=[-26,0]}
