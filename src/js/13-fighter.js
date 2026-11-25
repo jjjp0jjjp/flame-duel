@@ -6,18 +6,18 @@ reset(){this.x=this.side?W/2+170:W/2-170;this.y=GY;this.vx=0;this.vy=0;this.dir=
 pick(i,g){
  const fw=this.dir>0?i.r:i.l,bk=this.dir>0?i.l:i.r,dn=i.d;
  if(i.sp)return dn?'ex':(!g&&this.ch.asp)?'asp':fw?'sp2':bk?'sp3':'sp';
- if(i.th&&g)return bk?'th2':'th';
- const h=g?{lp:dn?'upper':fw?'jab':'lp',hp:dn?'upper':fw?'lunge':'hp',lk:dn?'sweep':fw?'push':'lk',hk:dn?'sweep':fw?'spin':bk?'flip':'hk'}:{lp:'ap',hp:'ap',lk:dn?'dive':'ak',hk:dn?'dive':'ak'};
+ if(i.th&&g)return dn&&this.ch.sp4?'sp4':bk?'th2':'th';
+ const h=g?{lp:dn?'upper':fw?'jab':bk?'blp':'lp',hp:dn?'dhp':fw?'lunge':bk?'bhp':'hp',lk:dn?'dlk':fw?'push':'lk',hk:dn?'sweep':fw?'spin':bk?'flip':'hk'}:{lp:'ap',hp:'ahp',lk:dn?'dive':'ak',hk:dn?'dive':'ak'};
  for(const b of['hk','hp','lk','lp'])if(i[b])return h[b];
  return null;
 }
-cc(a,m){if(this.cl.includes(m))return false;if(a.cn===4)return m==='ex';if(a.cn===3)return m==='ap'||m==='ak'||m==='ex'||m==='asp';return a.cn&&m!==a.key&&m!=='th'&&m!=='th2'&&m!=='ap'&&m!=='ak'&&m!=='dive'&&(m==='sp'||m==='sp2'||m==='sp3'||m==='ex'||m==='upper'||a.cn===1)}
- setBuf(m){const sp=x=>x==='sp'||x==='sp2'||x==='sp3'||x==='ex'||x==='asp'||x==='upper';if(this.buf&&sp(this.buf.m)&&!sp(m)&&this.buf.t>=7)return;this.buf={m,t:10}}
+cc(a,m){if(this.cl.includes(m))return false;if(a.cn===4)return m==='ex';if(a.cn===3)return m==='ap'||m==='ak'||m==='ex'||m==='asp';return a.cn&&m!==a.key&&m!=='th'&&m!=='th2'&&m!=='ap'&&m!=='ak'&&m!=='dive'&&(m==='sp'||m==='sp2'||m==='sp3'||m==='sp4'||m==='ex'||m==='upper'||a.cn===1)}
+ setBuf(m){const sp=x=>x==='sp'||x==='sp2'||x==='sp3'||x==='sp4'||x==='ex'||x==='asp'||x==='upper';if(this.buf&&sp(this.buf.m)&&!sp(m)&&this.buf.t>=7)return;this.buf={m,t:10}}
  dashGo(s){gho(this,colOf(this));this.st='dash';this.dt=13;this.dd=s;this.inv=s!==this.dir?7:0;this.vx=s*8.5;spark(this.x,GY-4,'#b9a8d8',6,1);snd(180,.1,'sine',.04,500)}
 start(m,nf){
  if(!nf&&m==='ex'&&this.mt<100&&this.mt>=50)m='sp';
  const ov=this.ch.mv&&this.ch.mv[m],a=Object.assign({key:m},ov&&ov.rep?{}:(MV[m]||this.ch[m]),ov),air=this.y<GY-2;
- if(a.cn===undefined&&(m==='sp'||m==='sp2'||m==='sp3'||m==='asp'))a.cn=4;
+ if(a.cn===undefined&&(m==='sp'||m==='sp2'||m==='sp3'||m==='sp4'||m==='asp'))a.cn=4;
  if(MV[m]&&!!MV[m].air!==air){this.buf=null;return false}
  if(a.cost){if(this.mt<a.cost){this.buf=null;return false}this.mt-=a.cost}
  this.st='atk';this.atk=a;this.t=0;this.hit=false;this.hc=0;this.hlt=0;this.buf=null;if(nf)this.cl.push(m);else this.cl=[m];if(!air)this.vx=0;
@@ -48,6 +48,7 @@ update(i,o){
    if(a.tele&&this.t===a.su){spark(this.x,this.y-60,'#e3ccff',14);ring(this.x,this.y-60,'#b46bff');this.x=Math.max(50,Math.min(W-50,o.x+this.dir*50));this.dir=-this.dir;spark(this.x,this.y-60,'#e3ccff',14);ring(this.x,this.y-60,'#b46bff');snd(700,.15,'sine',.06,200)}
    if(a.hop&&this.t===2&&g){this.vy=a.hop;if(a.hvx)this.vx=this.dir*a.hvx}
    if(a.float&&!g&&this.t>a.su&&this.t<=a.su+a.ac)this.vy=Math.min(this.vy,.6);
+   if(a.heal&&this.t===a.su){this.hp=Math.min(this.ch.hp*(this.hm||1),this.hp+a.heal);if(!NOFX)healFx(this,a.heal)}
    if(a.buff&&this.t===a.su){this.pw=a.buff;if(!NOFX)buffFx(this)}
    if(a.dive&&this.t>=a.su&&!g){this.vy=Math.max(this.vy,12);this.vx=this.dir*5}
    if(a.lift&&this.t===a.su+1&&g){this.vy=a.lift;this.vx=this.dir*2.5;snd(250,.2,'sine',.05,700)}

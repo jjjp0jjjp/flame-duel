@@ -60,6 +60,7 @@ function mine(p){const t=G.frame,pu=.5+.5*Math.sin(t*.25);ctx.save();ctx.transla
 function fan(x,y,r,rot,c1,c2){ctx.save();ctx.translate(x,y);ctx.rotate(rot);ctx.beginPath();ctx.moveTo(0,0);ctx.arc(0,0,r,-2.6,-.55);ctx.closePath();
  const g=ctx.createRadialGradient(0,0,2,0,0,r);g.addColorStop(0,c2);g.addColorStop(1,c1);ctx.fillStyle=g;ctx.fill();ctx.strokeStyle='#3a1a3a';ctx.lineWidth=1.6;ctx.stroke();
  ctx.strokeStyle='rgba(90,30,90,.6)';ctx.lineWidth=1;ctx.beginPath();for(let a=-2.5;a<=-.6;a+=.38){ctx.moveTo(0,0);ctx.lineTo(Math.cos(a)*r,Math.sin(a)*r)}ctx.stroke();ctx.restore()}
+function mechMine(p){const pu=.5+.5*Math.sin(G.frame*.3);ctx.save();ctx.translate(p.x,GY-6);ctx.fillStyle='#3a404c';ctx.strokeStyle='#14161c';ctx.lineWidth=1.5;ctx.beginPath();ctx.ellipse(0,0,15,6,0,0,6.3);ctx.fill();ctx.stroke();ctx.fillStyle='#5a6270';ctx.fillRect(-6,-9,12,5);ctx.strokeRect(-6,-9,12,5);ctx.fillStyle=pu>.5?'#ff3b3b':'#7a1010';ctx.beginPath();ctx.arc(0,-10,2.6,0,6.3);ctx.fill();if(pu>.5)glow(0,-10,10,'#ff3b3b',.8);ctx.restore()}
 function rocketFist(p){const d=p.vx>=0?1:-1;ctx.save();ctx.translate(p.x,p.y);ctx.scale(d,1);
  const fl=ctx.createLinearGradient(-40,0,-10,0);fl.addColorStop(0,'rgba(255,159,28,0)');fl.addColorStop(1,'#ffd166');ctx.fillStyle=fl;ctx.beginPath();ctx.moveTo(-10,-6);ctx.lineTo(-38-Math.random()*8,0);ctx.lineTo(-10,6);ctx.closePath();ctx.fill();
  ctx.fillStyle='#5a6270';ctx.strokeStyle='#14161c';ctx.lineWidth=1.8;ctx.fillRect(-14,-7,12,14);ctx.strokeRect(-14,-7,12,14);
@@ -73,7 +74,7 @@ function missile(p){const al=Math.min(1,1-p.wait/30+.3),yy=GY-Math.max(0,p.wait)
 function drawProj3(p,li,k,t){
  if(li===9)mine(p);
  else if(li===10){const r=p.big?30:17,rot=t*.5*(p.vx>=0?1:-1);for(let i=2;i>=1;i--){ctx.save();ctx.globalAlpha=.25/i;fan(p.x-p.vx*i*1.5,p.y,r,rot-i*.5,'#ff9ff3','#ffe3fb');ctx.restore()}fan(p.x,p.y,r,rot,'#ff9ff3','#ffe3fb');if(p.big)fan(p.x,p.y,r,rot+Math.PI,'#ffd166','#fff3c0')}
- else if(li===11){if(p.strike)missile(p);else rocketFist(p)}
+ else if(li===11){if(p.strike)missile(p);else if(!p.vx)mechMine(p);else rocketFist(p)}
  else drawProj4(p,li,k,t);
 }
 // 超必殺特寫背景

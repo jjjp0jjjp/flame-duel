@@ -1,7 +1,8 @@
 // ===== 新角色（刃、巫、獸、羽）的招式特效、飛行道具與超必殺背景（純視覺，不影響判定）=====
 // 由 19-roster3.js 的 fxMove3／hitFx3／projFx3／projEnd3／drawProj3／supPattern3 在 li>=12 時呼叫
 function fxMove4(f,a,g,li,k,t,d,x,y,act,ex,ey){
- if(li===12){ // 刃：刀光、居合殘影
+ if(li===12){ // 刃：刀光、居合殘影、見切架勢
+  if(a.counter&&t>a.su&&t<=a.su+a.ac&&t%3===0)P({ring:1,x:x+d*24,y:y-72,c:'#ffffff',l:10,rs:2,lw:3,r0:36});
   if(a.thru&&act){gho(f,'#ffffff');if(t%2===0)slh(x-d*30,y-78,0,rr_(60,110),'#ffffff',8)}
   if(a.gb&&t===a.su+1)P({t:'ar',x:x+d*40,y:y-70,dir:d,c:'#ffffff',l:14,g:0,dr:1});
   if(act&&!a.thru&&t===a.su+1)slh(ex,ey,rr_(-.5,.5),rr_(40,60),'#e9ecef',8);

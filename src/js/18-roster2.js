@@ -93,3 +93,5 @@ function buffFx(f){const c=colOf(f);P({ring:1,x:f.x,y:f.y-60,c,l:20,rs:8,lw:6});
 function iceWall(p){const al=Math.min(1,p.life/20);ctx.save();ctx.globalAlpha=al;const x=p.x,h=104,g=ctx.createLinearGradient(0,GY-h,0,GY);g.addColorStop(0,'#ffffff');g.addColorStop(.5,'#bff4ff');g.addColorStop(1,'rgba(127,200,240,.7)');
  ctx.beginPath();ctx.moveTo(x-16,GY);ctx.lineTo(x-14,GY-h*.7);ctx.lineTo(x-6,GY-h);ctx.lineTo(x+4,GY-h*.85);ctx.lineTo(x+14,GY-h*.95);ctx.lineTo(x+16,GY);ctx.closePath();ctx.fillStyle=g;ctx.fill();ctx.strokeStyle='#1d3a5a';ctx.lineWidth=2;ctx.stroke();
  ctx.strokeStyle='rgba(255,255,255,.8)';ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(x-8,GY-10);ctx.lineTo(x-3,GY-h*.8);ctx.moveTo(x+6,GY-20);ctx.lineTo(x+9,GY-h*.7);ctx.stroke();glow(x,GY-50,46,'#9fe8ff',.35);ctx.restore()}
+// 回復：綠色光點往上飄＋數字
+function healFx(f,n){for(let i=0;i<14;i++)P({t:'e',x:f.x+rr_(-24,24),y:f.y-rr_(10,110),vx:0,vy:-rr_(.5,2),l:30,s:rr_(3,5),c:'#7dffb0',g:-.01,dr:.98});pp({x:f.x,y:f.y-150,vx:0,vy:-.7,l:45,m:45,txt:'+'+n,c:'#7dffb0',text:1,big:1});snd(520,.3,'triangle',.06,880)}

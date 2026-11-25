@@ -17,7 +17,12 @@ const MV={
  flip:{d:12,su:8,ac:5,rc:16,r:98,h:-72,st:22,kb:8,vx:-4,cn:2},
  th2:{d:15,su:5,ac:2,rc:22,r:56,h:-70,st:34,kb:8,throw:1,rev:1,cn:0},
  dive:{d:12,su:4,ac:30,rc:3,r:62,h:-26,st:22,kb:6,knock:1,air:1,dive:1,cn:0},
- ak:{d:10,su:5,ac:10,rc:3,r:78,h:-30,st:18,kb:5,air:1,cn:0}
+ ak:{d:10,su:5,ac:10,rc:3,r:78,h:-30,st:18,kb:5,air:1,cn:0},
+ dhp:{d:11,su:7,ac:4,rc:16,r:70,h:-100,st:20,kb:4,cn:2},
+ dlk:{d:5,su:4,ac:3,rc:9,r:96,h:-14,st:14,kb:3,low:1,cn:1},
+ blp:{d:6,su:4,ac:3,rc:8,r:66,h:-84,st:14,kb:3,cn:1},
+ bhp:{d:12,su:9,ac:5,rc:16,r:84,h:-80,st:21,kb:9,cn:2},
+ ahp:{d:9,su:4,ac:8,rc:3,r:72,h:-56,st:18,kb:5,air:1,cn:0}
 };
 const CH=[
 {n:'烈',ds:'迅捷・波動彈',col:'#ff5a4d',col2:'#ffc4b3',spd:4.4,jmp:15,hp:100,w:1,

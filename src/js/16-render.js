@@ -59,10 +59,12 @@ function drawF(f){
  if(f.st==='dash'){ln=f.dd===d?10:-10;ff=[26,0];bf=[-26,0]}
  if(f.st==='atk'&&a){
   const tot=a.su+a.ac,e=f.t<=a.su?f.t/a.su*.7:f.t<=tot?1:Math.max(0,1-(f.t-tot)/a.rc),k=a.key;
-  if(k==='lp'||k==='hp'||k==='ap'||k==='lunge'||k==='jab'){ln=(k==='hp'?10:k==='lunge'?20:6)*e;fh=[34+(a.r-34)*e,k==='lunge'?-92:-86]}
+  if(k==='lp'||k==='hp'||k==='ap'||k==='ahp'||k==='blp'||k==='bhp'||k==='lunge'||k==='jab'){ln=(k==='hp'?10:k==='lunge'?20:6)*e;fh=[34+(a.r-34)*e,k==='lunge'?-92:-86]}
   else if(k==='lk'||k==='hk'||k==='spin'||k==='push'||k==='flip'){kl=1;ln=-8*e;ff=[16+(a.r-16)*e,(k==='spin'?-70:a.h)*e]}
   else if(k==='ak'||a.dive){kl=1;ln=-6*e;ff=[20+(a.r-20)*e,-28-6*e];bf=[-6,-12]}
   else if(k==='upper'||(k==='sp3'&&a.lift)){ln=8*e;fh=[22+8*e,-98-48*e]}
+  else if(k==='dlk'){kl=1;hip=-34;sh=-76;ff=[16+(a.r-16)*e,-8];bf=[-20,0];fh=[26,-70];bh=[12,-60]}
+  else if(k==='dhp'){hip=-40;sh=-80+(-10*e);ln=6*e;fh=[24+8*e,-84-36*e];bh=[14,-64];ff=[24,0];bf=[-22,0]}
   else if(k==='sweep'){kl=1;hip=-26;sh=-62;ff=[16+(a.r-16)*e,-4];bf=[-20,0];fh=[26,-58];bh=[10,-48]}
   else if(a.counter){hip=-46;sh=-92;fh=[30,-100];bh=[26,-82];ff=[28,0];bf=[-26,0]}
   else if(a.around){ln=0;fh=[40,-96-10*e];bh=[-34,-96-10*e]}

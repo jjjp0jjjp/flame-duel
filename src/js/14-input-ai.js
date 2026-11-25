@@ -39,7 +39,7 @@ function aiInput(me,op){
   else if(ad>220&&lv&&h.prj>2&&r<.35){a.mv=1;a.act={u:1,[to]:1}}
   else if(ad>220){a.mv=1;if(me.mt>=100&&pj&&r<.3)a.act={d:1,sp:1};else if(me.mt>=50&&pj&&r<.4)a.act={sp:1};else if(r<.12)a.act={dash:sg};else if(r<.18)a.act={u:1}}
   else if(ad>115){a.mv=1;if(r<.14)a.act={dash:sg};else if(r<.22)a.act={u:1}}
-  else if(r<.5+.1*lv){const L=op.st==='block'?[{th:1},{th:1},{d:1,lk:1}]:[{lp:1},{lk:1},{hp:1},{hk:1},{d:1,lk:1},{[to]:1,hp:1},{[to]:1,hk:1},{[to]:1,lp:1},{[aw]:1,hk:1}].concat(me.mt>=50?[{[to]:1,sp:1},{[aw]:1,sp:1}]:[]).concat(me.ch.mv&&me.ch.mv.th?[{th:1},{th:1},{sp:1}]:[]);a.act=L[rnd(0,L.length)]}
+  else if(r<.5+.1*lv){const L=op.st==='block'?[{th:1},{th:1},{d:1,hk:1}]:[{lp:1},{lk:1},{hp:1},{hk:1},{d:1,hk:1},{[to]:1,hp:1},{[to]:1,hk:1},{[to]:1,lp:1},{[aw]:1,hk:1}].concat(me.mt>=50?[{[to]:1,sp:1},{[aw]:1,sp:1}]:[]).concat(me.ch.mv&&me.ch.mv.th?[{th:1},{th:1},{sp:1}]:[]);a.act=L[rnd(0,L.length)]}
   else if(r<.6)a.mv=-1;
   else if(r<.75&&me.mt>=50)a.act={sp:1};
  }

@@ -109,6 +109,42 @@ const CMD=[
  {jab:['爪擊',{d:8,su:5,ac:3,rc:10,r:96,h:-84,st:16,kb:4,cn:1}],lunge:['頭鎚',{d:14,su:11,ac:5,rc:18,r:84,h:-90,st:23,kb:12,arm:1,vx:6,cn:2}],push:['低掃爪',{d:8,su:7,ac:4,rc:14,r:100,h:-14,st:18,kb:5,low:1,cn:1}],spin:['熊掌落',{d:16,su:15,ac:4,rc:20,r:92,h:-70,st:24,kb:8,ovh:1,cn:2}],flip:['迴身尾擊',{d:12,su:9,ac:5,rc:16,r:100,h:-60,st:22,kb:15,cn:2}],upper:['撈爪',{d:14,su:6,ac:7,rc:22,r:70,h:-108,st:30,kb:3,launch:1,lift:-10,cn:3}]},
  {jab:['弓尾擊',{d:6,su:4,ac:3,rc:9,r:110,h:-84,st:15,kb:4,cn:1}],lunge:['肘打',{d:10,su:8,ac:5,rc:14,r:88,h:-84,st:20,kb:8,vx:6,cn:2}],push:['掃腿',{d:7,su:6,ac:4,rc:13,r:104,h:-12,st:17,kb:5,low:1,cn:1}],spin:['鷹落踢',{d:12,su:9,ac:10,rc:14,r:86,h:-58,st:22,kb:7,hop:-10,vx:5,cn:2}],flip:['後躍',{d:0,su:2,ac:10,rc:6,r:0,vx:-7,hop:-10,nohit:1,cn:0}],upper:['弓挑',{d:12,su:5,ac:7,rc:22,r:70,h:-110,st:28,kb:3,launch:1,inv:1,lift:-12,cn:3}]}];
 CMD.forEach((c,i)=>{const ch=CH[i];ch.mv=ch.mv||{};ch.nm={};for(const k in c){ch.nm[k]=c[k][0];ch.mv[k]=Object.assign({rep:1},c[k][1])}});
+// ===== 第二批專屬招式：↓+重拳 dhp、↓+輕腳 dlk、←+輕拳 blp、←+重拳 bhp、空中重拳 ahp，以及 ↓+投技 的第六個必殺技 sp4 =====
+const A1={air:1,cn:0};
+const CMD2=[
+ {dhp:['蹲炎拳',{d:11,su:6,ac:4,rc:16,r:72,h:-100,st:20,kb:4,cn:2}],dlk:['火蛇腳',{d:5,su:4,ac:3,rc:9,r:100,h:-14,st:14,kb:3,low:1,cn:1}],blp:['護身掌',{d:6,su:3,ac:3,rc:8,r:70,h:-86,st:14,kb:5,cn:1}],bhp:['回燄拳',{d:12,su:9,ac:5,rc:16,r:90,h:-80,st:21,kb:10,vx:-3,cn:2}],ahp:['空炎拳',{d:10,su:4,ac:8,rc:3,r:74,h:-56,st:18,kb:5,...A1}],
+  sp4:['爆炎掌（近身爆炸）',{d:16,su:12,ac:6,rc:24,r:90,h:-70,st:26,kb:12,around:1,knock:1,cost:50}]},
+ {dhp:['鋼樁拳',{d:12,su:8,ac:4,rc:18,r:70,h:-96,st:21,kb:5,arm:1,cn:2}],dlk:['鋼脛',{d:6,su:5,ac:3,rc:11,r:90,h:-14,st:15,kb:4,low:1,cn:1}],blp:['盾肘',{d:7,su:4,ac:3,rc:9,r:66,h:-86,st:15,kb:6,cn:1}],bhp:['迴旋鐵拳',{d:14,su:12,ac:5,rc:18,r:88,h:-80,st:23,kb:13,cn:2}],ahp:['空中鐵肘',{d:12,su:5,ac:8,rc:4,r:70,h:-56,st:20,kb:7,arm:1,...A1}],
+  sp4:['崩拳（破防、霸體）',{d:16,su:14,ac:5,rc:22,r:90,h:-80,st:24,kb:12,gb:1,arm:1,cost:50}]},
+ {dhp:['昇苦無',{d:10,su:5,ac:4,rc:14,r:74,h:-104,st:19,kb:4,cn:2}],dlk:['足払',{d:5,su:3,ac:3,rc:8,r:100,h:-12,st:13,kb:3,low:1,cn:1}],blp:['影手',{d:5,su:3,ac:3,rc:7,r:70,h:-86,st:13,kb:3,cn:1}],bhp:['鎖喉',{d:11,su:8,ac:5,rc:15,r:96,h:-84,st:20,kb:-5,cn:2}],ahp:['空蟬',{d:9,su:3,ac:8,rc:3,r:76,h:-56,st:17,kb:5,...A1}],
+  sp4:['影縫（緩速陷阱）',{type:'proj',d:6,su:8,ac:1,rc:16,spd:0,low:1,life:180,sl:150,cost:50}]},
+ {dhp:['雷光衝',{d:11,su:6,ac:5,rc:16,r:72,h:-104,st:20,kb:4,cn:2}],dlk:['電流腳',{d:5,su:4,ac:3,rc:9,r:100,h:-14,st:14,kb:3,low:1,cn:1}],blp:['靜電掌',{d:4,su:4,ac:8,rc:9,r:66,h:-84,st:13,kb:2,hits:2,gap:4,cn:1}],bhp:['雷擊掌',{d:12,su:9,ac:5,rc:16,r:92,h:-80,st:21,kb:9,cn:2}],ahp:['雷翼',{d:9,su:4,ac:8,rc:3,r:80,h:-60,st:18,kb:5,...A1}],
+  sp4:['球雷（慢速穿透三次）',{type:'proj',d:7,su:12,ac:1,rc:22,spd:3,ph:3,life:200,cost:50}]},
+ {dhp:['岩頂',{d:13,su:8,ac:4,rc:18,r:70,h:-96,st:21,kb:5,arm:1,cn:2}],dlk:['碎石腳',{d:6,su:5,ac:3,rc:10,r:88,h:-12,st:15,kb:4,low:1,cn:1}],blp:['岩肘',{d:7,su:5,ac:3,rc:9,r:64,h:-86,st:15,kb:7,cn:1}],bhp:['巨岩掌',{d:15,su:13,ac:5,rc:20,r:90,h:-80,st:24,kb:15,cn:2}],ahp:['落石肘',{d:12,su:5,ac:8,rc:4,r:70,h:-50,st:20,kb:7,...A1}],
+  sp4:['岩崩（下段、震倒）',{d:12,su:12,ac:5,rc:24,r:110,h:-10,st:24,kb:6,around:1,low:1,knock:1,cost:50}]},
+ {dhp:['冰錐拳',{d:11,su:6,ac:4,rc:16,r:72,h:-104,st:20,kb:4,cn:2}],dlk:['霜腳',{d:5,su:4,ac:3,rc:9,r:104,h:-14,st:14,kb:3,low:1,sl:60,cn:1}],blp:['寒掌',{d:6,su:4,ac:3,rc:8,r:70,h:-84,st:14,kb:4,sl:60,cn:1}],bhp:['冰晶掌',{d:12,su:9,ac:5,rc:16,r:96,h:-80,st:21,kb:8,cn:2}],ahp:['冰翼',{d:9,su:4,ac:8,rc:3,r:80,h:-56,st:18,kb:5,...A1}],
+  sp4:['霜降（周圍緩速）',{d:6,su:10,ac:10,rc:22,r:120,h:-60,st:18,kb:4,around:1,sl:240,cost:50}]},
+ {dhp:['旋昇掌',{d:6,su:5,ac:10,rc:16,r:72,h:-100,st:18,kb:3,hits:2,gap:5,cn:2}],dlk:['疾掃',{d:5,su:3,ac:3,rc:8,r:100,h:-14,st:13,kb:3,low:1,cn:1}],blp:['風掌',{d:6,su:3,ac:3,rc:8,r:70,h:-84,st:14,kb:6,cn:1}],bhp:['迴旋肘',{d:6,su:7,ac:10,rc:15,r:88,h:-80,st:18,kb:4,hits:2,gap:5,vx:-3,cn:2}],ahp:['鷹爪',{d:9,su:3,ac:8,rc:3,r:76,h:-56,st:17,kb:5,...A1}],
+  sp4:['龍捲（慢速穿透三次）',{type:'proj',d:6,su:10,ac:1,rc:20,spd:4,ph:3,life:120,cost:50}]},
+ {dhp:['撐棍',{d:12,su:8,ac:5,rc:18,r:100,h:-104,st:21,kb:4,cn:2}],dlk:['點足',{d:5,su:5,ac:3,rc:10,r:120,h:-14,st:14,kb:3,low:1,cn:1}],blp:['棍柄',{d:6,su:4,ac:3,rc:8,r:80,h:-84,st:14,kb:5,cn:1}],bhp:['橫掃棍',{d:13,su:11,ac:6,rc:18,r:130,h:-76,st:22,kb:10,cn:2}],ahp:['空中劈',{d:11,su:5,ac:8,rc:4,r:96,h:-50,st:19,kb:6,...A1}],
+  sp4:['棍陣（周圍三段）',{d:6,su:10,ac:16,rc:22,r:130,h:-70,st:18,kb:4,around:1,hits:3,gap:5,cost:50}]},
+ {dhp:['蹲身上勾',{d:12,su:5,ac:4,rc:16,r:66,h:-104,st:22,kb:4,cn:2}],dlk:['低踢',{d:5,su:4,ac:3,rc:9,r:90,h:-14,st:14,kb:3,low:1,cn:1}],blp:['防守刺拳',{d:5,su:2,ac:3,rc:7,r:80,h:-86,st:13,kb:4,cn:1}],bhp:['交叉反擊',{d:14,su:10,ac:4,rc:16,r:92,h:-84,st:23,kb:11,cn:2}],ahp:['空中重拳',{d:11,su:4,ac:7,rc:3,r:74,h:-56,st:19,kb:6,...A1}],
+  sp4:['搖閃突擊（起手無敵）',{d:14,su:10,ac:6,rc:18,vx:9,r:84,h:-84,st:22,kb:10,inv:1,iv:10,cost:50}]},
+ {dhp:['毒勾',{d:10,su:6,ac:4,rc:16,r:72,h:-100,st:20,kb:4,psn:60,cn:2}],dlk:['蛇牙',{d:5,su:4,ac:3,rc:9,r:100,h:-14,st:14,kb:3,low:1,psn:60,cn:1}],blp:['毒刺',{d:5,su:3,ac:3,rc:8,r:72,h:-84,st:13,kb:3,psn:60,cn:1}],bhp:['鎖鏈橫掃',{d:11,su:10,ac:6,rc:18,r:140,h:-76,st:20,kb:-4,cn:2}],ahp:['空中毒爪',{d:9,su:4,ac:8,rc:3,r:74,h:-56,st:17,kb:5,psn:60,...A1}],
+  sp4:['劇毒爆（周圍劇毒）',{d:10,su:12,ac:6,rc:24,r:100,h:-70,st:22,kb:10,around:1,psn:300,cost:50}]},
+ {dhp:['扇昇',{d:10,su:5,ac:5,rc:15,r:76,h:-104,st:19,kb:4,cn:2}],dlk:['蝶尾',{d:5,su:3,ac:3,rc:8,r:100,h:-14,st:13,kb:3,low:1,cn:1}],blp:['扇遮',{d:5,su:3,ac:3,rc:8,r:72,h:-86,st:13,kb:4,cn:1}],bhp:['迴扇',{d:5,su:7,ac:10,rc:15,r:96,h:-80,st:17,kb:3,hits:2,gap:6,cn:2}],ahp:['空扇',{d:9,su:3,ac:10,rc:3,r:80,h:-56,st:17,kb:5,float:1,...A1}],
+  sp4:['雙蝶（兩把迴旋扇）',{type:'proj',d:7,su:10,ac:1,rc:24,spd:8,ret:26,life:60,n2:1,cost:50}]},
+ {dhp:['對空鑽',{d:5,su:7,ac:12,rc:18,r:70,h:-110,st:18,kb:2,hits:3,gap:4,cn:2}],dlk:['履帶掃',{d:6,su:5,ac:3,rc:11,r:96,h:-14,st:15,kb:4,low:1,cn:1}],blp:['裝甲拳',{d:7,su:5,ac:3,rc:10,r:70,h:-86,st:15,kb:6,arm:1,cn:1}],bhp:['迴轉臂',{d:6,su:10,ac:12,rc:18,r:96,h:-80,st:18,kb:4,hits:3,gap:4,cn:2}],ahp:['空中推進拳',{d:11,su:5,ac:8,rc:4,r:76,h:-56,st:19,kb:7,vx:4,...A1}],
+  sp4:['地雷（踩到會爆炸）',{type:'proj',d:14,su:10,ac:1,rc:18,spd:0,low:1,life:240,knock:1,cost:50}]},
+ {dhp:['斬上',{d:12,su:6,ac:4,rc:16,r:84,h:-104,st:20,kb:4,cn:2}],dlk:['足斬',{d:6,su:4,ac:3,rc:9,r:108,h:-14,st:14,kb:3,low:1,cn:1}],blp:['鍔迫',{d:6,su:4,ac:3,rc:8,r:74,h:-84,st:14,kb:6,cn:1}],bhp:['袈裟斬',{d:13,su:10,ac:5,rc:17,r:104,h:-76,st:22,kb:9,cn:2}],ahp:['空斬',{d:11,su:4,ac:7,rc:3,r:84,h:-52,st:19,kb:6,...A1}],
+  sp4:['見切（擋下攻擊後反擊）',{d:0,su:2,ac:18,rc:16,r:60,h:-70,st:0,kb:0,counter:1,cost:50}]},
+ {dhp:['魂昇',{d:10,su:6,ac:5,rc:16,r:74,h:-104,st:19,kb:4,ls:.3,cn:2}],dlk:['冥足',{d:5,su:4,ac:3,rc:9,r:100,h:-14,st:14,kb:3,low:1,cn:1}],blp:['咒印',{d:5,su:4,ac:3,rc:8,r:70,h:-84,st:13,kb:3,wk:90,cn:1}],bhp:['鬼手',{d:11,su:10,ac:6,rc:18,r:120,h:-80,st:20,kb:-5,cn:2}],ahp:['魂爪',{d:9,su:4,ac:8,rc:3,r:76,h:-56,st:17,kb:5,ls:.3,...A1}],
+  sp4:['魂分（兩發追蹤）',{type:'proj',d:8,su:12,ac:1,rc:22,spd:4,hm:1,n2:1,life:160,cost:50}]},
+ {dhp:['撕裂爪',{d:6,su:6,ac:10,rc:16,r:74,h:-100,st:18,kb:3,hits:2,gap:5,cn:2}],dlk:['低咬',{d:6,su:4,ac:3,rc:9,r:92,h:-14,st:14,kb:3,low:1,cn:1}],blp:['獸掌',{d:7,su:4,ac:3,rc:9,r:72,h:-84,st:15,kb:6,cn:1}],bhp:['狂爪',{d:6,su:8,ac:12,rc:16,r:92,h:-80,st:18,kb:4,hits:3,gap:4,cn:2}],ahp:['空中撲擊',{d:12,su:4,ac:8,rc:4,r:76,h:-50,st:20,kb:7,...A1}],
+  sp4:['舔傷（回復 15 體力）',{d:0,su:20,ac:1,rc:16,r:0,nohit:1,heal:15,cost:50}]},
+ {dhp:['對空射',{type:'proj',d:9,su:7,ac:1,rc:16,spd:9,vy:-7,cn:2}],dlk:['低掃',{d:5,su:4,ac:3,rc:9,r:100,h:-14,st:14,kb:3,low:1,cn:1}],blp:['弓擋',{d:5,su:3,ac:3,rc:8,r:76,h:-84,st:13,kb:5,cn:1}],bhp:['近射',{type:'proj',d:10,su:9,ac:1,rc:18,spd:16,pkb:12,life:30,cn:2}],ahp:['空射',{type:'proj',d:8,su:4,ac:1,rc:6,spd:13,...A1}],
+  sp4:['束縛箭（長時間緩速）',{type:'proj',d:8,su:10,ac:1,rc:18,spd:12,sl:300,knock:1,cost:50}]}];
+CMD2.forEach((c,i)=>{const ch=CH[i];for(const k in c){if(k==='sp4'){ch.sp4=c[k][1];ch.sp4n=c[k][0];continue}ch.nm[k]=c[k][0];ch.mv[k]=Object.assign({rep:1},c[k][1])}});
 const QUO=['還不夠熱！','堅不可摧。','……影已逝。','雷光，一閃！','大地，不會動搖。','凍結吧。','跟得上我的風嗎？','月有圓缺，勝負亦然。','再來一回合！','毒，已經滲透了。','一舞，終幕。','目標，清除完畢。','刀已入鞘。','你的魂，我收下了。','吼——！','一箭，就夠了。'];
 const pp=o=>NOFX||parts.push(o);
 // ---- 同時命中：兩邊都打到就互相命中（不再由 P1 優先）

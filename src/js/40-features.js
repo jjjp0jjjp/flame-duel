@@ -72,8 +72,8 @@ function dummyIn(a){
 function trRec(){if(TR.rec){TR.rec=0;if(TR.buf.length){TR.dm=5;TR.pi=0}}else{TR.rec=1;TR.buf=[];trReset()}tbar()}
 function trReset(){p1.reset();p2.reset();projs=[];FD=null;G.cam={z:1,cx:W/2}}
 const MVN={lp:'輕拳',hp:'重拳',lk:'輕腳',hk:'重腳',jab:'前手刺拳',lunge:'突進肘擊',push:'推踢',spin:'迴旋踢',flip:'後空翻踢',upper:'升龍拳',sweep:'掃堂腿',th:'投技',th2:'背摔',ap:'空拳',ak:'飛踢',dive:'俯衝踢',ctr:'反擊'};
-const SPI={sp:0,sp2:1,sp3:2,asp:3,ex:4};
-const mvName=(f,k)=>(f.ch.nm&&f.ch.nm[k])||MVN[k]||(SPI[k]!==undefined?CHM[CH.indexOf(f.ch)].m[SPI[k]][1].replace(/（.*）/,''):k);
+const SPI={sp:0,sp2:1,sp3:2,asp:3,ex:4,sp4:5};
+const mvName=(f,k)=>(f.ch.nm&&f.ch.nm[k])||(k==='sp4'&&f.ch.sp4n?f.ch.sp4n.replace(/（.*）/,''):0)||MVN[k]||(SPI[k]!==undefined?CHM[CH.indexOf(f.ch)].m[SPI[k]][1].replace(/（.*）/,''):k);
 const actable=f=>f.y>=GY&&(f.st==='idle'||f.st==='walk'||(f.st==='block'&&f.stun===0));
 function trainTick(){
  if(G.phase!=='fight')return;
@@ -217,9 +217,10 @@ const CHM=[
  {p:'狂暴：體力低於 35% 時傷害 +30%',m:[['必殺','飛撲（跳起指令投）'],['→+必殺','撕咬（四段）'],['←+必殺','咆哮（震開對手、吸走 30 氣）'],['空中 必殺','重壓'],['↓+必殺','狂獸亂舞（七段、霸體）']]},
  {p:'鷹眼：箭速極快',m:[['必殺','速射（中箭後移動變慢）'],['→+必殺','拋射（拋物線、擊倒）'],['←+必殺','後躍射（邊跳開邊射）'],['空中 必殺','箭雨（兩發）'],['↓+必殺','天羽箭雨（五發）']]}];
 // 指令技清單（每個角色不同）
-const CMDK=[['jab','→+輕拳'],['lunge','→+重拳'],['push','→+輕腳'],['spin','→+重腳'],['flip','←+重腳'],['upper','↓+拳']];
-const cmdTag=a=>a.ovh?'（中段）':a.low?'（下段）':a.hits?'（'+a.hits+'段）':a.arm?'（霸體）':a.nohit?'（閃避）':a.kb<0?'（拉近）':a.rev?'（打到身後）':a.psn?'（中毒）':a.wk?'（詛咒）':a.ls?'（吸血）':a.hop?'（跳起）':'';
+const CMDK=[['jab','→+輕拳'],['lunge','→+重拳'],['push','→+輕腳'],['spin','→+重腳'],['flip','←+重腳'],['upper','↓+輕拳'],['dhp','↓+重拳'],['dlk','↓+輕腳'],['blp','←+輕拳'],['bhp','←+重拳'],['ahp','空中 重拳']];
+const cmdTag=a=>a.ovh?'（中段）':a.low?'（下段）':a.hits?'（'+a.hits+'段）':a.arm?'（霸體）':a.nohit?'（閃避）':a.kb<0?'（拉近）':a.rev?'（打到身後）':a.psn?'（中毒）':a.wk?'（詛咒）':a.ls?'（吸血）':a.sl?'（緩速）':a.type==='proj'?'（射擊）':a.hop?'（跳起）':'';
 const cmdList=ch=>CMDK.map(([k,l])=>[l,ch.nm[k]+cmdTag(ch.mv[k])]);
+const spList=i=>CHM[i].m.concat(CH[i].sp4n?[['↓+投技',CH[i].sp4n]]:[]);
 let HTAB='基本';
 function helpRender(){
  const k=j=>'<b>'+KN(0,j)+'</b>',q=j=>'<b>'+KN(1,j)+'</b>';
@@ -230,13 +231,13 @@ function helpRender(){
 <b>P2：</b>${q(0)} ${q(1)} ${q(2)} ${q(3)} 移動；${q(4)} 輕拳　${q(5)} 重拳　${q(6)} 輕腳　${q(7)} 重腳　${q(8)} 必殺　${q(9)} 投技<br>
 按鍵可在上方「設定」更改。第一次玩建議先到「訓練模式」熟悉操作。`,
   '組合招':`方向以角色為準：<b>↓</b>＝蹲（${k(3)}），<b>→</b>＝朝向對手，<b>←</b>＝背向對手。<br>
-<b>共通：</b>↓+輕腳／重腳 掃堂腿（下段擊倒）　←+投技 背摔　↓+必殺 超必殺（100 氣）<br>
-<b>每個角色專屬：</b>→+輕拳、→+重拳、→+輕腳、→+重腳、←+重腳、↓+拳 這 6 個指令技每人都不同，名稱與特性見「角色」分頁或暫停畫面。<br>
+<b>共通：</b>↓+重腳 掃堂腿（下段擊倒）　←+投技 背摔　↓+必殺 超必殺（100 氣）　↓+投技 第六個必殺技（50 氣）<br>
+<b>每個角色專屬：</b>→+輕拳、→+重拳、→+輕腳、→+重腳、←+輕拳、←+重拳、←+重腳、↓+輕拳、↓+重拳、↓+輕腳、空中重拳 這 11 個指令技每人都不同，名稱與特性見「角色」分頁或暫停畫面。<br>
 <b>上下段：</b>標示<b>中段</b>的招式和所有跳躍攻擊要<b>站著擋</b>（按住後方），<b>下段</b>要<b>蹲著擋</b>，擋錯會被打中。<br>
 <b>空中：</b>輕拳／重拳 空拳　輕腳／重腳 飛踢　↓+輕腳／重腳 俯衝踢<br>
 <b>連段：</b>輕攻擊命中或被防後可取消成其他招式；重攻擊可取消成必殺／升龍；升龍命中後可接空中拳腳；必殺後可接超必殺。同一連段每招只能用一次。命中後雙擊方向可衝刺取消，重攻擊命中後按跳可跳躍取消。<br>
 <b>防守：</b>對手投你時搶先按投技可拆投（指令投無法拆）；對手出招起手時打中他會觸發<b>反擊（傷害 +30%）</b>；倒地時先按招式可起身反擊。`,
-  '角色':CH.map((c,i)=>`<b style="color:${c.col}">${c.n}・${c.ds}</b>（體力 ${c.hp}）　被動：${CHM[i].p}<br>　指令技：`+cmdList(c).map(x=>x[0]+' '+x[1]).join('　')+'<br>　必殺技：'+CHM[i].m.map(x=>x[0]+' '+x[1]).join('　')).join('<br>'),
+  '角色':CH.map((c,i)=>`<b style="color:${c.col}">${c.n}・${c.ds}</b>（體力 ${c.hp}）　被動：${CHM[i].p}<br>　指令技：`+cmdList(c).map(x=>x[0]+' '+x[1]).join('　')+'<br>　必殺技：'+spList(i).map(x=>x[0]+' '+x[1]).join('　')).join('<br>'),
   '系統':`<b>暫停：</b>P 或 Esc（暫停時按 Q 回選單）　<b>靜音：</b>M　<b>判定框：</b>F2（藍＝受擊框、紅＝攻擊判定、紫＝投技、黃＝反擊架勢、白＝無敵）<br>
 <b>手把：</b>X 輕拳、Y 重拳、A 輕腳、B 重腳、RB／RT 必殺、LB／LT 投技，方向鍵或左搖桿移動。<br>
 <b>手機：</b>螢幕下方有按鈕（操作 P1）。<br>
@@ -250,10 +251,10 @@ function pauseScreen(){
  ctx.save();ctx.fillStyle='#000c';ctx.fillRect(0,0,W,H);ctx.textAlign='center';ctx.fillStyle='#fff';ctx.font='900 46px '+FONT;ctx.fillText('暫停',W/2,70);
  const k=j=>KN(0,j),L=[
   [k(4)+' 輕拳　'+k(5)+' 重拳　'+k(6)+' 輕腳　'+k(7)+' 重腳　'+k(8)+' 必殺　'+k(9)+' 投技　雙擊方向 衝刺','#fff'],
-  ['↓+腳 掃堂腿（下段）　←+投技 背摔　↓+必殺 超必殺（100 氣）　中段要站著擋、下段要蹲著擋','#fff'],
+  ['↓+重腳 掃堂腿（下段）　←+投技 背摔　↓+必殺 超必殺（100 氣）　↓+投技 第六必殺　中段要站著擋、下段要蹲著擋','#fff'],
   ['連段：輕→重→必殺→超必殺；同一連段每招只能用一次；命中後可衝刺或跳躍取消','#cfd2ff'],['','#fff']];
  const who=[p1].concat(G.mode===2&&p2.ch!==p1.ch?[p2]:[]);
- who.forEach(f=>{const i=CH.indexOf(f.ch);L.push([f.ch.n+'：'+cmdList(f.ch).map(x=>x[0]+' '+x[1].replace(/（.*）/,'')).join('　'),f.ch.col]);L.push([CHM[i].m.map(x=>x[0]+' '+x[1].replace(/（.*）/,'')).join('　'),f.ch.col]);L.push(['被動：'+CHM[i].p,f.ch.col2])});
+ who.forEach(f=>{const i=CH.indexOf(f.ch);const cl=cmdList(f.ch).map(x=>x[0]+' '+x[1].replace(/（.*）/,''));L.push([f.ch.n+'：'+cl.slice(0,6).join('　'),f.ch.col]);L.push([cl.slice(6).join('　'),f.ch.col]);L.push([spList(i).map(x=>x[0]+' '+x[1].replace(/（.*）/,'')).join('　'),f.ch.col]);L.push(['被動：'+CHM[i].p,f.ch.col2])});
  L.push(['','#fff'],['按 P 或 Esc 繼續　按 Q 回到選單　F2 判定框'+(G.hb?'（開）':''),'#ffe14d']);
  ctx.font='15px '+FONT;L.forEach((l,i)=>{ctx.fillStyle=l[1];ctx.fillText(l[0],W/2,120+i*30)});ctx.restore();
 }
