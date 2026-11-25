@@ -129,6 +129,36 @@ const ok = (name, cond, detail) => {
   ok('街機：輸了可以接關再戰同一位', arc.log.join(',') === 'win,lose,win,win,win,win' && arc.seen[1] === arc.seen[2], arc.log.join(','));
   ok('街機：通關後記錄接關次數，回選單還原難度與場景', arc.done && arc.cont === 1 && arc.diff === 0 && arc.stage === 1, JSON.stringify(arc));
 
+  // ---- 3 對 3 隊伍戰、生存模式、一回合決勝與延續體力的重播
+  const chain = await pg.evaluate(async () => {
+    const out = {}, ko = (who) => { while (G.phase !== 'over') { if (G.phase === 'fight') who.st = 'ko'; step() } };
+    // 隊伍戰：P1 先贏兩場、輸一場、再贏一場 → P1 勝
+    TEAM = { A: [0, 1, 2], B: [3, 4, 5], ia: 0, ib: 0, ha: null, hb: null, mode: 1, res: null }; teamFight(); G.vs = 0;
+    const seq = [];
+    for (const lose of [0, 0, 1, 0]) { G.vs = 0; seq.push(CH[sel[0]].n + 'v' + CH[sel[1]].n); ko(lose ? p1 : p2); teamNext() }
+    out.team = seq.join(',') === '烈v雷,烈v岩,烈v霜,鋼v霜' && TEAM && TEAM.done && G.msg.includes('P1');
+    toMenu();
+    // 生存：贏 4 場後輸 → 紀錄 4 勝、難度隨勝場上升
+    localStorage.removeItem('fd_surv'); G.diff = 0; sel[0] = 6;
+    SURV = { me: 6, n: 0, hp: null, d0: 0, last: -1, res: null }; survFight(); const diffs = [];
+    for (let i = 0; i < 5; i++) { G.vs = 0; diffs.push(G.diff); ko(i < 4 ? p2 : p1); survNext() }
+    out.surv = SURV.done && SURV.n === 4 && JSON.parse(localStorage.getItem('fd_surv'))[6] === 4 && diffs.join('') === '00011';
+    toMenu(); out.restore = G.diff === 0 && !G.ft;
+    // 延續體力的一回合對戰，重播後結果相同
+    const KS = ['KeyA', 'KeyD', 'KeyW', 'KeyS', 'KeyU', 'KeyI', 'KeyJ', 'KeyK', 'KeyO', 'KeyL'];
+    const hash = () => { const o = JSON.parse(snapAll()); delete o.v1; delete o.v2; delete o.a.ai; delete o.b.ai; return rbFnv(canon(o)) };
+    chainStart(2, 7, 1, 40, 70); G.vs = 0;
+    for (let i = 0; i < 20000 && G.phase !== 'over'; i++) { for (const k of KS) { if (Math.random() < 0.06) { keys[k] = keys[k] ? 0 : 1; if (keys[k]) pend[k] = 1 } } step() }
+    for (const k in keys) keys[k] = 0;
+    const si = G.si, h = hash(), o = await codeDec(await codeEnc(rpPack())); startReplay(o); G.vs = 0; while (G.si < si) step();
+    out.replay = hash() === h && G.phase === 'over'; RP = null; toMenu();
+    return out;
+  });
+  ok('隊伍戰：輪番上陣、輸的換人、最後判定勝負', chain.team);
+  ok('生存：勝場累積、難度上升、保存最佳紀錄', chain.surv);
+  ok('連戰結束後還原難度與回合設定', chain.restore);
+  ok('延續體力的一回合對戰可正確重播', chain.replay);
+
   // ---- 對戰機制（用腳本輸入驗證）
   const mech = await pg.evaluate(() => {
     const H0 = human, out = {};

@@ -8,6 +8,7 @@ function inputs(hs){
  else if(G.mode===4)b=d2;
  else{const r=dummyIn(a);a=r[0];b=r[1]}
  if(REC)recPush(a,b);
+ if(G.mode===3||RP)inRec(a,b);
  return[a,b];
 }
 // ===== 選角卡片 =====
@@ -76,6 +77,7 @@ const SPI={sp:0,sp2:1,sp3:2,asp:3,ex:4,sp4:5};
 const mvName=(f,k)=>(f.ch.nm&&f.ch.nm[k])||(k==='sp4'&&f.ch.sp4n?f.ch.sp4n.replace(/（.*）/,''):0)||MVN[k]||(SPI[k]!==undefined?CHM[CH.indexOf(f.ch)].m[SPI[k]][1].replace(/（.*）/,''):k);
 const actable=f=>f.y>=GY&&(f.st==='idle'||f.st==='walk'||(f.st==='block'&&f.stun===0));
 function trainTick(){
+ fmRec();
  if(G.phase!=='fight')return;
  if(TUT)tutTick();
  const a=p1.atk;
@@ -126,7 +128,8 @@ function trainHud(){
   if(FD.res)L.push([FD.res+(FD.kd?'：對手倒地':FD.adv===null?'：計算中…':'：'+(FD.adv>0?'+':'')+FD.adv+' 幀（'+(FD.adv>0?'你先動':FD.adv<0?'對手先動':'同時')+'）'),FD.res==='命中'?'#ffe14d':'#7ec8ff'])}
  if(TR.rec)L.push(['● 錄製中：用 P1 按鍵操作木樁（'+(TR.buf.length/60).toFixed(1)+'／15 秒），再按一次「停止錄製」','#ff6b6b']);
  else if(TR.dm===5)L.push(['木樁正在重播你錄的動作（'+(TR.buf.length/60).toFixed(1)+' 秒循環）','#cfd2ff']);
- if(L.length){ctx.fillStyle='rgba(0,0,0,.6)';ctx.fillRect(12,H-18-L.length*22,620,L.length*22+8);L.forEach((l,i)=>{ctx.fillStyle=l[1];ctx.fillText(l[0],22,H-L.length*22+i*22)})}
+ fmDraw();inDraw(0,12);
+ if(L.length){ctx.fillStyle='rgba(0,0,0,.6)';ctx.fillRect(12,H-44-L.length*22,620,L.length*22+8);L.forEach((l,i)=>{ctx.fillStyle=l[1];ctx.fillText(l[0],22,H-26-L.length*22+i*22)})}
  if(TR.tr>=0){const t=trialList()[TR.tr],n=TR.ok?t.length:(()=>{let k=0;while(k<TR.seq.length&&TR.seq[k]===t[k])k++;return k})();
   ctx.textAlign='center';ctx.font='bold 20px '+FONT;const s=t.map((k,i)=>(i<n?'✔':'')+mvName(p1,k)).join(' → ');
   ctx.fillStyle='rgba(0,0,0,.6)';ctx.fillRect(W/2-300,92,600,58);ctx.fillStyle='#ffe14d';ctx.fillText('連段挑戰 '+(TR.tr+1)+'／'+trialList().length,W/2,116);ctx.fillStyle=TR.ok?'#3ddc6a':'#fff';ctx.fillText(TR.ok?'成功！'+s:s,W/2,142);
@@ -277,14 +280,14 @@ function recPush(a,b){const k=G.si-1;REC.a[k]=encI(a);REC.b[k]=encI(b)}
 function rpNext(){const k=G.si-1,a=RP.a[k],b=RP.b[k];return[decI(a===undefined?0:a)||NI,decI(b===undefined?0:b)]}
 function rle(arr){const o=[];let v=null,c=0;for(let i=0;i<arr.length;i++){const x=arr[i]===undefined?0:arr[i];if(x===v)c++;else{if(c)o.push(v,c);v=x;c=1}}if(c)o.push(v,c);return o}
 function unrle(o){const a=[];for(let i=0;i+1<o.length;i+=2){const v=o[i]|0,c=Math.min(o[i+1]|0,40000);for(let k=0;k<c&&a.length<40000;k++)a.push(v)}return a}
-const rpPack=()=>({v:1,m:REC.m,c:REC.c,g:REC.g,h:REC.h||[1,1],a:rle(REC.a),b:rle(REC.b)});
+const rpPack=()=>({v:1,m:REC.m,c:REC.c,g:REC.g,h:REC.h||[1,1],ini:REC.ini,a:rle(REC.a),b:rle(REC.b)});
 function rpValid(o){return o&&o.v===1&&[1,2,4].includes(o.m)&&Array.isArray(o.c)&&o.c.length===2&&o.c.every(x=>Number.isInteger(x)&&x>=0&&x<CH.length)&&Number.isInteger(o.g)&&o.g>=0&&o.g<STG.length&&Array.isArray(o.a)&&Array.isArray(o.b)&&o.a.concat(o.b).every(Number.isInteger)&&(o.h===undefined||Array.isArray(o.h)&&o.h.length===2&&o.h.every(x=>typeof x==='number'&&x>=1&&x<=2))}
 function rpSaveLast(){if(!REC||RP||G.si<300)return;try{localStorage.setItem('fd_last',JSON.stringify(rpPack()))}catch(e){}}
 function startReplay(o){
  if(!rpValid(o))return false;
  const sv=[sel[0],sel[1],G.stage];REC=null;
  RP={a:unrle(o.a),b:unrle(o.b),end:0,m:o.m};RP.n=Math.max(RP.a.length,RP.b.length);
- sel[0]=o.c[0];sel[1]=o.c[1];G.stage=o.g;startGame(o.m===4?2:o.m);if(o.h)[p1,p2].forEach((f,k)=>{if(o.h[k]!==1){f.hm=o.h[k];f.reset()}});sel[0]=sv[0];sel[1]=sv[1];G.stage=sv[2];
+ sel[0]=o.c[0];sel[1]=o.c[1];G.stage=o.g;startGame(o.m===4?2:o.m);if(o.h)[p1,p2].forEach((f,k)=>{if(o.h[k]!==1){f.hm=o.h[k];f.reset()}});if(o.ini&&typeof o.ini.ft==='number'&&Array.isArray(o.ini.hp)){G.ft=o.ini.ft;p1.hp=p1.lag=+o.ini.hp[0]||p1.hp;p2.hp=p2.lag=+o.ini.hp[1]||p2.hp}sel[0]=sv[0];sel[1]=sv[1];G.stage=sv[2];
  return true;
 }
 const pageURL=()=>location.href.split('#')[0];
@@ -305,7 +308,7 @@ function uiTick(){
  const on=G.phase==='over'&&!!REC&&!(G.mode===4&&NET.on);if(on!==OBAR){OBAR=on;$('obar').style.display=on?'flex':'none'}
 }
 function overlayDraw(){
- arcHud();const now=performance.now();ctx.save();ctx.textAlign='center';
+ arcHud();chainHud();if(RP&&G.phase!=='menu'){inDraw(0,12);inDraw(1,W-12)}const now=performance.now();ctx.save();ctx.textAlign='center';
  if(RP&&G.phase!=='menu'){ctx.font='bold 16px '+FONT;ctx.fillStyle='#ff6b6b';ctx.fillText(RP.end?'■ 重播結束　按 Enter 回選單':'▶ 重播中　P 暫停　暫停時 Q 離開',W/2,H-14)}
  else if(G.phase==='over'&&REC){ctx.font='bold 15px '+FONT;ctx.fillStyle='#ffe14d';ctx.fillText('R：複製這場的重播連結',W/2,H-66)}
  if(TOAST&&now<TOAST.until){ctx.font='bold 18px '+FONT;const w=ctx.measureText(TOAST.t).width+30;ctx.fillStyle='rgba(0,0,0,.75)';ctx.fillRect(W/2-w/2,H/2+60,w,36);ctx.fillStyle='#3ddc6a';ctx.fillText(TOAST.t,W/2,H/2+84)}

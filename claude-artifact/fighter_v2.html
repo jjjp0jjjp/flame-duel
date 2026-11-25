@@ -49,6 +49,7 @@ h1{filter:drop-shadow(0 0 22px #ff4d4d55);background-size:100% 200%;animation:sh
 .mode i{grid-row:1/3;font-style:normal;font-size:26px;align-self:center}.mode b{font-size:16px}.mode small{color:#aab;font-size:12px;line-height:1.3}
 .mode.main{background:linear-gradient(135deg,#ff5a4d,#a0203a);border-color:#ff9db8}.mode.main small{color:#ffe0e0}
 .mode.hot::after{content:"推薦";position:absolute;top:-8px;right:8px;background:#3ddc6a;color:#06210f;font-size:11px;font-weight:900;padding:1px 7px;border-radius:8px}
+#tpick{position:fixed;inset:0;background:#000c;z-index:20;display:flex;align-items:center;justify-content:center;padding:16px}.tp{background:#151832;border:1px solid #3a4080;border-radius:16px;padding:16px;max-width:560px;width:100%}.tp-row{display:flex;gap:10px;align-items:center;margin:8px 0}.tp-row>span{width:40px;color:#aab}.tp-slots{display:flex;gap:8px}.tp-slots span{border:2px solid #3a4080;border-radius:8px;padding:4px 14px;font-weight:900}.tp-slots .em{color:#555}#tpG{display:grid;grid-template-columns:repeat(8,1fr);gap:3px;margin:10px 0}#tpS:disabled{opacity:.4}
 #rec{color:#ffe14d;font-size:13px;text-align:center;margin:10px 0 2px}
 @media (max-width:520px){#mgrid{grid-template-columns:1fr}#pvbox{grid-template-columns:110px 1fr}#pv{width:110px;height:125px}.cell .nm{font-size:14px}}
 
@@ -86,6 +87,8 @@ input[type=range]{width:90px;padding:0}
   <div id="mgrid">
    <button class="mode main" id="b1"><i>🥊</i><b>單人 vs 電腦</b><small>三戰兩勝，挑戰電腦</small></button>
    <button class="mode" id="b7"><i>🏆</i><b>街機模式</b><small>連戰 5 場，最後挑戰強化版的自己</small></button>
+   <button class="mode" id="b8"><i>⚔️</i><b>3 對 3 隊伍戰</b><small>各選 3 人輪番上陣，體力延續</small></button>
+   <button class="mode" id="b9"><i>♾️</i><b>生存模式</b><small>無限連戰，看你能撐幾場</small></button>
    <button class="mode" id="b2"><i>👥</i><b>雙人對戰</b><small>同一台裝置兩人對打</small></button>
    <button class="mode" id="b4"><i>🌐</i><b>連線對戰</b><small>輸入房間代碼和朋友對戰</small></button>
    <button class="mode" id="b3"><i>🎯</i><b>訓練模式</b><small>判定框、幀數、連段挑戰</small></button>
@@ -876,7 +879,7 @@ function aiInput(me,op){
 
 function startRound(){G.win=-1;p1.reset();p2.reset();projs=[];parts=[];G.cam={z:1,cx:W/2};G.phase='intro';G.pt=100;G.time=60;G.tf=0;G.msg='ROUND '+G.round;G.mt=G.mm=100;sfx('round')}
 function startGame(m){rpSaveLast();REC=(m===1||m===2||m===4)&&!RP?{m,c:[sel[0],sel[1]],g:G.stage,a:[],b:[]}:null;G.mode=m;G.frame=0;G.hitstop=0;G.shake=0;for(const o of[pv1,pv2])for(const k in o)delete o[k];bg=makeBg(STG[G.stage]);p1=new F(CH[sel[0]],0);p2=new F(CH[sel[1]],1);G.round=1;G.si=0;G.pause=false;document.getElementById('menu').style.display='none';startRound();G.vs=m===3?0:110;if(G.vs)sfx('vs');if(m!==3)TUT=null;TR.rec=0;TR.tr=-1;TR.ok=0;FD=null;tbar()}
-function toMenu(){if(NET.room){netQuit(1);return}rpSaveLast();RP=null;REC=null;arcEnd();G.phase='menu';G.mt=0;TUT=null;lab();tbar();rpLastBtn();document.getElementById('menu').style.display='flex'}
+function toMenu(){if(NET.room){netQuit(1);return}rpSaveLast();RP=null;REC=null;arcEnd();chainEnd();G.phase='menu';G.mt=0;TUT=null;lab();tbar();rpLastBtn();document.getElementById('menu').style.display='flex'}
 function endRound(why){
  const ko1=p1.st==='ko',ko2=p2.st==='ko';let w=null;
  if(why==='ko'){if(ko1&&!ko2)w=p2;else if(ko2&&!ko1)w=p1}else w=p1.hp>p2.hp?p1:p2.hp>p1.hp?p2:null;
@@ -919,8 +922,8 @@ function step(){
   if(p1.st==='ko'||p2.st==='ko')endRound('ko');else if(G.time<=0)endRound('time');
  }else if(G.phase==='ko'){
   if(--G.pt<=0){
-   if(p1.wins>=2||p2.wins>=2){
-    G.phase='over';const w=p1.wins>p2.wins?p1:p2.wins>p1.wins?p2:null;if(G.mode===1&&w&&!RP)rec(w===p1);if(ARC&&!RP)ARC.res=w===p1?'win':'lose';
+   if(p1.wins>=(G.ft||2)||p2.wins>=(G.ft||2)){
+    G.phase='over';const w=p1.wins>p2.wins?p1:p2.wins>p1.wins?p2:null;if(G.mode===1&&w&&!RP&&!TEAM&&!SURV)rec(w===p1);if(ARC&&!RP)ARC.res=w===p1?'win':'lose';chainResult(w);
     G.msg=w?(w===p1?'P1 ':G.mode===1?'電腦 ':'P2 ')+w.ch.n+' 獲勝!':'平手';G.mt=G.mm=1e9;snd(660,.4,'triangle',.07,990)
    }else{G.round++;startRound()}
   }
@@ -1310,7 +1313,7 @@ function draw(){
   ctx.textAlign='center';ctx.lineWidth=5;ctx.strokeStyle='#000';ctx.fillStyle='#fff';ctx.font='bold 28px '+FONT;
   const st=NET.stallT?performance.now()-NET.stallT:0,tx=NET.gone?'對手已離開':st>8000?'連線中斷，按 Esc 離開':st>500?'等待對手…':'';
   if(tx){ctx.strokeText(tx,W/2,H/2+90);ctx.fillText(tx,W/2,H/2+90)}ctx.restore()}
- if(G.phase==='over'){ctx.textAlign='center';ctx.font='bold 24px '+FONT;ctx.fillStyle='#fff';ctx.fillStyle='rgba(0,0,0,.55)';ctx.fillRect(0,H-58,W,40);ctx.fillStyle='#fff';ctx.fillText(G.mode===4?(NET.reL?(NET.reR?'準備開始…':'已送出再戰邀請，等待對手…'):(NET.reR?'對手想再戰一局！按 Enter 接受　Esc 離開':'按 Enter 再戰一局　Esc 離開')):ARC?arcTip():'按 Enter 或點擊畫面回到選單',W/2,H-30)}
+ if(G.phase==='over'){ctx.textAlign='center';ctx.font='bold 24px '+FONT;ctx.fillStyle='#fff';ctx.fillStyle='rgba(0,0,0,.55)';ctx.fillRect(0,H-58,W,40);ctx.fillStyle='#fff';ctx.fillText(G.mode===4?(NET.reL?(NET.reR?'準備開始…':'已送出再戰邀請，等待對手…'):(NET.reR?'對手想再戰一局！按 Enter 接受　Esc 離開':'按 Enter 再戰一局　Esc 離開')):chainTip(),W/2,H-30)}
  if(G.pause)pauseScreen();
 }
 
@@ -1800,14 +1803,14 @@ addEventListener('keydown',e=>{if(KCAP){e.preventDefault();kcapDone(e.code);retu
  if(G.vs>0&&G.mode!==4&&(e.code==='Enter'||e.code==='Space'))G.vs=1;
  if(e.code==='Enter'&&RP&&RP.end){toMenu();return}
  if(e.code==='KeyR'&&G.phase==='over'&&REC&&!bound(e.code))rpCopy();
- if(e.code==='Escape'&&G.phase==='over'&&ARC){toMenu();return}
- if(e.code==='Enter'&&G.phase==='over'){if(G.mode===4&&NET.on)netRematch();else if(ARC)arcNext();else toMenu()}
+ if(e.code==='Escape'&&G.phase==='over'&&(ARC||TEAM||SURV)){toMenu();return}
+ if(e.code==='Enter'&&G.phase==='over'){if(G.mode===4&&NET.on)netRematch();else chainNext()}
  if(e.code==='KeyQ'&&G.pause&&!bound(e.code)){G.pause=false;toMenu()}
  if(e.code==='KeyM'&&!bound(e.code))mute=!mute;
 });
 addEventListener('keyup',e=>{keys[e.code]=0});
 addEventListener('blur',()=>{for(const k in keys)keys[k]=0;if(G.phase==='fight'&&G.mode!==4)G.pause=true});
-cv.addEventListener('pointerdown',()=>{if(G.phase==='over'){if(G.mode===4&&NET.on)netRematch();else if(ARC)arcNext();else toMenu()}});
+cv.addEventListener('pointerdown',()=>{if(G.phase==='over'){if(G.mode===4&&NET.on)netRematch();else chainNext()}});
 document.querySelectorAll('#pad button').forEach(b=>{
  const ks=b.dataset.k.split(','),on=e=>{e.preventDefault();ks.forEach(k=>{keys[k]=1;pend[k]=1})},off=()=>{ks.forEach(k=>keys[k]=0)};
  b.addEventListener('pointerdown',on);['pointerup','pointercancel','pointerleave'].forEach(n=>b.addEventListener(n,off));
@@ -1815,11 +1818,76 @@ document.querySelectorAll('#pad button').forEach(b=>{
 });
 const $=id=>document.getElementById(id),DF=['簡單','普通','困難'];
 function rec(win){try{const r=JSON.parse(localStorage.getItem('fd_rec')||'{}');win?r.w=(r.w||0)+1:r.l=(r.l||0)+1;localStorage.setItem('fd_rec',JSON.stringify(r))}catch(e){}}
-function lab(){try{const r=JSON.parse(localStorage.getItem('fd_rec')||'{}');$('rec').textContent='單人戰績：'+(r.w||0)+' 勝 '+(r.l||0)+' 敗'+arcInfo()}catch(e){}if(THUMB.length)selUI()}
+function lab(){try{const r=JSON.parse(localStorage.getItem('fd_rec')||'{}');$('rec').textContent='單人戰績：'+(r.w||0)+' 勝 '+(r.l||0)+' 敗'+arcInfo()+survInfo()}catch(e){}if(THUMB.length)selUI()}
 $('b1').onclick=()=>{snd(500,.1);startGame(1)};$('b2').onclick=()=>{snd(500,.1);startGame(2)};$('b3').onclick=()=>{snd(500,.1);startGame(3)};
 $('b4').onclick=()=>{snd(500,.1);$('net').style.display='block';$('net').scrollIntoView&&$('net').scrollIntoView({block:'nearest'})};
 $('nh').onclick=()=>netJoin(true);$('nj').onclick=()=>netJoin(false);
 $('nx').onclick=()=>{netLeave(1);$('net').style.display='none';setNs('房主按「建立房間」，把代碼告訴對手；對手輸入代碼後按「加入房間」。')};
+// ===== 幀數條、輸入顯示、3 對 3 隊伍戰、生存模式 =====
+// ---- 幀數條（訓練模式）：每幀記錄雙方狀態，畫在畫面底部
+const FM={a:[],b:[]},FMN=96;
+function fmCode(f){
+ if(f.st==='atk'&&f.atk){const a=f.atk;return f.t<=a.su?1:f.t<=a.su+a.ac?2:3}
+ if(f.st==='hit'||(f.st==='block'&&f.stun>0))return 4;
+ if(f.st==='down')return 5;if(f.st==='dash')return 6;if(f.y<GY-2)return 7;return 0;
+}
+const FMC=['#2a2f4a','#3ddc6a','#ff4040','#4d7bff','#ffd23d','#8a8fa8','#7fe3ff','#cfd2ff'];
+function fmRec(){for(const[f,L]of[[p1,FM.a],[p2,FM.b]]){const inv=f.st==='down'||(f.st==='dash'&&f.inv>0)||(f.atk&&f.atk.inv&&f.t<=(f.atk.iv||f.atk.su+3));L.push(fmCode(f)+(inv?8:0));if(L.length>FMN)L.shift()}}
+function fmDraw(){
+ const cw=6,x0=W/2-FMN*cw/2;ctx.save();ctx.fillStyle='rgba(0,0,0,.65)';ctx.fillRect(x0-50,H-30,FMN*cw+58,26);ctx.font='10px '+FONT;ctx.fillStyle='#cfd2ff';ctx.textAlign='left';ctx.fillText('P1',x0-44,H-19);ctx.fillText('P2',x0-44,H-8);
+ [FM.a,FM.b].forEach((L,r)=>L.forEach((c,i)=>{const y=H-27+r*11;ctx.fillStyle=FMC[c&7];ctx.fillRect(x0+i*cw,y,cw-1,9);if(c&8){ctx.strokeStyle='#fff';ctx.lineWidth=1;ctx.strokeRect(x0+i*cw+.5,y+.5,cw-2,8)}}));ctx.restore();
+}
+// ---- 輸入顯示（訓練、重播）：最近的輸入變化與持續幀數
+const INL=[[],[]];
+const inStr=i=>{if(!i)return'';const h=(i.r?1:0)-(i.l?1:0),v=(i.d?1:0)-(i.u?1:0),dir=['↖','↑','↗','←','','→','↙','↓','↘'][(v+1)*3+h+1],b=['lp','hp','lk','hk','sp','th'].filter(k=>i[k]).map(k=>({lp:'LP',hp:'HP',lk:'LK',hk:'HK',sp:'SP',th:'TH'})[k]);return(dir+(i.dash?'≫':'')+(b.length?' '+b.join('+'):'')).trim()};
+function inRec(a,b){[a,b].forEach((x,k)=>{const L=INL[k],s=inStr(x);if(L.length&&L[L.length-1][0]===s)L[L.length-1][1]++;else{L.push([s,1]);if(L.length>14)L.shift()}})}
+function inDraw(k,x){const L=INL[k];ctx.save();ctx.font='bold 12px '+FONT;ctx.textAlign=k?'right':'left';L.slice().reverse().forEach((e,j)=>{if(!e[0])return;const y=128+j*18;ctx.fillStyle='rgba(0,0,0,.55)';ctx.fillRect(k?x-96:x,y-12,96,16);ctx.fillStyle='#fff';ctx.fillText(e[0],k?x-32:x+4,y);ctx.fillStyle='#8a8fa8';ctx.fillText(e[1],k?x-4:x+92-ctx.measureText(String(e[1])).width,y)});ctx.restore()}
+// ---- 一回合決勝的連戰（隊伍戰、生存）：共用的開打與結算
+let TEAM=null,SURV=null;
+function chainStart(c0,c1,mode,hp0,hp1){
+ sel[0]=c0;sel[1]=c1;startGame(mode);G.ft=1;
+ if(hp0!=null){p1.hp=p1.lag=hp0}if(hp1!=null){p2.hp=p2.lag=hp1}
+ if(REC)REC.ini={ft:1,hp:[p1.hp,p2.hp]};
+}
+const regen=(f,r)=>Math.min(f.ch.hp*(f.hm||1),f.hp+f.ch.hp*r);
+// 隊伍戰：輸的換下一位，贏的保留體力並回復 20%
+function teamFight(){const T=TEAM;chainStart(T.A[T.ia],T.B[T.ib],T.mode,T.ha,T.hb);T.res=null}
+function teamNext(){const T=TEAM;if(!T||!T.res)return;if(T.done){toMenu();return}
+ if(T.res==='a'){T.ha=regen(p1,.2);T.hb=null;T.ib++}else{T.hb=regen(p2,.2);T.ha=null;T.ia++}
+ if(T.ia>=3||T.ib>=3){T.done=1;G.msg=T.ia>=3?(T.mode===1?'電腦隊伍 勝利':'P2 隊伍 勝利'):'P1 隊伍 勝利';G.mt=G.mm=1e9;sfx('round');return}
+ teamFight()}
+// 生存：無限連戰，勝場回復 25% 體力，每 3 勝難度提高
+function survFight(){const S=SURV;let c;do{c=Math.random()*CH.length|0}while(c===S.last&&CH.length>1);S.last=c;G.diff=Math.min(2,S.d0+Math.floor(S.n/3));chainStart(S.me,c,1,S.hp,null);S.res=null}
+function survNext(){const S=SURV;if(!S||!S.res)return;if(S.done){toMenu();return}
+ if(S.res==='a'){S.n++;S.hp=regen(p1,.25);survFight();return}
+ S.done=1;try{const r=JSON.parse(localStorage.getItem('fd_surv')||'{}');if((r[S.me]||0)<S.n){r[S.me]=S.n;localStorage.setItem('fd_surv',JSON.stringify(r))}}catch(e){}
+ G.msg='生存 '+S.n+' 勝';G.mt=G.mm=1e9}
+function chainResult(w){if(RP)return;const r=w===p1?'a':w===p2?'b':'b';if(TEAM)TEAM.res=r;if(SURV)SURV.res=r}
+function chainNext(){if(ARC)arcNext();else if(TEAM)teamNext();else if(SURV)survNext();else toMenu()}
+function chainTip(){
+ if(ARC)return arcTip();
+ if(TEAM)return TEAM.done?'按 Enter 回選單':'按 Enter 下一場（剩 P1 '+(3-TEAM.ia-(TEAM.res==='b'?1:0))+' 人、對手 '+(3-TEAM.ib-(TEAM.res==='a'?1:0))+' 人）';
+ if(SURV)return SURV.done?'最佳紀錄已保存　按 Enter 回選單':'勝利！按 Enter 繼續（回復 25% 體力）';
+ return'按 Enter 或點擊畫面回到選單'}
+function chainEnd(){if(SURV)G.diff=SURV.d0;TEAM=null;SURV=null;G.ft=0}
+function chainHud(){
+ if(G.phase==='menu')return;ctx.save();ctx.textAlign='center';ctx.font='bold 14px '+FONT;
+ if(TEAM){[[TEAM.A,TEAM.ia,0],[TEAM.B,TEAM.ib,1]].forEach(([L,ix,k])=>L.forEach((c,j)=>{const x=k?W-60-j*30:60+j*30,y=110;ctx.globalAlpha=j<ix?.25:1;ctx.drawImage(HEAD[c],x-13,y-13,26,26);ctx.strokeStyle=j===ix?'#ffe14d':'#555';ctx.lineWidth=2;ctx.strokeRect(x-13,y-13,26,26)}));ctx.globalAlpha=1;ctx.fillStyle='#ffe14d';ctx.fillText('隊伍戰',W/2,90)}
+ if(SURV){ctx.fillStyle='#ffe14d';ctx.fillText('生存 第 '+(SURV.n+1)+' 戰　難度 '+DF[G.diff],W/2,90)}
+ ctx.restore()}
+function survInfo(){try{const r=JSON.parse(localStorage.getItem('fd_surv')||'{}'),b=Math.max(0,...Object.values(r));return b?'　生存最佳：'+b+' 勝':''}catch(e){return''}}
+// ---- 隊伍選擇視窗
+function teamPicker(){
+ const d=document.createElement('div');d.id='tpick';d.innerHTML='<div class="tp"><b>隊伍戰：各選 3 位角色（依序上場）</b><div class="tp-row"><span>P1</span><div id="tpA" class="tp-slots"></div></div><div class="tp-row"><span id="tpBl">電腦</span><div id="tpB" class="tp-slots"></div></div><div id="tpG"></div><div class="row"><button id="tpM">對手：電腦</button><button id="tpR">🎲 隨機補滿</button><button id="tpC">清除</button><button id="tpS" class="main">開始</button><button id="tpX">取消</button></div></div>';
+ document.body.appendChild(d);const A=[],B=[];let mode=1;
+ const draw=()=>{[[A,'tpA'],[B,'tpB']].forEach(([L,id])=>{$(id).innerHTML=[0,1,2].map(j=>L[j]!=null?'<span style="border-color:'+CH[L[j]].col+'">'+CH[L[j]].n+'</span>':'<span class="em">？</span>').join('')});$('tpM').textContent='對手：'+(mode===1?'電腦':'玩家二');$('tpBl').textContent=mode===1?'電腦':'P2';$('tpS').disabled=!(A.length===3&&B.length===3)};
+ CH.forEach((ch,i)=>{const b=document.createElement('button');b.className='cell';b.style.background='radial-gradient(circle at 50% 38%,'+ch.col+'66,#0b0b1e 72%)';const c=document.createElement('canvas');c.width=c.height=200;c.getContext('2d').drawImage(HEAD[i],0,0);b.appendChild(c);b.insertAdjacentHTML('beforeend','<span class="nm">'+ch.n+'</span>');b.onclick=()=>{if(A.length<3)A.push(i);else if(B.length<3)B.push(i);draw()};$('tpG').appendChild(b)});
+ $('tpM').onclick=()=>{mode=mode===1?2:1;draw()};$('tpC').onclick=()=>{A.length=0;B.length=0;draw()};
+ $('tpR').onclick=()=>{const r=()=>Math.random()*CH.length|0;while(A.length<3)A.push(r());while(B.length<3)B.push(r());draw()};
+ $('tpX').onclick=()=>d.remove();$('tpS').onclick=()=>{d.remove();TEAM={A:A.slice(),B:B.slice(),ia:0,ib:0,ha:null,hb:null,mode,res:null};teamFight()};draw();
+}
+$('b8').onclick=()=>{snd(500,.1);teamPicker()};
+$('b9').onclick=()=>{snd(500,.1);SURV={me:sel[0],n:0,hp:null,d0:G.diff,last:-1,res:null};survFight()};
 // ===== 輸入集中：每次 step 取得雙方輸入（訓練木樁、錄製、重播都走這裡）=====
 let RP=null,REC=null;
 function inputs(hs){
@@ -1830,6 +1898,7 @@ function inputs(hs){
  else if(G.mode===4)b=d2;
  else{const r=dummyIn(a);a=r[0];b=r[1]}
  if(REC)recPush(a,b);
+ if(G.mode===3||RP)inRec(a,b);
  return[a,b];
 }
 // ===== 選角卡片 =====
@@ -1898,6 +1967,7 @@ const SPI={sp:0,sp2:1,sp3:2,asp:3,ex:4,sp4:5};
 const mvName=(f,k)=>(f.ch.nm&&f.ch.nm[k])||(k==='sp4'&&f.ch.sp4n?f.ch.sp4n.replace(/（.*）/,''):0)||MVN[k]||(SPI[k]!==undefined?CHM[CH.indexOf(f.ch)].m[SPI[k]][1].replace(/（.*）/,''):k);
 const actable=f=>f.y>=GY&&(f.st==='idle'||f.st==='walk'||(f.st==='block'&&f.stun===0));
 function trainTick(){
+ fmRec();
  if(G.phase!=='fight')return;
  if(TUT)tutTick();
  const a=p1.atk;
@@ -1948,7 +2018,8 @@ function trainHud(){
   if(FD.res)L.push([FD.res+(FD.kd?'：對手倒地':FD.adv===null?'：計算中…':'：'+(FD.adv>0?'+':'')+FD.adv+' 幀（'+(FD.adv>0?'你先動':FD.adv<0?'對手先動':'同時')+'）'),FD.res==='命中'?'#ffe14d':'#7ec8ff'])}
  if(TR.rec)L.push(['● 錄製中：用 P1 按鍵操作木樁（'+(TR.buf.length/60).toFixed(1)+'／15 秒），再按一次「停止錄製」','#ff6b6b']);
  else if(TR.dm===5)L.push(['木樁正在重播你錄的動作（'+(TR.buf.length/60).toFixed(1)+' 秒循環）','#cfd2ff']);
- if(L.length){ctx.fillStyle='rgba(0,0,0,.6)';ctx.fillRect(12,H-18-L.length*22,620,L.length*22+8);L.forEach((l,i)=>{ctx.fillStyle=l[1];ctx.fillText(l[0],22,H-L.length*22+i*22)})}
+ fmDraw();inDraw(0,12);
+ if(L.length){ctx.fillStyle='rgba(0,0,0,.6)';ctx.fillRect(12,H-44-L.length*22,620,L.length*22+8);L.forEach((l,i)=>{ctx.fillStyle=l[1];ctx.fillText(l[0],22,H-26-L.length*22+i*22)})}
  if(TR.tr>=0){const t=trialList()[TR.tr],n=TR.ok?t.length:(()=>{let k=0;while(k<TR.seq.length&&TR.seq[k]===t[k])k++;return k})();
   ctx.textAlign='center';ctx.font='bold 20px '+FONT;const s=t.map((k,i)=>(i<n?'✔':'')+mvName(p1,k)).join(' → ');
   ctx.fillStyle='rgba(0,0,0,.6)';ctx.fillRect(W/2-300,92,600,58);ctx.fillStyle='#ffe14d';ctx.fillText('連段挑戰 '+(TR.tr+1)+'／'+trialList().length,W/2,116);ctx.fillStyle=TR.ok?'#3ddc6a':'#fff';ctx.fillText(TR.ok?'成功！'+s:s,W/2,142);
@@ -2099,14 +2170,14 @@ function recPush(a,b){const k=G.si-1;REC.a[k]=encI(a);REC.b[k]=encI(b)}
 function rpNext(){const k=G.si-1,a=RP.a[k],b=RP.b[k];return[decI(a===undefined?0:a)||NI,decI(b===undefined?0:b)]}
 function rle(arr){const o=[];let v=null,c=0;for(let i=0;i<arr.length;i++){const x=arr[i]===undefined?0:arr[i];if(x===v)c++;else{if(c)o.push(v,c);v=x;c=1}}if(c)o.push(v,c);return o}
 function unrle(o){const a=[];for(let i=0;i+1<o.length;i+=2){const v=o[i]|0,c=Math.min(o[i+1]|0,40000);for(let k=0;k<c&&a.length<40000;k++)a.push(v)}return a}
-const rpPack=()=>({v:1,m:REC.m,c:REC.c,g:REC.g,h:REC.h||[1,1],a:rle(REC.a),b:rle(REC.b)});
+const rpPack=()=>({v:1,m:REC.m,c:REC.c,g:REC.g,h:REC.h||[1,1],ini:REC.ini,a:rle(REC.a),b:rle(REC.b)});
 function rpValid(o){return o&&o.v===1&&[1,2,4].includes(o.m)&&Array.isArray(o.c)&&o.c.length===2&&o.c.every(x=>Number.isInteger(x)&&x>=0&&x<CH.length)&&Number.isInteger(o.g)&&o.g>=0&&o.g<STG.length&&Array.isArray(o.a)&&Array.isArray(o.b)&&o.a.concat(o.b).every(Number.isInteger)&&(o.h===undefined||Array.isArray(o.h)&&o.h.length===2&&o.h.every(x=>typeof x==='number'&&x>=1&&x<=2))}
 function rpSaveLast(){if(!REC||RP||G.si<300)return;try{localStorage.setItem('fd_last',JSON.stringify(rpPack()))}catch(e){}}
 function startReplay(o){
  if(!rpValid(o))return false;
  const sv=[sel[0],sel[1],G.stage];REC=null;
  RP={a:unrle(o.a),b:unrle(o.b),end:0,m:o.m};RP.n=Math.max(RP.a.length,RP.b.length);
- sel[0]=o.c[0];sel[1]=o.c[1];G.stage=o.g;startGame(o.m===4?2:o.m);if(o.h)[p1,p2].forEach((f,k)=>{if(o.h[k]!==1){f.hm=o.h[k];f.reset()}});sel[0]=sv[0];sel[1]=sv[1];G.stage=sv[2];
+ sel[0]=o.c[0];sel[1]=o.c[1];G.stage=o.g;startGame(o.m===4?2:o.m);if(o.h)[p1,p2].forEach((f,k)=>{if(o.h[k]!==1){f.hm=o.h[k];f.reset()}});if(o.ini&&typeof o.ini.ft==='number'&&Array.isArray(o.ini.hp)){G.ft=o.ini.ft;p1.hp=p1.lag=+o.ini.hp[0]||p1.hp;p2.hp=p2.lag=+o.ini.hp[1]||p2.hp}sel[0]=sv[0];sel[1]=sv[1];G.stage=sv[2];
  return true;
 }
 const pageURL=()=>location.href.split('#')[0];
@@ -2127,7 +2198,7 @@ function uiTick(){
  const on=G.phase==='over'&&!!REC&&!(G.mode===4&&NET.on);if(on!==OBAR){OBAR=on;$('obar').style.display=on?'flex':'none'}
 }
 function overlayDraw(){
- arcHud();const now=performance.now();ctx.save();ctx.textAlign='center';
+ arcHud();chainHud();if(RP&&G.phase!=='menu'){inDraw(0,12);inDraw(1,W-12)}const now=performance.now();ctx.save();ctx.textAlign='center';
  if(RP&&G.phase!=='menu'){ctx.font='bold 16px '+FONT;ctx.fillStyle='#ff6b6b';ctx.fillText(RP.end?'■ 重播結束　按 Enter 回選單':'▶ 重播中　P 暫停　暫停時 Q 離開',W/2,H-14)}
  else if(G.phase==='over'&&REC){ctx.font='bold 15px '+FONT;ctx.fillStyle='#ffe14d';ctx.fillText('R：複製這場的重播連結',W/2,H-66)}
  if(TOAST&&now<TOAST.until){ctx.font='bold 18px '+FONT;const w=ctx.measureText(TOAST.t).width+30;ctx.fillStyle='rgba(0,0,0,.75)';ctx.fillRect(W/2-w/2,H/2+60,w,36);ctx.fillStyle='#3ddc6a';ctx.fillText(TOAST.t,W/2,H/2+84)}
