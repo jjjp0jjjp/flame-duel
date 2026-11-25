@@ -188,9 +188,15 @@ const ok = (name, cond, detail) => {
     setup(1, 0); let crushed = false;
     for (let r = 0; r < 12 && !crushed; r++) { p1.x = 400; p2.x = 470; run(40, (k) => { crushed = crushed || (p2.st === 'hit' && p2.stun > 30); return [k === 0 ? { hp: 1 } : {}, { d: 1 }] }) }
     out.guard = crushed;
+    // 簡易操作：連按輕拳自動接 輕→輕腳→重拳→必殺，傷害較低；並寫進重播
+    const SV = SIMPLE; SIMPLE = [1, 0]; setup(0, 0); p1.mt = 60; let seen = [];
+    run(70, (k) => { if (p1.st === 'atk' && p1.atk && !seen.includes(p1.atk.key)) seen.push(p1.atk.key); return [k % 3 === 0 ? { lp: 1 } : {}, {}] });
+    const simpleOK = p1.sm === 1 && p2.sm === 0 && ['lp', 'lk', 'hp', 'sp'].every(m => seen.includes(m)) && REC && REC.s && REC.s[0] === 1;
+    SIMPLE = [0, 0]; setup(0, 0); p1.mt = 60; let seen2 = []; run(70, (k) => { if (p1.st === 'atk' && p1.atk && !seen2.includes(p1.atk.key)) seen2.push(p1.atk.key); return [k % 3 === 0 ? { lp: 1 } : {}, {}] });
+    SIMPLE = SV; out.simple = simpleOK && !seen2.includes('sp');
     return out;
   });
-  for (const [k, v] of Object.entries(mech)) ok('機制：' + { parry: '精準招架', punish: '確反加傷', tech: '受身與強制倒地', wall: '撞牆反彈', burst: '爆氣', guard: '防禦崩潰' }[k], v);
+  for (const [k, v] of Object.entries(mech)) ok('機制：' + { parry: '精準招架', punish: '確反加傷', tech: '受身與強制倒地', wall: '撞牆反彈', burst: '爆氣', guard: '防禦崩潰', simple: '簡易操作輔助連段' }[k], v);
 
   // ---- 連段挑戰
   const tr = await pg.evaluate(() => {

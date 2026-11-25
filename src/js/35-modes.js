@@ -63,3 +63,10 @@ function teamPicker(){
 }
 $('b8').onclick=()=>{snd(500,.1);teamPicker()};
 $('b9').onclick=()=>{snd(500,.1);SURV={me:sel[0],n:0,hp:null,d0:G.diff,last:-1,res:null};survFight()};
+// ---- 簡易操作（輔助連段）：命中後在中立方向連按任一攻擊鍵，自動接 輕→中→重→必殺；傷害 ×0.85
+const SMC={lp:'lk',jab:'lk',blp:'lk',lk:'hp',push:'hp',dlk:'hp',hp:'sp',hk:'sp',dhp:'sp',lunge:'sp',bhp:'sp',spin:'sp',flip:'sp',sweep:'sp'};
+let SIMPLE=[0,0];try{const o=JSON.parse(localStorage.getItem('fd_sm')||'null');if(Array.isArray(o))SIMPLE=[o[0]?1:0,o[1]?1:0]}catch(e){}
+function smApply(m){const s=G.smo||[SIMPLE[0],m===2?SIMPLE[1]:0];G.smo=null;p1.sm=s[0]?1:0;p2.sm=s[1]?1:0;if(REC&&(p1.sm||p2.sm))REC.s=[p1.sm,p2.sm]}
+const smName=k=>SIMPLE[k]?'簡易':'傳統';
+function smLabel(){$('smbtn').textContent='操作：P1 '+smName(0)+'／P2 '+smName(1)}
+$('smbtn').onclick=()=>{const n=((SIMPLE[0]?1:0)+(SIMPLE[1]?2:0)+1)%4;SIMPLE=[n&1,n>>1&1];try{localStorage.setItem('fd_sm',JSON.stringify(SIMPLE))}catch(e){}smLabel();snd(600,.06)};smLabel();
