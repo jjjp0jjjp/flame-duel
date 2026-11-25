@@ -43,7 +43,7 @@ h1{filter:drop-shadow(0 0 22px #ff4d4d55);background-size:100% 200%;animation:sh
 .opt{display:flex;align-items:center;gap:10px;margin:4px 0 10px;flex-wrap:wrap}.opt>span{color:#aab;font-size:13px;width:32px}
 .seg{display:inline-flex;border:2px solid var(--bd);border-radius:10px;overflow:hidden}.seg button{border:0;border-radius:0;padding:6px 14px}.seg button.on{background:var(--ac);color:#fff}
 #stgs{display:flex;gap:6px;flex-wrap:wrap}#stgs button{padding:0;border-radius:8px;overflow:hidden;position:relative;line-height:0}#stgs canvas{width:84px;height:47px;max-width:none;background:none}
-#stgs span{position:absolute;left:0;right:0;bottom:0;font-size:11px;line-height:1.5;background:#0008}#stgs button.on{border-color:#ffe14d;box-shadow:0 0 10px #ffe14d88}
+#hzbtn.on{border-color:#ff8a3a;box-shadow:0 0 8px #ff8a3a88}#stgs span{position:absolute;left:0;right:0;bottom:0;font-size:11px;line-height:1.5;background:#0008}#stgs button.on{border-color:#ffe14d;box-shadow:0 0 10px #ffe14d88}
 #mgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .mode{display:grid;grid-template-columns:40px 1fr;column-gap:6px;text-align:left;padding:10px 12px;border-radius:14px;background:linear-gradient(135deg,#2a1a44,#161a33);position:relative}
 .mode i{grid-row:1/3;font-style:normal;font-size:26px;align-self:center}.mode b{font-size:16px}.mode small{color:#aab;font-size:12px;line-height:1.3}
@@ -71,7 +71,7 @@ input[type=range]{width:90px;padding:0}
 <div id="obar" style="display:none;gap:8px;justify-content:center;padding:6px"><button id="ob-rp">複製重播連結</button><button id="ob-mn">回選單</button></div>
 <div id="tbar"><button id="tb-hb"></button><button id="tb-dm"></button><button id="tb-rec"></button><button id="tb-tr"></button><button id="tb-rs">重置位置</button></div>
 <div id="pad"><div id="stick"><div id="knob"></div></div>
-<div class="a"><button data-k="T0a">輕拳</button><button data-k="T0b">重拳</button><button data-k="T0s">必殺</button><button data-k="T0e,T0a" class="q">升龍</button><button data-k="T0x">輕腳</button><button data-k="T0y">重腳</button><button data-k="T0t">投</button><button data-k="T0e,T0s" class="q">超必</button><button data-k="T0t,T0s" class="q">爆氣</button></div></div>
+<div class="a"><button data-k="T0a">輕拳</button><button data-k="T0b">重拳</button><button data-k="T0s">必殺</button><button data-k="T0e,T0a" class="q">升龍</button><button data-k="T0x">輕腳</button><button data-k="T0y">重腳</button><button data-k="T0t">投</button><button data-k="T0e,T0s" class="q">超必</button><button data-k="T0t,T0s" class="q">爆氣</button><button data-k="T0a,T0b,T0x" class="q">迅移</button></div></div>
 <div id="menu">
 <header id="mhead"><h1>烈焰對決</h1><p class="sub">FLAME DUEL</p></header>
 <div id="mmain">
@@ -84,6 +84,7 @@ input[type=range]{width:90px;padding:0}
  <section id="modes" class="panel">
   <div class="opt"><span>難度</span><div class="seg" id="dfseg"><button data-v="0">簡單</button><button data-v="1">普通</button><button data-v="2">困難</button></div></div>
   <div class="opt"><span>場景</span><div id="stgs"></div></div>
+  <div class="opt"><span>機關</span><button id="hzbtn"></button></div>
   <div id="mgrid">
    <button class="mode main" id="b1"><i>🥊</i><b>單人 vs 電腦</b><small>三戰兩勝，挑戰電腦</small></button>
    <button class="mode" id="b7"><i>🏆</i><b>街機模式</b><small>連戰 5 場，最後挑戰強化版的自己</small></button>
@@ -702,6 +703,7 @@ pick(i,g){
  return null;
 }
 cc(a,m){if(this.cl.includes(m))return false;if(a.cn===4)return m==='ex';if(a.cn===3)return m==='ap'||m==='ak'||m==='ex'||m==='asp';return a.cn&&m!==a.key&&m!=='th'&&m!=='th2'&&m!=='ap'&&m!=='ak'&&m!=='dive'&&(m==='sp'||m==='sp2'||m==='sp3'||m==='sp4'||m==='ex'||m==='upper'||a.cn===1)}
+ rcIn(i){const r=this.r3||(this.r3=[0,0,0]);['lp','hp','lk'].forEach((k,j)=>{if(i[k])r[j]=4;else if(r[j]>0)r[j]--});if(r[0]&&r[1]&&r[2]&&(i.lp||i.hp||i.lk)){r[0]=r[1]=r[2]=0;return true}return false}
  setBuf(m){const sp=x=>x==='sp'||x==='sp2'||x==='sp3'||x==='sp4'||x==='ex'||x==='asp'||x==='upper';if(this.buf&&sp(this.buf.m)&&!sp(m)&&this.buf.t>=7)return;this.buf={m,t:10}}
  dashGo(s){gho(this,colOf(this));this.st='dash';this.dt=13;this.dd=s;this.inv=s!==this.dir?7:0;this.vx=s*8.5;spark(this.x,GY-4,'#b9a8d8',6,1);snd(180,.1,'sine',.04,500)}
 start(m,nf){
@@ -724,7 +726,8 @@ update(i,o){
  if(this.kd&&!g&&(i.lp||i.hp||i.lk||i.hk))this.tb=10;else if(this.tb>0)this.tb--;
  if(this.st==='block')this.gbt=0;else if(++this.gbt>60&&this.gd<100)this.gd=Math.min(100,this.gd+.25);
  if(this.bu&&this.st==='hit'&&i.th&&i.sp){this.bu=0;this.stun=0;this.kd=0;this.st='idle';this.vy=Math.min(this.vy,0);this.buf=null;this.start('burst');this.buf=null;if(!NOFX)burstFx(this)}
- if(this.st!=='ko'){const m=this.pick(i,g);if(m)this.setBuf(m);else if(this.buf&&!(this.st==='down'&&this.dt<=14)&&--this.buf.t<=0)this.buf=null}
+ let rc=0;{const rq=this.rcIn(i)||this.rcq;this.rcq=0;if(rq&&this.st==='atk'&&this.atk&&this.atk.key!=='burst'&&!this.atk.throw&&this.mt>=50){rc=1;const hit=this.hit;this.mt-=50;this.atk=null;this.st='idle';this.t=0;this.cl=[];this.buf=null;this.hit=false;this.hc=0;this.vx=g?0:this.vx*.3;if(!g)this.vy=Math.min(this.vy,-2);if(hit&&o.st==='hit')o.stun+=10;rcFx(this)}}
+ if(this.st!=='ko'&&!rc){const m=this.pick(i,g);if(m)this.setBuf(m);else if(this.buf&&!(this.st==='down'&&this.dt<=14)&&--this.buf.t<=0)this.buf=null}
  if(this.jh){if(g&&this.vy>=0)this.jh=0;else if(!i.u&&this.vy<-6){this.vy*=.6;this.jh=0}}
  if(this.st==='ko')this.kt++;
  else if(this.st==='win'){this.vx*=.8;this.kt++}
@@ -780,7 +783,7 @@ update(i,o){
  }
  if(this.st==='ko'&&this.y>=GY)this.vx*=.9;
  this.x=Math.max(40,Math.min(W-40,this.x));
- if(this.kd&&this.st==='hit'&&!this.wb&&this.y<GY&&(this.x<=40.5||this.x>=W-40.5)&&Math.abs(this.vx)>4){this.wb=1;this.vx=(this.x<W/2?1:-1)*3;this.vy=Math.min(this.vy,-6);G.shake=Math.max(G.shake,8);if(!NOFX)wallFx(this)}
+ if(this.kd&&this.st==='hit'&&!this.wb&&this.y<GY&&(this.x<=40.5||this.x>=W-40.5)&&Math.abs(this.vx)>4){this.wb=1;this.vx=(this.x<W/2?1:-1)*3;this.vy=Math.min(this.vy,-6);G.shake=Math.max(G.shake,8);if(!NOFX)wallFx(this);hzWall(this)}
 }
 tryHit(o){
  if(o.st==='ko')return;
@@ -878,8 +881,8 @@ function aiInput(me,op){
  return i;
 }
 
-function startRound(){G.win=-1;p1.reset();p2.reset();projs=[];parts=[];G.cam={z:1,cx:W/2};G.phase='intro';G.pt=100;G.time=60;G.tf=0;G.msg='ROUND '+G.round;G.mt=G.mm=100;sfx('round')}
-function startGame(m){rpSaveLast();REC=(m===1||m===2||m===4)&&!RP?{m,c:[sel[0],sel[1]],g:G.stage,a:[],b:[]}:null;G.mode=m;G.frame=0;G.hitstop=0;G.shake=0;for(const o of[pv1,pv2])for(const k in o)delete o[k];bg=makeBg(STG[G.stage]);p1=new F(CH[sel[0]],0);p2=new F(CH[sel[1]],1);smApply(m);G.round=1;G.si=0;G.pause=false;document.getElementById('menu').style.display='none';startRound();G.vs=m===3?0:110;if(G.vs)sfx('vs');if(m!==3)TUT=null;TR.rec=0;TR.tr=-1;TR.ok=0;FD=null;tbar()}
+function startRound(){G.win=-1;G.wbk=0;p1.reset();p2.reset();projs=[];parts=[];G.cam={z:1,cx:W/2};G.phase='intro';G.pt=100;G.time=60;G.tf=0;G.msg='ROUND '+G.round;G.mt=G.mm=100;sfx('round')}
+function startGame(m){rpSaveLast();REC=(m===1||m===2||m===4)&&!RP?{m,c:[sel[0],sel[1]],g:G.stage,a:[],b:[]}:null;G.mode=m;G.frame=0;G.hitstop=0;G.shake=0;for(const o of[pv1,pv2])for(const k in o)delete o[k];bg=makeBg(STG[G.stage]);p1=new F(CH[sel[0]],0);p2=new F(CH[sel[1]],1);smApply(m);hzApply();G.round=1;G.si=0;G.pause=false;document.getElementById('menu').style.display='none';startRound();G.vs=m===3?0:110;if(G.vs)sfx('vs');if(m!==3)TUT=null;TR.rec=0;TR.tr=-1;TR.ok=0;FD=null;tbar()}
 function toMenu(){if(NET.room){netQuit(1);return}rpSaveLast();RP=null;REC=null;arcEnd();chainEnd();G.phase='menu';G.mt=0;TUT=null;lab();tbar();rpLastBtn();document.getElementById('menu').style.display='flex'}
 function endRound(why){
  const ko1=p1.st==='ko',ko2=p2.st==='ko';let w=null;
@@ -893,12 +896,12 @@ function step(){
  if(G.mode===4){d1=dec(NET.inp[0],pv1);d2=dec(NET.inp[1],pv2)}
  if(G.vs>0){G.vs--;if(G.vs===0)sfx('round');return}
  G.si=(G.si|0)+1;
- if(G.hitstop>0){G.hitstop--;if(G.phase==='fight'){const bf=(p,i)=>{const m=p.pick(i,p.y>=GY);if(m)p.setBuf(m);if(i.u&&!p.pu)p.jb=8;p.pu=i.u;if(i.dash)p.db={d:i.dash,t:8}};const ab=inputs(1);bf(p1,ab[0]);if(ab[1])bf(p2,ab[1])}return}
+ if(G.hitstop>0){G.hitstop--;if(G.phase==='fight'){const bf=(p,i)=>{if(p.rcIn(i))p.rcq=1;const m=p.pick(i,p.y>=GY);if(m)p.setBuf(m);if(i.u&&!p.pu)p.jb=8;p.pu=i.u;if(i.dash)p.db={d:i.dash,t:8}};const ab=inputs(1);bf(p1,ab[0]);if(ab[1])bf(p2,ab[1])}return}
  G.frame++;G.shake*=.88;if(G.mt>0)G.mt--;
  if(G.phase==='ko'&&G.frame%2)return;
  let i1=NI,i2=NI;
  if(G.phase==='fight'){const ab=inputs(0);i1=ab[0];i2=ab[1]||NI;p1.mt=Math.min(100,p1.mt+.03);p2.mt=Math.min(100,p2.mt+.03);if(G.mode===3){p1.mt=100;if(p2.combo===0&&p2.st==='idle'){p2.hp=p2.ch.hp;p2.lag=p2.hp}}}
- p1.update(i1,p2);p2.update(i2,p1);resolveHits();if(G.mode===3)trainTick();
+ p1.update(i1,p2);p2.update(i2,p1);resolveHits();hzStep();if(G.mode===3)trainTick();
  const dx=p2.x-p1.x;
  if(Math.abs(dx)<44&&Math.abs(p1.y-p2.y)<60&&p1.st!=='ko'&&p2.st!=='ko'&&p1.st!=='down'&&p2.st!=='down'){const pu=(44-Math.abs(dx))/2,s=dx>=0?1:-1;p1.x-=s*pu;p2.x+=s*pu;p1.x=Math.max(40,Math.min(W-40,p1.x));p2.x=Math.max(40,Math.min(W-40,p2.x))}
  for(const p of projs){
@@ -1287,7 +1290,7 @@ function draw(){
  if(G.shake>.5)ctx.translate((Math.random()-.5)*G.shake,(Math.random()-.5)*G.shake);
  const z=G.cam.z,l=Math.max(0,Math.min(W-W/z,G.cam.cx-W/(2*z)));
  ctx.scale(z,z);ctx.translate(-l,-(H-H/z));
- ctx.drawImage(bg,0,0,W,H);amb();
+ ctx.drawImage(bg,0,0,W,H);amb();hzDraw();
  if(p1&&qHigh())reflect();
  if(p1){
   [p1,p2].sort((a,b)=>(b.st==='ko'||b.st==='down')-(a.st==='ko'||a.st==='down')).forEach(drawF);
@@ -1298,6 +1301,7 @@ function draw(){
   if(G.win>=0&&(G.phase==='over'||(G.phase==='ko'&&G.pt<100))){const wf=G.win?p2:p1;if(wf.st==='win')quote(wf)}
  }
  ctx.restore();
+ if(now0()<G.rcF){ctx.save();ctx.globalCompositeOperation='lighter';ctx.fillStyle='rgba(90,200,255,'+((G.rcF-now0())/180*.22)+')';ctx.fillRect(0,0,W,H);ctx.restore()}
  if(p1&&qHigh())postFx();
  if(p1)hud();
  if(p1&&G.mode===3&&G.phase!=='menu'){if(TUT)tutHud();else trainHud()}
@@ -1664,7 +1668,7 @@ function netHello(){
  if(NET.slot===0&&NET.remote&&!NET.started){
   if(NET.pings.length<5){R.emit('png',{t:performance.now()}).catch(emitErr);return}
   if(!NET.sid){const a=[...NET.pings].sort((x,y)=>x-y),med=a[a.length>>1];NET.Dsel=med<=60?1:med<=120?2:med<=200?3:4;NET.sid=Math.random().toString(36).slice(2,8)}
-  R.emit('start',{sid:NET.sid,c0:sel[0],c1:NET.remote.c,g:G.stage,D:NET.Dsel,m:1,s:[SIMPLE[0],NET.remote.sm]}).catch(emitErr);
+  R.emit('start',{sid:NET.sid,c0:sel[0],c1:NET.remote.c,g:G.stage,D:NET.Dsel,m:1,s:[SIMPLE[0],NET.remote.sm],hz:HZ}).catch(emitErr);
  }
 }
 function onPog(d){if(NET.slot===0&&!NET.started&&d&&typeof d.t==='number'){const r=performance.now()-d.t;if(r>0&&r<5000&&NET.pings.length<5)NET.pings.push(r)}}
@@ -1677,12 +1681,12 @@ function onHello(d){
 function onStart(d){
  if(NET.slot!==1||!d||typeof d.sid!=='string')return;
  const c0=Math.max(0,Math.min(CH.length-1,d.c0|0)),c1=Math.max(0,Math.min(CH.length-1,d.c1|0)),g=Math.max(0,Math.min(STG.length-1,d.g|0));
- if(!NET.started){NET.sid=d.sid;beginNet(c0,c1,g,d.D,1,d.s)}
+ if(!NET.started){NET.sid=d.sid;beginNet(c0,c1,g,d.D,1,d.s,d.hz)}
  if(d.sid===NET.sid&&NET.room)NET.room.emit('ready',{sid:d.sid}).catch(emitErr);
 }
 function onReady(d){
  if(NET.slot!==0||NET.started||!d||d.sid!==NET.sid||!NET.remote)return;
- beginNet(sel[0],NET.remote.c,G.stage,NET.Dsel,1,[SIMPLE[0],NET.remote.sm]);
+ beginNet(sel[0],NET.remote.c,G.stage,NET.Dsel,1,[SIMPLE[0],NET.remote.sm],HZ);
 }
 // ================= 連線對戰(回滾式同步) =================
 const RB_MAX=8;
@@ -1690,21 +1694,21 @@ function rbFnv(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i
 function canon(v){if(Array.isArray(v))return'['+v.map(canon).join(',')+']';if(v&&typeof v==='object')return'{'+Object.keys(v).sort().map(k=>k+':'+canon(v[k])).join(',')+'}';return JSON.stringify(v)}
 function snapF(f){const o={};for(const k in f){if(k==='tr'||k==='lt'||k==='ph')continue;o[k]=k==='ch'?CH.indexOf(f[k]):f[k]}return o}
 function restF(f,o){const tr=f.tr,lt=f.lt;for(const k of Object.keys(f))delete f[k];Object.assign(f,o);f.ch=CH[o.ch];f.tr=tr||[];f.lt=lt;f.ph=null}
-function snapAll(){return JSON.stringify({g:[G.frame,G.hitstop,G.phase,G.round,G.time,G.tf,G.pt,G.msg,G.mt,G.mm,G.vs|0,G.win,G.si|0],a:snapF(p1),b:snapF(p2),pr:projs.map(p=>{const o=Object.assign({},p);o.own=p.own===p1?0:1;return o}),v1:pv1,v2:pv2})}
-function loadAll(s){const o=JSON.parse(s),g=o.g;G.frame=g[0];G.hitstop=g[1];G.phase=g[2];G.round=g[3];G.time=g[4];G.tf=g[5];G.pt=g[6];G.msg=g[7];G.mt=g[8];G.mm=g[9];G.vs=g[10];G.win=g[11];G.si=g[12]|0;
+function snapAll(){return JSON.stringify({g:[G.frame,G.hitstop,G.phase,G.round,G.time,G.tf,G.pt,G.msg,G.mt,G.mm,G.vs|0,G.win,G.si|0,G.wbk|0],a:snapF(p1),b:snapF(p2),pr:projs.map(p=>{const o=Object.assign({},p);o.own=p.own===p1?0:1;return o}),v1:pv1,v2:pv2})}
+function loadAll(s){const o=JSON.parse(s),g=o.g;G.frame=g[0];G.hitstop=g[1];G.phase=g[2];G.round=g[3];G.time=g[4];G.tf=g[5];G.pt=g[6];G.msg=g[7];G.mt=g[8];G.mm=g[9];G.vs=g[10];G.win=g[11];G.si=g[12]|0;G.wbk=g[13]|0;
  restF(p1,o.a);restF(p2,o.b);projs=o.pr.map(p=>{p.own=p.own?p2:p1;return p});
  for(const k in pv1)delete pv1[k];Object.assign(pv1,o.v1);for(const k in pv2)delete pv2[k];Object.assign(pv2,o.v2)}
-function beginNet(c0,c1,g,D,m,sm){
+function beginNet(c0,c1,g,D,m,sm,hz){
  clearInterval(NET.hb);
  const sv=[sel[0],sel[1],G.stage];
- NET.DL=Math.max(1,Math.min(4,D|0))||2;NET.m=m||1;NET.c=[c0,c1];NET.g=g;NET.sm=Array.isArray(sm)?[sm[0]?1:0,sm[1]?1:0]:[0,0];
+ NET.DL=Math.max(1,Math.min(4,D|0))||2;NET.m=m||1;NET.c=[c0,c1];NET.g=g;NET.sm=Array.isArray(sm)?[sm[0]?1:0,sm[1]?1:0]:[0,0];NET.hz=hz?1:0;
  NET.started=true;NET.on=true;NET.tick=0;NET.loc={};NET.rem={};NET.used={};NET.snaps={};NET.rbFrom=null;NET.rbCount=0;NET.rbMax=0;
  NET.sendT={};NET.hash={};NET.rh={};NET.hl=null;NET.nextHash=29;NET.desync=false;NET.syncF=0;NET.dsAt=0;NET.resyncs=0;NET.rsT=0;NET.lastSrq=0;NET.stallT=0;NET.rtt=NET.rtt||0;NET.gone=false;
  NET.remHigh=NET.DL-1;NET.remAck=NET.DL-1;NET.remAd=0;NET.skip=0;NET.inp=[0,0];NET.reL=0;NET.reR=0;NET.gotM=0;NET.lastRe=0;NET.rst=null;
  for(let i=0;i<NET.DL;i++){NET.loc[i]=0;NET.rem[i]=0}
  sel[0]=c0;sel[1]=c1;G.stage=g;
  $('net').style.display='none';
- G.smo=NET.sm;startGame(4);
+ G.smo=NET.sm;G.hzo=NET.hz;startGame(4);
  sel[0]=sv[0];sel[1]=sv[1];
 }
 function netSend(){
@@ -1771,8 +1775,8 @@ function onSnp(d){
 }
 function netRematch(){if(!NET.on||G.phase!=='over'||NET.reL)return;NET.reL=1;NET.lastRe=0;netCheckRe()}
 function onRem(d){if(!NET.on||!d||d.m!==NET.m||G.phase!=='over')return;NET.reR=1;netCheckRe()}
-function netCheckRe(){if(NET.slot!==0||!NET.reL||!NET.reR)return;const m=NET.m+1,msg={m,c0:NET.c[0],c1:NET.c[1],g:NET.g,D:NET.DL,s:NET.sm};beginNet(msg.c0,msg.c1,msg.g,msg.D,m,msg.s);NET.rst=msg;NET.gotM=0;NET.lastRe=0}
-function onRst(d){if(NET.slot!==1||!d||typeof d.m!=='number'||d.m<=(NET.m||0))return;beginNet(Math.max(0,Math.min(CH.length-1,d.c0|0)),Math.max(0,Math.min(CH.length-1,d.c1|0)),Math.max(0,Math.min(STG.length-1,d.g|0)),d.D,d.m,d.s)}
+function netCheckRe(){if(NET.slot!==0||!NET.reL||!NET.reR)return;const m=NET.m+1,msg={m,c0:NET.c[0],c1:NET.c[1],g:NET.g,D:NET.DL,s:NET.sm,hz:NET.hz};beginNet(msg.c0,msg.c1,msg.g,msg.D,m,msg.s,msg.hz);NET.rst=msg;NET.gotM=0;NET.lastRe=0}
+function onRst(d){if(NET.slot!==1||!d||typeof d.m!=='number'||d.m<=(NET.m||0))return;beginNet(Math.max(0,Math.min(CH.length-1,d.c0|0)),Math.max(0,Math.min(CH.length-1,d.c1|0)),Math.max(0,Math.min(STG.length-1,d.g|0)),d.D,d.m,d.s,d.hz)}
 function netLeave(say){
  NET.on=false;clearInterval(NET.hb);
  NET.unsub.forEach(u=>{try{u()}catch(e){}});NET.unsub=[];
@@ -1896,6 +1900,37 @@ function smApply(m){const s=G.smo||[SIMPLE[0],m===2?SIMPLE[1]:0];G.smo=null;p1.s
 const smName=k=>SIMPLE[k]?'簡易':'傳統';
 function smLabel(){$('smbtn').textContent='操作：P1 '+smName(0)+'／P2 '+smName(1)}
 $('smbtn').onclick=()=>{const n=((SIMPLE[0]?1:0)+(SIMPLE[1]?2:0)+1)%4;SIMPLE=[n&1,n>>1&1];try{localStorage.setItem('fd_sm',JSON.stringify(SIMPLE))}catch(e){}smLabel();snd(600,.06)};smLabel();
+// ===== 迅移取消、場景機關 =====
+// ---- 迅移取消：輕拳＋重拳＋輕腳（4 幀內）耗 50 氣，取消任何招式的收招；命中中使用會讓對手多硬直
+function rcFx(f){if(NOFX)return;const c=colOf(f);gho(f,c);ring(f.x,f.y-70,'#fff');ring(f.x,f.y-70,c);emb(f.x,f.y-70,c,18,6,16,4,1);pp({x:f.x,y:f.y-160,vx:0,vy:-.6,l:45,m:45,txt:'迅移！',c:'#7fe3ff',text:1,big:1});G.rcF=performance.now()+180;snd(1200,.12,'sine',.06,300);sfx('cancel')}
+// ---- 場景機關（選單可開關；開關值會跟著連線開局訊息與重播一起保存）
+let HZ=0;try{HZ=+(localStorage.getItem('fd_hz')||0)?1:0}catch(e){}
+const HZN=['夜城：無','黃昏港：木箱牆可撞破','極光雪原：地面濕滑','火山口：定時噴發','竹林道場：無'];
+function hzApply(){G.hz=G.hzo!=null?(G.hzo?1:0):HZ;G.hzo=null;if(REC&&G.hz)REC.hz=1}
+function hzLabel(){const b=$('hzbtn');if(b){b.textContent='場景機關：'+(HZ?'開':'關');b.classList.toggle('on',!!HZ);b.title=HZN.join('\n')}}
+// 火山：每 480 幀一次，前 60 幀地面發光預告，接著 30 幀岩漿柱；位置只由幀數決定（確定性）
+const VC=480,vcX=n=>120+((n*7919+G.round*131)%720);
+function hzStep(){
+ if(!G.hz||G.phase!=='fight')return;
+ if(G.stage===3){const n=Math.floor(G.frame/VC),c=G.frame%VC,x=vcX(n);
+  if(c===420){G.shake=Math.max(G.shake,10);noise(.5,.2,900,'lowpass',80)}
+  if(c>=420&&c<450)for(const f of[p1,p2]){if(f.hzh===n||f.st==='ko'||f.st==='down'||(f.st==='dash'&&f.inv>0)||Math.abs(f.x-x)>48||f.y<GY-230)continue;
+   f.hzh=n;f.hp=Math.max(1,f.hp-7);f.st='hit';f.atk=null;f.buf=null;f.stun=22;f.kd=1;f.vy=-12;f.vx=(f.x<x?-1:1)*2.5;f.flash=6;G.hitstop=Math.max(G.hitstop,5);if(!NOFX){emb(f.x,f.y-40,'#ff8a3a',16,6,18,4,2);spark(f.x,f.y-50,'#ffd27a',10)}sfx('hitbig')}}
+ if(G.stage===2)for(const f of[p1,p2])if(f.y>=GY&&(f.st==='hit'||f.st==='block'||f.st==='down'||f.st==='dash'||f.st==='atk')&&Math.abs(f.vx)>.3){f.x=Math.max(40,Math.min(W-40,f.x+f.vx*.45));if(!NOFX&&G.frame%4===0)P({t:'e',x:f.x,y:GY-2,vx:-f.vx*.3,vy:-.5,l:14,s:2.5,c:'#e8f6ff',g:.05,dr:.9})}
+}
+// 黃昏港：第一次在血量 60% 以下被撞牆，木箱牆碎裂，額外傷害並彈得更遠
+function hzWall(f){if(!G.hz||G.stage!==1||G.wbk||f.hp>=f.ch.hp*(f.hm||1)*.6)return;G.wbk=f.x<W/2?1:2;f.hp=Math.max(1,f.hp-8);f.vx*=2.2;f.vy=-9;G.shake=Math.max(G.shake,16);G.hitstop=Math.max(G.hitstop,8);
+ if(!NOFX){const wx=f.x<W/2?20:W-20;for(let i=0;i<14;i++)rok(wx,GY-30-Math.random()*90,(f.x<W/2?1:-1)*(2+Math.random()*5),-3-Math.random()*6,i%2?'#8a5a32':'#c08a4e');smk(wx,GY-40,30,'#a08060',30);pp({x:f.x,y:f.y-160,vx:0,vy:-.6,l:55,m:55,txt:'破牆！',c:'#ffb36b',text:1,big:1})}sfx('hitbig')}
+function crate(x,y,s){ctx.fillStyle='#8a5a32';ctx.fillRect(x,y,s,s);ctx.strokeStyle='#2a1608';ctx.lineWidth=3;ctx.strokeRect(x+1.5,y+1.5,s-3,s-3);ctx.beginPath();ctx.moveTo(x+4,y+4);ctx.lineTo(x+s-4,y+s-4);ctx.moveTo(x+s-4,y+4);ctx.lineTo(x+4,y+s-4);ctx.lineWidth=4;ctx.stroke();ctx.fillStyle='#c08a4e55';ctx.fillRect(x+3,y+3,s-6,5)}
+function hzDraw(){
+ if(!G.hz||!p1)return;ctx.save();
+ if(G.stage===1)[0,1].forEach(k=>{if(G.wbk===k+1)return;const x=k?W-44:0;crate(x,GY-44,44);crate(x,GY-88,44);crate(k?x+8:x-8,GY-124,36)});
+ if(G.stage===3&&G.phase==='fight'){const n=Math.floor(G.frame/VC),c=G.frame%VC,x=vcX(n);
+  if(c>=360&&c<420){const a=(c-360)/60,fl=G.frame%8<4;ctx.globalCompositeOperation='lighter';const g=ctx.createRadialGradient(x,GY,2,x,GY,60);g.addColorStop(0,'rgba(255,170,60,'+(.35+a*.5)*(fl?1:.7)+')');g.addColorStop(1,'rgba(255,60,0,0)');ctx.fillStyle=g;ctx.fillRect(x-60,GY-30,120,40);if(!NOFX&&Math.random()<.4)emb(x+(Math.random()-.5)*60,GY-4,'#ff8a3a',1,2,14,3,2)}
+  if(c>=420&&c<450){const e=c-420,h=Math.min(1,e/5)*(1-Math.max(0,e-22)/8)*260;ctx.globalCompositeOperation='lighter';const g=ctx.createLinearGradient(0,GY-h,0,GY);g.addColorStop(0,'rgba(255,220,120,0)');g.addColorStop(.3,'rgba(255,140,40,.85)');g.addColorStop(1,'rgba(255,240,180,.95)');ctx.fillStyle=g;const w=40+Math.sin(e*.9)*6;ctx.beginPath();ctx.moveTo(x-w,GY);ctx.quadraticCurveTo(x-w*.5,GY-h*.6,x-w*.25,GY-h);ctx.lineTo(x+w*.25,GY-h);ctx.quadraticCurveTo(x+w*.5,GY-h*.6,x+w,GY);ctx.fill();if(!NOFX&&e%2===0)emb(x,GY-h*.8,'#ffb050',3,5,22,4,3)}}
+ ctx.restore()}
+const now0=()=>performance.now();
+$('hzbtn').onclick=()=>{HZ=HZ?0:1;try{localStorage.setItem('fd_hz',HZ)}catch(e){}hzLabel();snd(600,.06)};hzLabel();
 // ===== 輸入集中：每次 step 取得雙方輸入（訓練木樁、錄製、重播都走這裡）=====
 let RP=null,REC=null;
 function inputs(hs){
@@ -2138,6 +2173,16 @@ function helpRender(){
 <b>空中：</b>輕拳／重拳 空拳　輕腳／重腳 飛踢　↓+輕腳／重腳 俯衝踢<br>
 <b>連段：</b>輕攻擊命中或被防後可取消成其他招式；重攻擊可取消成必殺／升龍；升龍命中後可接空中拳腳；必殺後可接超必殺。同一連段每招只能用一次。命中後雙擊方向可衝刺取消，重攻擊命中後按跳可跳躍取消。<br>
 <b>防守：</b>對手投你時搶先按投技可拆投（指令投無法拆）；對手出招起手時打中他會觸發<b>反擊（傷害 +30%）</b>；倒地時先按招式可起身反擊。`,
+  '進階系統':`<b>精準招架：</b>對手的攻擊快打到時，在地上<b>按一下 →（朝對手）</b>，7 幀內被打到就會招架：不受傷，還能立刻反擊。<br>
+<b>確反：</b>在對手招式收招時打中他，傷害 +20%、硬直更長，畫面顯示「確反！」。<br>
+<b>受身：</b>被打飛落地前按任一攻擊鍵會翻滾起身；落地時按住 ↓ 可延後起身。投技、掃堂腿與超必殺是<b>強制倒地</b>，不能受身。<br>
+<b>撞牆：</b>把對手打飛撞到牆會反彈回來，可以追擊。<br>
+<b>爆氣：</b>被連段時同時按<b>投技＋必殺</b>，震開對手並取消硬直；每回合只能一次（血條旁的紅色圓點）。<br>
+<b>防禦耐久：</b>血條下方的藍條。一直防禦會減少，歸零時<b>破防</b>，長時間硬直；不防禦一陣子會慢慢回復。<br>
+<b>迅移取消：</b>出招中同時按<b>輕拳＋重拳＋輕腳</b>（50 氣），立刻取消招式回到可行動；命中時使用，對手會多硬直一點，可延長連段或掩護失誤。<br>
+<b>簡易操作：</b>設定裡可讓 P1／P2 各自切換。命中後不按方向、連按任一攻擊鍵會自動接 輕→輕腳→重拳→必殺（必殺要 50 氣），傷害 ×0.85。<br>
+<b>場景機關：</b>選單「機關」開啟後：黃昏港的木箱牆第一次被撞（血量 60% 以下）會碎裂、多受傷害；極光雪原被擊退會滑更遠；火山口定時噴發，地面發光的位置要閃開。<br>
+<b>訓練模式：</b>畫面下方的幀數條（綠＝起手、紅＝攻擊判定、藍＝收招、黃＝硬直，白框＝無敵）與左右的輸入紀錄。`,
   '角色':CH.map((c,i)=>`<b style="color:${c.col}">${c.n}・${c.ds}</b>（體力 ${c.hp}）　被動：${CHM[i].p}<br>　指令技：`+cmdList(c).map(x=>x[0]+' '+x[1]).join('　')+'<br>　必殺技：'+spList(i).map(x=>x[0]+' '+x[1]).join('　')).join('<br>'),
   '系統':`<b>暫停：</b>P 或 Esc（暫停時按 Q 回選單）　<b>靜音：</b>M　<b>判定框：</b>F2（藍＝受擊框、紅＝攻擊判定、紫＝投技、黃＝反擊架勢、白＝無敵）<br>
 <b>手把：</b>X 輕拳、Y 重拳、A 輕腳、B 重腳、RB／RT 必殺、LB／LT 投技，方向鍵或左搖桿移動。<br>
@@ -2153,7 +2198,7 @@ function pauseScreen(){
  const k=j=>KN(0,j),L=[
   [k(4)+' 輕拳　'+k(5)+' 重拳　'+k(6)+' 輕腳　'+k(7)+' 重腳　'+k(8)+' 必殺　'+k(9)+' 投技　雙擊方向 衝刺','#fff'],
   ['↓+重腳 掃堂腿（下段）　←+投技 背摔　↓+必殺 超必殺（100 氣）　↓+投技 第六必殺　中段要站著擋、下段要蹲著擋','#fff'],
-  ['連段：輕→重→必殺→超必殺；同一連段每招只能用一次；命中後可衝刺或跳躍取消','#cfd2ff'],['','#fff']];
+  ['連段：輕→重→必殺→超必殺；同一連段每招只能用一次；命中後可衝刺或跳躍取消；輕拳＋重拳＋輕腳 迅移取消（50 氣）','#cfd2ff'],['','#fff']];
  const who=[p1].concat(G.mode===2&&p2.ch!==p1.ch?[p2]:[]);
  who.forEach(f=>{const i=CH.indexOf(f.ch);const cl=cmdList(f.ch).map(x=>x[0]+' '+x[1].replace(/（.*）/,''));L.push([f.ch.n+'：'+cl.slice(0,6).join('　'),f.ch.col]);L.push([cl.slice(6).join('　'),f.ch.col]);L.push([spList(i).map(x=>x[0]+' '+x[1].replace(/（.*）/,'')).join('　'),f.ch.col]);L.push(['被動：'+CHM[i].p,f.ch.col2])});
  L.push(['','#fff'],['按 P 或 Esc 繼續　按 Q 回到選單　F2 判定框'+(G.hb?'（開）':''),'#ffe14d']);
@@ -2178,14 +2223,14 @@ function recPush(a,b){const k=G.si-1;REC.a[k]=encI(a);REC.b[k]=encI(b)}
 function rpNext(){const k=G.si-1,a=RP.a[k],b=RP.b[k];return[decI(a===undefined?0:a)||NI,decI(b===undefined?0:b)]}
 function rle(arr){const o=[];let v=null,c=0;for(let i=0;i<arr.length;i++){const x=arr[i]===undefined?0:arr[i];if(x===v)c++;else{if(c)o.push(v,c);v=x;c=1}}if(c)o.push(v,c);return o}
 function unrle(o){const a=[];for(let i=0;i+1<o.length;i+=2){const v=o[i]|0,c=Math.min(o[i+1]|0,40000);for(let k=0;k<c&&a.length<40000;k++)a.push(v)}return a}
-const rpPack=()=>({v:1,m:REC.m,c:REC.c,g:REC.g,h:REC.h||[1,1],ini:REC.ini,s:REC.s,a:rle(REC.a),b:rle(REC.b)});
+const rpPack=()=>({v:1,m:REC.m,c:REC.c,g:REC.g,h:REC.h||[1,1],ini:REC.ini,s:REC.s,hz:REC.hz,a:rle(REC.a),b:rle(REC.b)});
 function rpValid(o){return o&&o.v===1&&[1,2,4].includes(o.m)&&Array.isArray(o.c)&&o.c.length===2&&o.c.every(x=>Number.isInteger(x)&&x>=0&&x<CH.length)&&Number.isInteger(o.g)&&o.g>=0&&o.g<STG.length&&Array.isArray(o.a)&&Array.isArray(o.b)&&o.a.concat(o.b).every(Number.isInteger)&&(o.h===undefined||Array.isArray(o.h)&&o.h.length===2&&o.h.every(x=>typeof x==='number'&&x>=1&&x<=2))}
 function rpSaveLast(){if(!REC||RP||G.si<300)return;try{localStorage.setItem('fd_last',JSON.stringify(rpPack()))}catch(e){}}
 function startReplay(o){
  if(!rpValid(o))return false;
  const sv=[sel[0],sel[1],G.stage];REC=null;
  RP={a:unrle(o.a),b:unrle(o.b),end:0,m:o.m};RP.n=Math.max(RP.a.length,RP.b.length);
- sel[0]=o.c[0];sel[1]=o.c[1];G.stage=o.g;G.smo=Array.isArray(o.s)?o.s:[0,0];startGame(o.m===4?2:o.m);if(o.h)[p1,p2].forEach((f,k)=>{if(o.h[k]!==1){f.hm=o.h[k];f.reset()}});if(o.ini&&typeof o.ini.ft==='number'&&Array.isArray(o.ini.hp)){G.ft=o.ini.ft;p1.hp=p1.lag=+o.ini.hp[0]||p1.hp;p2.hp=p2.lag=+o.ini.hp[1]||p2.hp}sel[0]=sv[0];sel[1]=sv[1];G.stage=sv[2];
+ sel[0]=o.c[0];sel[1]=o.c[1];G.stage=o.g;G.smo=Array.isArray(o.s)?o.s:[0,0];G.hzo=o.hz?1:0;startGame(o.m===4?2:o.m);if(o.h)[p1,p2].forEach((f,k)=>{if(o.h[k]!==1){f.hm=o.h[k];f.reset()}});if(o.ini&&typeof o.ini.ft==='number'&&Array.isArray(o.ini.hp)){G.ft=o.ini.ft;p1.hp=p1.lag=+o.ini.hp[0]||p1.hp;p2.hp=p2.lag=+o.ini.hp[1]||p2.hp}sel[0]=sv[0];sel[1]=sv[1];G.stage=sv[2];
  return true;
 }
 const pageURL=()=>location.href.split('#')[0];

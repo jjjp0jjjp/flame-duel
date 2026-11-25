@@ -13,6 +13,7 @@ pick(i,g){
  return null;
 }
 cc(a,m){if(this.cl.includes(m))return false;if(a.cn===4)return m==='ex';if(a.cn===3)return m==='ap'||m==='ak'||m==='ex'||m==='asp';return a.cn&&m!==a.key&&m!=='th'&&m!=='th2'&&m!=='ap'&&m!=='ak'&&m!=='dive'&&(m==='sp'||m==='sp2'||m==='sp3'||m==='sp4'||m==='ex'||m==='upper'||a.cn===1)}
+ rcIn(i){const r=this.r3||(this.r3=[0,0,0]);['lp','hp','lk'].forEach((k,j)=>{if(i[k])r[j]=4;else if(r[j]>0)r[j]--});if(r[0]&&r[1]&&r[2]&&(i.lp||i.hp||i.lk)){r[0]=r[1]=r[2]=0;return true}return false}
  setBuf(m){const sp=x=>x==='sp'||x==='sp2'||x==='sp3'||x==='sp4'||x==='ex'||x==='asp'||x==='upper';if(this.buf&&sp(this.buf.m)&&!sp(m)&&this.buf.t>=7)return;this.buf={m,t:10}}
  dashGo(s){gho(this,colOf(this));this.st='dash';this.dt=13;this.dd=s;this.inv=s!==this.dir?7:0;this.vx=s*8.5;spark(this.x,GY-4,'#b9a8d8',6,1);snd(180,.1,'sine',.04,500)}
 start(m,nf){
@@ -35,7 +36,8 @@ update(i,o){
  if(this.kd&&!g&&(i.lp||i.hp||i.lk||i.hk))this.tb=10;else if(this.tb>0)this.tb--;
  if(this.st==='block')this.gbt=0;else if(++this.gbt>60&&this.gd<100)this.gd=Math.min(100,this.gd+.25);
  if(this.bu&&this.st==='hit'&&i.th&&i.sp){this.bu=0;this.stun=0;this.kd=0;this.st='idle';this.vy=Math.min(this.vy,0);this.buf=null;this.start('burst');this.buf=null;if(!NOFX)burstFx(this)}
- if(this.st!=='ko'){const m=this.pick(i,g);if(m)this.setBuf(m);else if(this.buf&&!(this.st==='down'&&this.dt<=14)&&--this.buf.t<=0)this.buf=null}
+ let rc=0;{const rq=this.rcIn(i)||this.rcq;this.rcq=0;if(rq&&this.st==='atk'&&this.atk&&this.atk.key!=='burst'&&!this.atk.throw&&this.mt>=50){rc=1;const hit=this.hit;this.mt-=50;this.atk=null;this.st='idle';this.t=0;this.cl=[];this.buf=null;this.hit=false;this.hc=0;this.vx=g?0:this.vx*.3;if(!g)this.vy=Math.min(this.vy,-2);if(hit&&o.st==='hit')o.stun+=10;rcFx(this)}}
+ if(this.st!=='ko'&&!rc){const m=this.pick(i,g);if(m)this.setBuf(m);else if(this.buf&&!(this.st==='down'&&this.dt<=14)&&--this.buf.t<=0)this.buf=null}
  if(this.jh){if(g&&this.vy>=0)this.jh=0;else if(!i.u&&this.vy<-6){this.vy*=.6;this.jh=0}}
  if(this.st==='ko')this.kt++;
  else if(this.st==='win'){this.vx*=.8;this.kt++}
@@ -91,7 +93,7 @@ update(i,o){
  }
  if(this.st==='ko'&&this.y>=GY)this.vx*=.9;
  this.x=Math.max(40,Math.min(W-40,this.x));
- if(this.kd&&this.st==='hit'&&!this.wb&&this.y<GY&&(this.x<=40.5||this.x>=W-40.5)&&Math.abs(this.vx)>4){this.wb=1;this.vx=(this.x<W/2?1:-1)*3;this.vy=Math.min(this.vy,-6);G.shake=Math.max(G.shake,8);if(!NOFX)wallFx(this)}
+ if(this.kd&&this.st==='hit'&&!this.wb&&this.y<GY&&(this.x<=40.5||this.x>=W-40.5)&&Math.abs(this.vx)>4){this.wb=1;this.vx=(this.x<W/2?1:-1)*3;this.vy=Math.min(this.vy,-6);G.shake=Math.max(G.shake,8);if(!NOFX)wallFx(this);hzWall(this)}
 }
 tryHit(o){
  if(o.st==='ko')return;

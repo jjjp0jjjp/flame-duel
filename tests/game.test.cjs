@@ -147,11 +147,12 @@ const ok = (name, cond, detail) => {
     // 延續體力的一回合對戰，重播後結果相同
     const KS = ['KeyA', 'KeyD', 'KeyW', 'KeyS', 'KeyU', 'KeyI', 'KeyJ', 'KeyK', 'KeyO', 'KeyL'];
     const hash = () => { const o = JSON.parse(snapAll()); delete o.v1; delete o.v2; delete o.a.ai; delete o.b.ai; return rbFnv(canon(o)) };
+    HZ = 1; G.stage = 3;
     chainStart(2, 7, 1, 40, 70); G.vs = 0;
     for (let i = 0; i < 20000 && G.phase !== 'over'; i++) { for (const k of KS) { if (Math.random() < 0.06) { keys[k] = keys[k] ? 0 : 1; if (keys[k]) pend[k] = 1 } } step() }
     for (const k in keys) keys[k] = 0;
     const si = G.si, h = hash(), o = await codeDec(await codeEnc(rpPack())); startReplay(o); G.vs = 0; while (G.si < si) step();
-    out.replay = hash() === h && G.phase === 'over'; RP = null; toMenu();
+    out.replay = hash() === h && G.phase === 'over' && G.hz === 1; RP = null; HZ = 0; G.stage = 0; toMenu();
     return out;
   });
   ok('隊伍戰：輪番上陣、輸的換人、最後判定勝負', chain.team);
@@ -194,9 +195,20 @@ const ok = (name, cond, detail) => {
     const simpleOK = p1.sm === 1 && p2.sm === 0 && ['lp', 'lk', 'hp', 'sp'].every(m => seen.includes(m)) && REC && REC.s && REC.s[0] === 1;
     SIMPLE = [0, 0]; setup(0, 0); p1.mt = 60; let seen2 = []; run(70, (k) => { if (p1.st === 'atk' && p1.atk && !seen2.includes(p1.atk.key)) seen2.push(p1.atk.key); return [k % 3 === 0 ? { lp: 1 } : {}, {}] });
     SIMPLE = SV; out.simple = simpleOK && !seen2.includes('sp');
+    // 迅移取消：重腳揮空後同時按輕拳＋重拳＋輕腳 → 立刻回到可行動，扣 50 氣
+    setup(0, 0); p1.x = 200; p2.x = 700; p1.mt = 80; let rcAt = -1;
+    run(30, (k) => { if (rcAt < 0 && p1.st === 'idle' && k > 0) rcAt = k; return [k === 0 ? { hk: 1 } : k === 4 ? { lp: 1, hp: 1, lk: 1 } : {}, {}] });
+    out.rc = rcAt > 0 && rcAt <= 6 && Math.abs(p1.mt - 30) < 1;
+    // 場景機關：火山噴發會打中站在噴口的人；沒開機關時不會
+    const hz0 = HZ; const vol = (on) => { HZ = on; G.stage = 3; setup(0, 0); const x = vcX(Math.floor(G.frame / VC) + 1); const h = p2.hp; let n = 0; while (G.frame % VC !== 440 && n++ < 2000) { p2.x = x; p1.x = x > 450 ? 150 : 750; human = () => NI; step() } human = H0; return h - p2.hp };
+    const dOn = vol(1), dOff = vol(0);
+    // 雪原：被擊退會滑得比較遠
+    const slide = (on) => { HZ = on; G.stage = 2; setup(0, 0); run(30, (k) => [k === 0 ? { hp: 1 } : {}, {}]); return p2.x };
+    const sOn = slide(1), sOff = slide(0); HZ = hz0; G.stage = 0;
+    out.hazard = dOn >= 7 && dOff === 0 && sOn > sOff + 5;
     return out;
   });
-  for (const [k, v] of Object.entries(mech)) ok('機制：' + { parry: '精準招架', punish: '確反加傷', tech: '受身與強制倒地', wall: '撞牆反彈', burst: '爆氣', guard: '防禦崩潰', simple: '簡易操作輔助連段' }[k], v);
+  for (const [k, v] of Object.entries(mech)) ok('機制：' + { parry: '精準招架', punish: '確反加傷', tech: '受身與強制倒地', wall: '撞牆反彈', burst: '爆氣', guard: '防禦崩潰', simple: '簡易操作輔助連段', rc: '迅移取消', hazard: '場景機關（火山、雪原）' }[k], v);
 
   // ---- 連段挑戰
   const tr = await pg.evaluate(() => {
