@@ -163,6 +163,7 @@ const ok = (name, cond, detail) => {
   // ---- 對戰機制（用腳本輸入驗證）
   const mech = await pg.evaluate(() => {
     const H0 = human, out = {};
+    const hash0 = () => { const o = JSON.parse(snapAll()); delete o.v1; delete o.v2; delete o.a.ai; delete o.b.ai; return rbFnv(canon(o)) };
     const setup = (a, b) => { sel[0] = a; sel[1] = b; startGame(2); G.vs = 0; while (G.phase !== 'fight') step(); p1.x = 400; p2.x = 470; p1.mt = p2.mt = 0 };
     // f(n) 回傳 [P1 輸入, P2 輸入]
     const run = (n, f) => { let k = 0; human = (K) => { const r = f(k); return Object.assign({}, NI, K === K1 ? r[0] : r[1]) }; for (let i = 0; i < n; i++) { step(); if (G.hitstop === 0) k++ } human = H0 };
@@ -206,9 +207,11 @@ const ok = (name, cond, detail) => {
     const slide = (on) => { HZ = on; G.stage = 2; setup(0, 0); run(30, (k) => [k === 0 ? { hp: 1 } : {}, {}]); return p2.x };
     const sOn = slide(1), sOff = slide(0); HZ = hz0; G.stage = 0;
     out.hazard = dOn >= 7 && dOff === 0 && sOn > sOff + 5;
+    // 兩種畫風都能正常繪製（只影響畫面，不影響模擬）
+    setup(3, 9); run(20, (k) => [k % 4 === 0 ? { hp: 1 } : {}, {}]); const hb = hash0(); ART = 0; OLW = 1; OUTX = 0; draw(); ART = 1; OLW = 1.6; OUTX = 2.4; draw(); out.art = hash0() === hb;
     return out;
   });
-  for (const [k, v] of Object.entries(mech)) ok('機制：' + { parry: '精準招架', punish: '確反加傷', tech: '受身與強制倒地', wall: '撞牆反彈', burst: '爆氣', guard: '防禦崩潰', simple: '簡易操作輔助連段', rc: '迅移取消', hazard: '場景機關（火山、雪原）' }[k], v);
+  for (const [k, v] of Object.entries(mech)) ok('機制：' + { parry: '精準招架', punish: '確反加傷', tech: '受身與強制倒地', wall: '撞牆反彈', burst: '爆氣', guard: '防禦崩潰', simple: '簡易操作輔助連段', rc: '迅移取消', hazard: '場景機關（火山、雪原）', art: '街機／經典畫風繪製' }[k], v);
 
   // ---- 連段挑戰
   const tr = await pg.evaluate(() => {

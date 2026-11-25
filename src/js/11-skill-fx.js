@@ -55,6 +55,7 @@ function fxMove(f,a,g){
 // ---- 命中特效
 function hitFx(src,a,v){
  const li=li_(src),x=v.x,y=v.y-75,big=a.d>12||a.ex;
+ if(ART)impact(x,y,colOf(src),big||a.launch,src.dir);
  if(a.ex)flash(colOf(src),.35,220);else if(big)flash('#ffffff',.12,90);
  flare(x,y,colOf(src),a.ex?84:big?50:30,a.ex?10:big?7:5);if(a.ex)flare(x,y,'#ffffff',50,8);
  if(li===4&&a.ex){for(let i=0;i<14;i++)rok(v.x+rr_(-40,40),GY-6,rr_(-5,5),-rr_(5,11),i%2?'#a8784a':'#6a4a2a');for(let i=0;i<8;i++)smk(v.x+rr_(-50,50),GY-10,20,'#b9967a',40);P({ring:1,flat:1,x:v.x,y:GY-2,c:'#ffb070',l:26,rs:12,lw:8});flare(v.x,GY-30,'#ffb070',96,11);G.shake=Math.max(G.shake,14)}
@@ -172,6 +173,7 @@ function drawParticle(p){
  else if(p.t==='ck'){ctx.save();ctx.translate(p.x,p.y);ctx.lineJoin='round';ctx.beginPath();p.pts.forEach((q,i)=>i?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1]));ctx.strokeStyle='#070a14';ctx.lineWidth=5;ctx.stroke();ctx.strokeStyle='rgba(159,214,255,.9)';ctx.lineWidth=1.6;ctx.stroke();ctx.restore()}
  else if(p.t==='gh'){ctx.globalAlpha=al*.45;drawF(p.f)}
  else if(p.t==='zz'){ctx.save();ctx.lineJoin='round';ctx.beginPath();ctx.moveTo(p.x,p.y);for(let i=1;i<=5;i++)ctx.lineTo(p.x+Math.cos(p.ang)*p.len*i/5+(Math.random()-.5)*10,p.y+Math.sin(p.ang)*p.len*i/5+(Math.random()-.5)*10);ctx.globalCompositeOperation='lighter';ctx.strokeStyle=p.c;ctx.globalAlpha=al*.3;ctx.lineWidth=(2*al+.6)*4;ctx.stroke();ctx.globalAlpha=al;ctx.lineWidth=2*al+.6;ctx.stroke();ctx.restore()}
+ else if(p.t==='sb')drawStar(p,al);
  else if(p.t==='bolt'){bolt(p.x,0,GY,al,p.w||1)}
  else if(p.t==='fl'){const s2=p.s*(.45+.55*al),w2=Math.max(3,s2*.1),r=s2*.42,rs=raySpr(p.c);ctx.save();ctx.globalCompositeOperation='lighter';ctx.translate(p.x,p.y);ctx.drawImage(glowSpr(p.c),-r,-r,r*2,r*2);ctx.rotate(p.rot);ctx.drawImage(rs,-s2,-w2/2,s2*2,w2);ctx.rotate(Math.PI/2);ctx.drawImage(rs,-s2,-w2/2,s2*2,w2);ctx.restore()}
  else if(p.t==='sk'){ctx.globalCompositeOperation='lighter';ctx.lineCap='round';ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(p.x-p.vx*3,p.y-p.vy*3);ctx.strokeStyle=p.c;ctx.lineWidth=2.2;ctx.stroke();ctx.globalCompositeOperation='source-over'}
