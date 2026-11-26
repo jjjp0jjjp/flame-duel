@@ -249,7 +249,7 @@ function supCine(k){
  ctx.restore()}
 // ---- 出場（VS）畫面
 function vsScreen(){
- const t=110-G.vs,e=Math.min(1,t/16),o=Math.min(1,G.vs/12);
+ const t=(G.vm||110)-G.vs,e=Math.min(1,t/16),o=Math.min(1,G.vs/12);
  ctx.save();ctx.globalAlpha=o;ctx.fillStyle='#07070f';ctx.fillRect(0,0,W,H);
  [[p1,1,0],[p2,-1,1]].forEach(([f,sd,i])=>{
   ctx.save();ctx.beginPath();if(!i){ctx.moveTo(0,0);ctx.lineTo(W/2+56,0);ctx.lineTo(W/2-64,H);ctx.lineTo(0,H)}else{ctx.moveTo(W,0);ctx.lineTo(W/2+64,0);ctx.lineTo(W/2-56,H);ctx.lineTo(W,H)}ctx.closePath();ctx.clip();

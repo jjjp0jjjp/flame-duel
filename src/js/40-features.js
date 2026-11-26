@@ -248,7 +248,7 @@ function helpRender(){
 <b>防禦耐久：</b>血條下方的藍條。一直防禦會減少，歸零時<b>破防</b>，長時間硬直；不防禦一陣子會慢慢回復。<br>
 <b>迅移取消：</b>出招中同時按<b>輕拳＋重拳＋輕腳</b>（50 氣），立刻取消招式回到可行動；命中時使用，對手會多硬直一點，可延長連段或掩護失誤。<br>
 <b>簡易操作：</b>設定裡可讓 P1／P2 各自切換。命中後不按方向、連按任一攻擊鍵會自動接 輕→輕腳→重拳→必殺（必殺要 50 氣），傷害 ×0.85。<br>
-<b>場景機關：</b>選單「機關」開啟後：黃昏港的木箱牆第一次被撞（血量 60% 以下）會碎裂、多受傷害；極光雪原被擊退會滑更遠；火山口定時噴發，地面發光的位置要閃開。<br>
+<b>場景機關：</b>選單「機關」開啟後：夜城屋頂定時颳強風，把兩人往同一邊推（畫面會先預告方向）；黃昏港的木箱牆第一次被撞（血量 60% 以下）會碎裂、多受傷害；極光雪原被擊退會滑更遠；火山口定時噴發，地面發光的位置要閃開；竹林道場定時鐘響，雙方各加 15 氣。<br>
 <b>訓練模式：</b>畫面下方的幀數條（綠＝起手、紅＝攻擊判定、藍＝收招、黃＝硬直，白框＝無敵）與左右的輸入紀錄。`,
   '角色':CH.map((c,i)=>`<b style="color:${c.col}">${c.n}・${c.ds}</b>（體力 ${c.hp}）　被動：${CHM[i].p}<br>　指令技：`+cmdList(c).map(x=>x[0]+' '+x[1]).join('　')+'<br>　必殺技：'+spList(i).map(x=>x[0]+' '+x[1]).join('　')).join('<br>'),
   '系統':`<b>暫停：</b>P 或 Esc（暫停時按 Q 回選單）　<b>靜音：</b>M　<b>判定框：</b>F2（藍＝受擊框、紅＝攻擊判定、紫＝投技、黃＝反擊架勢、白＝無敵）<br>
@@ -319,7 +319,7 @@ function uiTick(){
  const on=G.phase==='over'&&!!REC&&!(G.mode===4&&NET.on);if(on!==OBAR){OBAR=on;$('obar').style.display=on?'flex':'none'}
 }
 function overlayDraw(){
- arcHud();chainHud();if(RP&&G.phase!=='menu'){inDraw(0,12);inDraw(1,W-12)}const now=performance.now();ctx.save();ctx.textAlign='center';
+ arcHud();chainHud();arcStory();if(RP&&G.phase!=='menu'){inDraw(0,12);inDraw(1,W-12)}const now=performance.now();ctx.save();ctx.textAlign='center';
  if(RP&&G.phase!=='menu'){ctx.font='bold 16px '+FONT;ctx.fillStyle='#ff6b6b';ctx.fillText(RP.end?'■ 重播結束　按 Enter 回選單':'▶ 重播中　P 暫停　暫停時 Q 離開',W/2,H-14)}
  else if(G.phase==='over'&&REC){ctx.font='bold 15px '+FONT;ctx.fillStyle='#ffe14d';ctx.fillText('R：複製這場的重播連結',W/2,H-66)}
  if(TOAST&&now<TOAST.until){ctx.font='bold 18px '+FONT;const w=ctx.measureText(TOAST.t).width+30;ctx.fillStyle='rgba(0,0,0,.75)';ctx.fillRect(W/2-w/2,H/2+60,w,36);ctx.fillStyle='#3ddc6a';ctx.fillText(TOAST.t,W/2,H/2+84)}
@@ -331,15 +331,16 @@ let ARC=null;
 function arcStart(){let L=CH.map((_,i)=>i).filter(i=>i!==sel[0]);for(let i=L.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[L[i],L[j]]=[L[j],L[i]]}L=L.slice(0,4);L.push(sel[0]);
  ARC={L,i:0,me:sel[0],cont:0,d0:G.diff,g0:G.stage,s1:sel[1],res:null,done:0};arcFight()}
 function arcFight(){const boss=ARC.i===ARC.L.length-1;sel[0]=ARC.me;sel[1]=ARC.L[ARC.i];G.diff=boss?2:Math.min(2,ARC.d0+(ARC.i>=2?1:0));G.stage=ARC.i%STG.length;
- startGame(1);sel[1]=ARC.s1;G.stage=ARC.g0;if(boss){p2.hm=1.3;p2.reset();if(REC)REC.h=[1,1.3]}ARC.res=null}
+ startGame(1);sel[1]=ARC.s1;G.stage=ARC.g0;if(boss){p2.hm=1.3;p2.reset();if(REC)REC.h=[1,1.3]}ARC.res=null;
+ ARC.dlg=boss?BOSSL:[INTRO[ARC.me],INTRO[ARC.L[ARC.i]]];G.vs=G.vm=200}
 function arcNext(){if(!ARC||!ARC.res)return;if(ARC.done){toMenu();return}
- if(ARC.res==='win'){ARC.i++;if(ARC.i>=ARC.L.length){ARC.done=1;G.msg='街機模式 通關！';G.mt=G.mm=1e9;sfx('round');
+ if(ARC.res==='win'){ARC.i++;if(ARC.i>=ARC.L.length){ARC.done=1;G.msg='街機模式 通關！';G.mt=G.mm=0;sfx('round');
   try{const r=JSON.parse(localStorage.getItem('fd_arc')||'{}');r[ARC.me]=Math.min(r[ARC.me]===undefined?99:r[ARC.me],ARC.cont);localStorage.setItem('fd_arc',JSON.stringify(r))}catch(e){}return}}
  else ARC.cont++;rpSaveLast();arcFight()}
 function arcEnd(){if(!ARC)return;G.diff=ARC.d0;G.stage=ARC.g0;ARC=null}
 function arcTip(){const n=ARC.L.length;return ARC.done?'恭喜通關（接關 '+ARC.cont+' 次）！按 Enter 回選單':ARC.res==='win'?(ARC.i+1>=n?'打倒魔王！按 Enter 繼續':'第 '+(ARC.i+1)+'／'+n+' 戰勝利！按 Enter 進入下一戰'):'輸了…按 Enter 接關再戰　Esc 回選單'}
 function arcInfo(){try{const r=JSON.parse(localStorage.getItem('fd_arc')||'{}'),k=Object.keys(r);return k.length?'　街機通關：'+k.map(i=>(CH[i]||CH[0]).n+(r[i]?'（接關 '+r[i]+'）':'（無接關）')).join('、'):''}catch(e){return''}}
-function arcHud(){if(!ARC||G.phase==='menu')return;const n=ARC.L.length,boss=ARC.i===n-1;ctx.save();ctx.textAlign='center';ctx.font='bold 14px '+FONT;ctx.fillStyle=boss?'#ff6b6b':'#ffe14d';ctx.fillText('街機 第 '+(ARC.i+1)+'／'+n+' 戰'+(boss?'　魔王：強化版'+CH[ARC.L[ARC.i]].n+'（體力 ×1.3）':''),W/2,90);ctx.restore()}
+function arcHud(){if(!ARC||ARC.done||G.phase==='menu')return;const n=ARC.L.length,boss=ARC.i===n-1;ctx.save();ctx.textAlign='center';ctx.font='bold 14px '+FONT;ctx.fillStyle=boss?'#ff6b6b':'#ffe14d';ctx.fillText('街機 第 '+(ARC.i+1)+'／'+n+' 戰'+(boss?'　魔王：強化版'+CH[ARC.L[ARC.i]].n+'（體力 ×1.3）':''),W/2,90);ctx.restore()}
 $('b7').onclick=()=>{snd(500,.1);arcStart()};
 // ===== 初始化 =====
 makeThumbs();makeHeads();makeStageThumbs();lab();rpLastBtn();rpHash();fitCanvas();qLabel();

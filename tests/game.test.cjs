@@ -110,9 +110,9 @@ const ok = (name, cond, detail) => {
     sel[0] = 2; sel[1] = 0; G.diff = 0; G.stage = 1;
     arcStart();
     const seen = [], log = [];
-    let lost = false;
+    let lost = false, dlgOK = true;
     for (let guard = 0; guard < 20 && ARC && !ARC.done; guard++) {
-      G.vs = 0; seen.push(p2.ch.n + (p2.hm ? '×' + p2.hm : '') + '/難度' + G.diff);
+      const boss = ARC.i === ARC.L.length - 1; dlgOK = dlgOK && G.vs === 200 && ARC.dlg && ARC.dlg[0] === (boss ? BOSSL[0] : INTRO[2]) && (boss || ARC.dlg[1] === INTRO[ARC.L[ARC.i]]); G.vs = 0; seen.push(p2.ch.n + (p2.hm ? '×' + p2.hm : '') + '/難度' + G.diff);
       while (G.phase !== 'over') {
         if (G.phase === 'fight') { if (!lost && ARC.i === 1) { p1.st = 'ko'; } else p2.st = 'ko'; }
         step();
@@ -122,9 +122,11 @@ const ok = (name, cond, detail) => {
       arcNext();
     }
     const done = !!(ARC && ARC.done), rec = localStorage.getItem('fd_arc');
+    G.vs = 0; draw(); const story = dlgOK && done && ENDING.length === CH.length && INTRO.length === CH.length;
     toMenu();
-    return { seen, log, done, rec, diff: G.diff, stage: G.stage, cont: JSON.parse(rec || '{}')[2] };
+    return { story, seen, log, done, rec, diff: G.diff, stage: G.stage, cont: JSON.parse(rec || '{}')[2] };
   });
+  ok('街機劇情：每場開打前有對話、魔王戰專屬對白、通關顯示結局', arc.story);
   ok('街機：5 位對手各一次、最後是強化版的自己', arc.seen.length === 6 && new Set(arc.seen.map((s) => s[0])).size === 5 && /^影×1.3\/難度2$/.test(arc.seen[5]), arc.seen.join(' → '));
   ok('街機：輸了可以接關再戰同一位', arc.log.join(',') === 'win,lose,win,win,win,win' && arc.seen[1] === arc.seen[2], arc.log.join(','));
   ok('街機：通關後記錄接關次數，回選單還原難度與場景', arc.done && arc.cont === 1 && arc.diff === 0 && arc.stage === 1, JSON.stringify(arc));
@@ -205,15 +207,21 @@ const ok = (name, cond, detail) => {
     const dOn = vol(1), dOff = vol(0);
     // 雪原：被擊退會滑得比較遠
     const slide = (on) => { HZ = on; G.stage = 2; setup(0, 0); run(30, (k) => [k === 0 ? { hp: 1 } : {}, {}]); return p2.x };
-    const sOn = slide(1), sOff = slide(0); HZ = hz0; G.stage = 0;
-    out.hazard = dOn >= 7 && dOff === 0 && sOn > sOff + 5;
+    const sOn = slide(1), sOff = slide(0);
+    // 夜城強風：颳風期間兩人都被往同一邊推；竹林道場鐘聲：雙方加 15 氣
+    HZ = 1; G.stage = 0; setup(0, 0); human = () => NI; while (G.frame % WC !== 421) step(); const wx = [p1.x, p2.x], wd = wdDir(Math.floor(G.frame / WC)); for (let i = 0; i < 40; i++) step(); human = H0;
+    const wind = (p1.x - wx[0]) * wd > 20 && (p2.x - wx[1]) * wd > 20;
+    G.stage = 4; setup(0, 0); human = () => NI; while (G.frame % BC !== BC - 22) step(); p1.mt = p2.mt = 10; step(); step(); step(); human = H0;
+    const bell = p1.mt >= 25 && p2.mt >= 25;
+    HZ = hz0; G.stage = 0;
+    out.hazard = dOn >= 7 && dOff === 0 && sOn > sOff + 5 && wind && bell;
     // 兩種畫風都能正常繪製（只影響畫面，不影響模擬）
     setup(3, 9); run(20, (k) => [k % 4 === 0 ? { hp: 1 } : {}, {}]); const hb = hash0(); ART = 0; OLW = 1; OUTX = 0; draw(); ART = 1; OLW = 1.6; OUTX = 2.4; draw(); out.art = hash0() === hb;
     // 減少閃光：不會設定全畫面閃色，且照常繪製
     CALM = 1; FL = null; flash('#fff', .5, 200); const noFlash = FL === null; draw(); CALM = 0; flash('#fff', .5, 200); out.calm = noFlash && (FL !== null || !qHigh()); FL = null;
     return out;
   });
-  for (const [k, v] of Object.entries(mech)) ok('機制：' + { parry: '精準招架', punish: '確反加傷', tech: '受身與強制倒地', wall: '撞牆反彈', burst: '爆氣', guard: '防禦崩潰', simple: '簡易操作輔助連段', rc: '迅移取消', hazard: '場景機關（火山、雪原）', art: '街機／經典畫風繪製', calm: '減少閃光' }[k], v);
+  for (const [k, v] of Object.entries(mech)) ok('機制：' + { parry: '精準招架', punish: '確反加傷', tech: '受身與強制倒地', wall: '撞牆反彈', burst: '爆氣', guard: '防禦崩潰', simple: '簡易操作輔助連段', rc: '迅移取消', hazard: '場景機關（火山、雪原、強風、鐘聲）', art: '街機／經典畫風繪製', calm: '減少閃光' }[k], v);
 
   // ---- 連段挑戰
   const tr = await pg.evaluate(() => {

@@ -692,7 +692,7 @@ function supCine(k){
  ctx.restore()}
 // ---- 出場（VS）畫面
 function vsScreen(){
- const t=110-G.vs,e=Math.min(1,t/16),o=Math.min(1,G.vs/12);
+ const t=(G.vm||110)-G.vs,e=Math.min(1,t/16),o=Math.min(1,G.vs/12);
  ctx.save();ctx.globalAlpha=o;ctx.fillStyle='#07070f';ctx.fillRect(0,0,W,H);
  [[p1,1,0],[p2,-1,1]].forEach(([f,sd,i])=>{
   ctx.save();ctx.beginPath();if(!i){ctx.moveTo(0,0);ctx.lineTo(W/2+56,0);ctx.lineTo(W/2-64,H);ctx.lineTo(0,H)}else{ctx.moveTo(W,0);ctx.lineTo(W/2+64,0);ctx.lineTo(W/2-56,H);ctx.lineTo(W,H)}ctx.closePath();ctx.clip();
@@ -922,7 +922,7 @@ function aiInput(me,op){
 }
 
 function startRound(){G.win=-1;G.wbk=0;p1.reset();p2.reset();projs=[];parts=[];G.cam={z:1,cx:W/2};G.phase='intro';G.pt=100;G.time=60;G.tf=0;G.msg='ROUND '+G.round;G.mt=G.mm=100;sfx('round')}
-function startGame(m){rpSaveLast();REC=(m===1||m===2||m===4)&&!RP?{m,c:[sel[0],sel[1]],g:G.stage,a:[],b:[]}:null;G.mode=m;G.frame=0;G.hitstop=0;G.shake=0;for(const o of[pv1,pv2])for(const k in o)delete o[k];bg=makeBg(STG[G.stage]);p1=new F(CH[sel[0]],0);p2=new F(CH[sel[1]],1);smApply(m);hzApply();G.round=1;G.si=0;G.pause=false;document.getElementById('menu').style.display='none';startRound();G.vs=m===3?0:110;if(G.vs)sfx('vs');if(m!==3)TUT=null;TR.rec=0;TR.tr=-1;TR.ok=0;FD=null;tbar()}
+function startGame(m){rpSaveLast();REC=(m===1||m===2||m===4)&&!RP?{m,c:[sel[0],sel[1]],g:G.stage,a:[],b:[]}:null;G.mode=m;G.frame=0;G.hitstop=0;G.shake=0;for(const o of[pv1,pv2])for(const k in o)delete o[k];bg=makeBg(STG[G.stage]);p1=new F(CH[sel[0]],0);p2=new F(CH[sel[1]],1);smApply(m);hzApply();G.round=1;G.si=0;G.pause=false;document.getElementById('menu').style.display='none';startRound();G.vs=m===3?0:110;G.vm=110;if(G.vs)sfx('vs');if(m!==3)TUT=null;TR.rec=0;TR.tr=-1;TR.ok=0;FD=null;tbar()}
 function toMenu(){if(NET.room){netQuit(1);return}rpSaveLast();RP=null;REC=null;arcEnd();chainEnd();G.phase='menu';G.mt=0;TUT=null;lab();tbar();rpLastBtn();document.getElementById('menu').style.display='flex'}
 function endRound(why){
  const ko1=p1.st==='ko',ko2=p2.st==='ko';let w=null;
@@ -1356,7 +1356,7 @@ function draw(){
  if(p1&&G.mode===3&&G.phase!=='menu'){if(TUT)tutHud();else trainHud()}
  overlayDraw();
  const now=performance.now();
- if(G.vs>0&&G.phase!=='menu')vsScreen();
+ if(G.vs>0&&G.phase!=='menu'){vsScreen();vsDialog()}
  if(G.mt>0&&G.phase!=='menu'&&!(G.vs>0)){
   const el=G.mm-G.mt,pop=1+Math.max(0,12-el)/12*.6,al=Math.min(1,G.mt/12);
   if(ART)arcMsg(el,al);else{ctx.save();ctx.globalAlpha=al;ctx.translate(W/2,G.phase==='over'?168:H/2-20);ctx.scale(pop*(G.phase==='over'?.6:1),pop*(G.phase==='over'?.6:1));ctx.font='900 76px '+FONT;ctx.textAlign='center';ctx.lineWidth=9;ctx.strokeStyle='#000';ctx.lineJoin='round';ctx.strokeText(G.msg,0,0);ctx.fillStyle='#ffe14d';ctx.fillText(G.msg,0,0);ctx.restore();}
@@ -1956,17 +1956,23 @@ $('smbtn').onclick=()=>{const n=((SIMPLE[0]?1:0)+(SIMPLE[1]?2:0)+1)%4;SIMPLE=[n&
 function rcFx(f){if(NOFX)return;const c=colOf(f);gho(f,c);ring(f.x,f.y-70,'#fff');ring(f.x,f.y-70,c);emb(f.x,f.y-70,c,18,6,16,4,1);pp({x:f.x,y:f.y-160,vx:0,vy:-.6,l:45,m:45,txt:'迅移！',c:'#7fe3ff',text:1,big:1});G.rcF=performance.now()+180;snd(1200,.12,'sine',.06,300);sfx('cancel')}
 // ---- 場景機關（選單可開關；開關值會跟著連線開局訊息與重播一起保存）
 let HZ=0;try{HZ=+(localStorage.getItem('fd_hz')||0)?1:0}catch(e){}
-const HZN=['夜城：無','黃昏港：木箱牆可撞破','極光雪原：地面濕滑','火山口：定時噴發','竹林道場：無'];
+const HZN=['夜城：屋頂定時颳強風','黃昏港：木箱牆可撞破','極光雪原：地面濕滑','火山口：定時噴發','竹林道場：定時鐘響，雙方加氣'];
 function hzApply(){G.hz=G.hzo!=null?(G.hzo?1:0):HZ;G.hzo=null;if(REC&&G.hz)REC.hz=1}
 function hzLabel(){const b=$('hzbtn');if(b){b.textContent='場景機關：'+(HZ?'開':'關');b.classList.toggle('on',!!HZ);b.title=HZN.join('\n')}}
 // 火山：每 480 幀一次，前 60 幀地面發光預告，接著 30 幀岩漿柱；位置只由幀數決定（確定性）
 const VC=480,vcX=n=>120+((n*7919+G.round*131)%720);
+// 夜城強風：每 540 幀颳一次，前 60 幀預告，接著 90 幀把地面上的人往同一邊推；方向只由幀數決定
+const WC=540,wdDir=n=>(n*5+G.round)%2?1:-1;
+// 竹林道場鐘聲：每 720 幀響一次，雙方各加 15 氣
+const BC=720;
 function hzStep(){
  if(!G.hz||G.phase!=='fight')return;
  if(G.stage===3){const n=Math.floor(G.frame/VC),c=G.frame%VC,x=vcX(n);
   if(c===420){G.shake=Math.max(G.shake,10);noise(.5,.2,900,'lowpass',80)}
   if(c>=420&&c<450)for(const f of[p1,p2]){if(f.hzh===n||f.st==='ko'||f.st==='down'||(f.st==='dash'&&f.inv>0)||Math.abs(f.x-x)>48||f.y<GY-230)continue;
    f.hzh=n;f.hp=Math.max(1,f.hp-7);f.st='hit';f.atk=null;f.buf=null;f.stun=22;f.kd=1;f.vy=-12;f.vx=(f.x<x?-1:1)*2.5;f.flash=6;G.hitstop=Math.max(G.hitstop,5);if(!NOFX){emb(f.x,f.y-40,'#ff8a3a',16,6,18,4,2);spark(f.x,f.y-50,'#ffd27a',10)}sfx('hitbig')}}
+ if(G.stage===0){const n=Math.floor(G.frame/WC),c=G.frame%WC;if(c>=420&&c<510){const dr=wdDir(n);for(const f of[p1,p2])if(f.y>=GY&&f.st!=='down'&&f.st!=='ko')f.x=Math.max(40,Math.min(W-40,f.x+dr*1.1))}if(c===420)noise(.9,.08,700,'bandpass',300)}
+ if(G.stage===4&&G.frame%BC===BC-20){for(const f of[p1,p2])if(f.st!=='ko')f.mt=Math.min(100,f.mt+15);if(!NOFX){P({ring:1,x:W/2,y:96,c:'#ffe14d',l:30,rs:9,lw:5});pp({x:W/2,y:140,vx:0,vy:-.4,l:60,m:60,txt:'鐘聲：雙方氣 +15',c:'#ffe14d',text:1})}snd(196,1.4,'sine',.12,190);snd(392,1,'sine',.05,380)}
  if(G.stage===2)for(const f of[p1,p2])if(f.y>=GY&&(f.st==='hit'||f.st==='block'||f.st==='down'||f.st==='dash'||f.st==='atk')&&Math.abs(f.vx)>.3){f.x=Math.max(40,Math.min(W-40,f.x+f.vx*.45));if(!NOFX&&G.frame%4===0)P({t:'e',x:f.x,y:GY-2,vx:-f.vx*.3,vy:-.5,l:14,s:2.5,c:'#e8f6ff',g:.05,dr:.9})}
 }
 // 黃昏港：第一次在血量 60% 以下被撞牆，木箱牆碎裂，額外傷害並彈得更遠
@@ -1976,6 +1982,8 @@ function crate(x,y,s){ctx.fillStyle='#8a5a32';ctx.fillRect(x,y,s,s);ctx.strokeSt
 function hzDraw(){
  if(!G.hz||!p1)return;ctx.save();
  if(G.stage===1)[0,1].forEach(k=>{if(G.wbk===k+1)return;const x=k?W-44:0;crate(x,GY-44,44);crate(x,GY-88,44);crate(k?x+8:x-8,GY-124,36)});
+ if(G.stage===0&&G.phase==='fight'){const n=Math.floor(G.frame/WC),c=G.frame%WC,dr=wdDir(n);if(c>=360&&c<510){const str=c<420?(c-360)/60*.35:1;ctx.globalCompositeOperation='lighter';ctx.strokeStyle='rgba(200,220,255,'+(.25*str)+')';ctx.lineWidth=2;ctx.beginPath();for(let i=0;i<18;i++){const y=140+((i*53)%300),x=((i*97+G.frame*(10+i%4*3)*dr)%(W+200)+W+200)%(W+200)-100;ctx.moveTo(x,y);ctx.lineTo(x-dr*(40+i%3*30)*str,y)}ctx.stroke();if(c<420){ctx.globalCompositeOperation='source-over';ctx.font='bold 18px '+FONT;ctx.textAlign='center';ctx.fillStyle='rgba(200,220,255,.8)';ctx.fillText(dr>0?'強風 ≫≫≫':'≪≪≪ 強風',W/2,170)}}}
+ if(G.stage===4&&G.phase==='fight'){const c=G.frame%BC;if(c>=BC-80&&c<BC-20){const sw=Math.sin(c*.5)*.4*(c-(BC-80))/60;ctx.save();ctx.translate(W/2,104);ctx.rotate(sw);ctx.fillStyle='#c9a36b';ctx.strokeStyle='#2a1c10';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-12,0);ctx.quadraticCurveTo(-12,-18,0,-20);ctx.quadraticCurveTo(12,-18,12,0);ctx.lineTo(15,6);ctx.lineTo(-15,6);ctx.closePath();ctx.fill();ctx.stroke();ctx.restore()}}
  if(G.stage===3&&G.phase==='fight'){const n=Math.floor(G.frame/VC),c=G.frame%VC,x=vcX(n);
   if(c>=360&&c<420){const a=(c-360)/60,fl=G.frame%8<4;ctx.globalCompositeOperation='lighter';const g=ctx.createRadialGradient(x,GY,2,x,GY,60);g.addColorStop(0,'rgba(255,170,60,'+(.35+a*.5)*(fl?1:.7)+')');g.addColorStop(1,'rgba(255,60,0,0)');ctx.fillStyle=g;ctx.fillRect(x-60,GY-30,120,40);if(!NOFX&&Math.random()<.4)emb(x+(Math.random()-.5)*60,GY-4,'#ff8a3a',1,2,14,3,2)}
   if(c>=420&&c<450){const e=c-420,h=Math.min(1,e/5)*(1-Math.max(0,e-22)/8)*260;ctx.globalCompositeOperation='lighter';const g=ctx.createLinearGradient(0,GY-h,0,GY);g.addColorStop(0,'rgba(255,220,120,0)');g.addColorStop(.3,'rgba(255,140,40,.85)');g.addColorStop(1,'rgba(255,240,180,.95)');ctx.fillStyle=g;const w=40+Math.sin(e*.9)*6;ctx.beginPath();ctx.moveTo(x-w,GY);ctx.quadraticCurveTo(x-w*.5,GY-h*.6,x-w*.25,GY-h);ctx.lineTo(x+w*.25,GY-h);ctx.quadraticCurveTo(x+w*.5,GY-h*.6,x+w,GY);ctx.fill();if(!NOFX&&e%2===0)emb(x,GY-h*.8,'#ffb050',3,5,22,4,3)}}
@@ -2101,6 +2109,47 @@ function fgDraw(){
   ctx.fill();ctx.globalAlpha=.5;ctx.lineWidth=2;ctx.stroke();
   if(st===3){ctx.globalAlpha=.6+.3*Math.sin(G.frame*.1);ctx.strokeStyle='#ff6a2a';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(20,-40);ctx.lineTo(44,-30);ctx.lineTo(60,-36);ctx.stroke()}
   ctx.restore()}
+ ctx.restore()}
+// ===== 街機劇情：開打前的對話、通關後的角色結局（原創內容） =====
+// 開場白：依角色順序（烈 鋼 影 雷 岩 霜 嵐 月 拳 蠍 蝶 機 刃 巫 獸 羽）
+const INTRO=['我的火焰還在燒，你準備好了嗎？','站穩了，這一拳不會留情。','你看得見我，就算你贏。','感覺到空氣裡的電了嗎？','來吧，被我抓住就結束了。','冷靜一點，你會輸得比較好看。','跟得上我的腳步，再來說話。','棍長三尺，你進不來的。','鈴聲響了，第一回合！','別緊張，毒只會讓你慢慢想通。','這支舞，你只能看，不能碰。','系統啟動。目標：鎖定。','拔刀之前，勝負已分。','你的魂魄……很亮呢。','吼——！別想跑！','這一箭，已經瞄準你的破綻了。'];
+const BOSSL=['那是……另一個我？','想變強，就先超越你自己。'];
+const ENDING=[
+ '打倒了另一個自己，烈明白真正的對手一直是心中的懈怠。他把頭帶綁得更緊，朝下一座城市出發——火焰，永不熄滅。',
+ '鋼的拳套在最後一戰後裂了一道縫。他笑著說：「鋼會生鏽，意志不會。」隔天，港口多了一間沒有招牌的拳館。',
+ '影在月光下消失，只留下一枚手裏劍釘在擂台中央。傳聞從那天起，夜城的每個屋頂都多了一道守望的影子。',
+ '雷把最後一道閃電送回雲端。暴風雨停了，他第一次聽見城市安靜的聲音——那比雷鳴更讓他著迷。',
+ '岩扛著冠軍腰帶回到山村，把它掛在師父的墓前。「師父，這次我沒有讓步。」山風輕輕回應了他。',
+ '霜讓擂台結了一整夜的冰，好記住勝利的溫度。天亮時冰化了，她也啟程前往更北的雪原。',
+ '嵐在竹林裡練了一整個月的腳技，直到落葉在半空就被踢成兩半。「還不夠快。」他說完，轉身迎向下一陣風。',
+ '月把長棍插在火山口邊，望著滿月升起。「勝負如潮汐，有漲有退。」她把這一戰刻在棍上，成為第一道刻痕。',
+ '拳拿下了街頭最強的稱號，卻推掉所有職業邀約。「我要的不是腰帶，是下一個讓我心跳加速的對手。」',
+ '蠍把解藥配方匿名寄給了城裡的醫院。沒人知道是誰寄的，只在信封上看到一隻小小的蠍子印記。',
+ '蝶在空無一人的舞台上跳了最後一支舞，扇子劃過的地方飄起花瓣。她把扇子收進木匣，等待下一個舞台。',
+ '機的核心記錄下所有戰鬥資料，接著做出一個從未被設定過的決定：關閉武器系統，去看一次真正的日出。',
+ '刃把刀收回鞘中，再也沒有拔出。「最強的一刀，是不用出的那一刀。」他在竹林道場開始教孩子們寫字。',
+ '巫收集了所有對手的魂光，最後卻把它們全部放回天空。那一夜，城市上空出現了從未見過的極光。',
+ '獸贏了，卻發現自己最想要的只是一碗熱騰騰的麵。從此，港口的麵攤多了一位會幫忙搬貨的大個子常客。',
+ '羽射出最後一箭，箭尾綁著一封信，飛過整座城市，落在故鄉的門口。信上只寫著：「我很好，我贏了。」'];
+// 中文斷行：依寬度一個字一個字排
+// 標點不放行首（。，」等跟著前一行）
+function wrapText(t,w){const L=[];let s='';for(const ch of t){if(ctx.measureText(s+ch).width>w&&s&&!'。，、」』！？；：）…'.includes(ch)){L.push(s);s=''}s+=ch}if(s)L.push(s);return L}
+// 開打前（VS 畫面）的對話
+function vsDialog(){
+ if(!ARC||!ARC.dlg||G.phase==='menu')return;const t=(G.vm||110)-G.vs;ctx.save();
+ ARC.dlg.forEach((ln,k)=>{const a=Math.max(0,Math.min(1,(t-20-k*45)/10));if(!a)return;ctx.globalAlpha=a;const f=k?p2:p1,y=H-132+k*50,x=k?W-40:40;
+  ctx.font='bold 19px '+FONT;const w=Math.min(W*.6,ctx.measureText(ln).width+40);ctx.fillStyle='rgba(0,0,0,.72)';ctx.beginPath();ctx.moveTo(k?x-w:x,y-26);ctx.lineTo(k?x:x+w,y-26);ctx.lineTo(k?x-8:x+w-8,y+12);ctx.lineTo(k?x-w-8:x+8,y+12);ctx.fill();
+  ctx.fillStyle=f.ch.col;ctx.fillRect(k?x-4:x,y-26,4,38);ctx.fillStyle='#fff';ctx.textAlign=k?'right':'left';ctx.fillText('「'+ln+'」',k?x-20:x+20,y)});
+ ctx.restore()}
+// 通關結局
+function arcStory(){
+ if(!ARC||!ARC.done||G.phase==='menu')return;const now=performance.now();if(!ARC.endT)ARC.endT=now;const a=Math.min(1,(now-ARC.endT)/600),c=ARC.me,ch=CH[c];
+ ctx.save();ctx.globalAlpha=a;ctx.fillStyle='#05040c';ctx.fillRect(0,0,W,H);
+ const g=ctx.createLinearGradient(0,0,W,0);g.addColorStop(0,ch.col+'55');g.addColorStop(.5,'rgba(0,0,0,0)');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+ if(HEAD[c])ctx.drawImage(HEAD[c],60,120,260,260);ctx.strokeStyle='#d9a640';ctx.lineWidth=3;ctx.strokeRect(60,120,260,260);
+ ctx.textAlign='left';ctx.font='italic 900 40px '+FONT;ctx.lineWidth=7;ctx.strokeStyle='#000';ctx.lineJoin='round';const tt=ch.n+' 的結局';ctx.strokeText(tt,360,150);ctx.fillStyle='#ffd21a';ctx.fillText(tt,360,150);
+ ctx.font='19px '+FONT;ctx.fillStyle='#f2f2f7';const L=wrapText(ENDING[c]||'',540),shown=Math.floor((now-ARC.endT-400)/45);let n=0;
+ L.forEach((ln,i)=>{const k=Math.max(0,Math.min(ln.length,shown-n));n+=ln.length;ctx.fillText(ln.slice(0,k),360,200+i*34)});
  ctx.restore()}
 // ===== 輸入集中：每次 step 取得雙方輸入（訓練木樁、錄製、重播都走這裡）=====
 let RP=null,REC=null;
@@ -2352,7 +2401,7 @@ function helpRender(){
 <b>防禦耐久：</b>血條下方的藍條。一直防禦會減少，歸零時<b>破防</b>，長時間硬直；不防禦一陣子會慢慢回復。<br>
 <b>迅移取消：</b>出招中同時按<b>輕拳＋重拳＋輕腳</b>（50 氣），立刻取消招式回到可行動；命中時使用，對手會多硬直一點，可延長連段或掩護失誤。<br>
 <b>簡易操作：</b>設定裡可讓 P1／P2 各自切換。命中後不按方向、連按任一攻擊鍵會自動接 輕→輕腳→重拳→必殺（必殺要 50 氣），傷害 ×0.85。<br>
-<b>場景機關：</b>選單「機關」開啟後：黃昏港的木箱牆第一次被撞（血量 60% 以下）會碎裂、多受傷害；極光雪原被擊退會滑更遠；火山口定時噴發，地面發光的位置要閃開。<br>
+<b>場景機關：</b>選單「機關」開啟後：夜城屋頂定時颳強風，把兩人往同一邊推（畫面會先預告方向）；黃昏港的木箱牆第一次被撞（血量 60% 以下）會碎裂、多受傷害；極光雪原被擊退會滑更遠；火山口定時噴發，地面發光的位置要閃開；竹林道場定時鐘響，雙方各加 15 氣。<br>
 <b>訓練模式：</b>畫面下方的幀數條（綠＝起手、紅＝攻擊判定、藍＝收招、黃＝硬直，白框＝無敵）與左右的輸入紀錄。`,
   '角色':CH.map((c,i)=>`<b style="color:${c.col}">${c.n}・${c.ds}</b>（體力 ${c.hp}）　被動：${CHM[i].p}<br>　指令技：`+cmdList(c).map(x=>x[0]+' '+x[1]).join('　')+'<br>　必殺技：'+spList(i).map(x=>x[0]+' '+x[1]).join('　')).join('<br>'),
   '系統':`<b>暫停：</b>P 或 Esc（暫停時按 Q 回選單）　<b>靜音：</b>M　<b>判定框：</b>F2（藍＝受擊框、紅＝攻擊判定、紫＝投技、黃＝反擊架勢、白＝無敵）<br>
@@ -2423,7 +2472,7 @@ function uiTick(){
  const on=G.phase==='over'&&!!REC&&!(G.mode===4&&NET.on);if(on!==OBAR){OBAR=on;$('obar').style.display=on?'flex':'none'}
 }
 function overlayDraw(){
- arcHud();chainHud();if(RP&&G.phase!=='menu'){inDraw(0,12);inDraw(1,W-12)}const now=performance.now();ctx.save();ctx.textAlign='center';
+ arcHud();chainHud();arcStory();if(RP&&G.phase!=='menu'){inDraw(0,12);inDraw(1,W-12)}const now=performance.now();ctx.save();ctx.textAlign='center';
  if(RP&&G.phase!=='menu'){ctx.font='bold 16px '+FONT;ctx.fillStyle='#ff6b6b';ctx.fillText(RP.end?'■ 重播結束　按 Enter 回選單':'▶ 重播中　P 暫停　暫停時 Q 離開',W/2,H-14)}
  else if(G.phase==='over'&&REC){ctx.font='bold 15px '+FONT;ctx.fillStyle='#ffe14d';ctx.fillText('R：複製這場的重播連結',W/2,H-66)}
  if(TOAST&&now<TOAST.until){ctx.font='bold 18px '+FONT;const w=ctx.measureText(TOAST.t).width+30;ctx.fillStyle='rgba(0,0,0,.75)';ctx.fillRect(W/2-w/2,H/2+60,w,36);ctx.fillStyle='#3ddc6a';ctx.fillText(TOAST.t,W/2,H/2+84)}
@@ -2435,15 +2484,16 @@ let ARC=null;
 function arcStart(){let L=CH.map((_,i)=>i).filter(i=>i!==sel[0]);for(let i=L.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[L[i],L[j]]=[L[j],L[i]]}L=L.slice(0,4);L.push(sel[0]);
  ARC={L,i:0,me:sel[0],cont:0,d0:G.diff,g0:G.stage,s1:sel[1],res:null,done:0};arcFight()}
 function arcFight(){const boss=ARC.i===ARC.L.length-1;sel[0]=ARC.me;sel[1]=ARC.L[ARC.i];G.diff=boss?2:Math.min(2,ARC.d0+(ARC.i>=2?1:0));G.stage=ARC.i%STG.length;
- startGame(1);sel[1]=ARC.s1;G.stage=ARC.g0;if(boss){p2.hm=1.3;p2.reset();if(REC)REC.h=[1,1.3]}ARC.res=null}
+ startGame(1);sel[1]=ARC.s1;G.stage=ARC.g0;if(boss){p2.hm=1.3;p2.reset();if(REC)REC.h=[1,1.3]}ARC.res=null;
+ ARC.dlg=boss?BOSSL:[INTRO[ARC.me],INTRO[ARC.L[ARC.i]]];G.vs=G.vm=200}
 function arcNext(){if(!ARC||!ARC.res)return;if(ARC.done){toMenu();return}
- if(ARC.res==='win'){ARC.i++;if(ARC.i>=ARC.L.length){ARC.done=1;G.msg='街機模式 通關！';G.mt=G.mm=1e9;sfx('round');
+ if(ARC.res==='win'){ARC.i++;if(ARC.i>=ARC.L.length){ARC.done=1;G.msg='街機模式 通關！';G.mt=G.mm=0;sfx('round');
   try{const r=JSON.parse(localStorage.getItem('fd_arc')||'{}');r[ARC.me]=Math.min(r[ARC.me]===undefined?99:r[ARC.me],ARC.cont);localStorage.setItem('fd_arc',JSON.stringify(r))}catch(e){}return}}
  else ARC.cont++;rpSaveLast();arcFight()}
 function arcEnd(){if(!ARC)return;G.diff=ARC.d0;G.stage=ARC.g0;ARC=null}
 function arcTip(){const n=ARC.L.length;return ARC.done?'恭喜通關（接關 '+ARC.cont+' 次）！按 Enter 回選單':ARC.res==='win'?(ARC.i+1>=n?'打倒魔王！按 Enter 繼續':'第 '+(ARC.i+1)+'／'+n+' 戰勝利！按 Enter 進入下一戰'):'輸了…按 Enter 接關再戰　Esc 回選單'}
 function arcInfo(){try{const r=JSON.parse(localStorage.getItem('fd_arc')||'{}'),k=Object.keys(r);return k.length?'　街機通關：'+k.map(i=>(CH[i]||CH[0]).n+(r[i]?'（接關 '+r[i]+'）':'（無接關）')).join('、'):''}catch(e){return''}}
-function arcHud(){if(!ARC||G.phase==='menu')return;const n=ARC.L.length,boss=ARC.i===n-1;ctx.save();ctx.textAlign='center';ctx.font='bold 14px '+FONT;ctx.fillStyle=boss?'#ff6b6b':'#ffe14d';ctx.fillText('街機 第 '+(ARC.i+1)+'／'+n+' 戰'+(boss?'　魔王：強化版'+CH[ARC.L[ARC.i]].n+'（體力 ×1.3）':''),W/2,90);ctx.restore()}
+function arcHud(){if(!ARC||ARC.done||G.phase==='menu')return;const n=ARC.L.length,boss=ARC.i===n-1;ctx.save();ctx.textAlign='center';ctx.font='bold 14px '+FONT;ctx.fillStyle=boss?'#ff6b6b':'#ffe14d';ctx.fillText('街機 第 '+(ARC.i+1)+'／'+n+' 戰'+(boss?'　魔王：強化版'+CH[ARC.L[ARC.i]].n+'（體力 ×1.3）':''),W/2,90);ctx.restore()}
 $('b7').onclick=()=>{snd(500,.1);arcStart()};
 // ===== 初始化 =====
 makeThumbs();makeHeads();makeStageThumbs();lab();rpLastBtn();rpHash();fitCanvas();qLabel();

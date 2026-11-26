@@ -378,7 +378,7 @@ function draw(){
  if(p1&&G.mode===3&&G.phase!=='menu'){if(TUT)tutHud();else trainHud()}
  overlayDraw();
  const now=performance.now();
- if(G.vs>0&&G.phase!=='menu')vsScreen();
+ if(G.vs>0&&G.phase!=='menu'){vsScreen();vsDialog()}
  if(G.mt>0&&G.phase!=='menu'&&!(G.vs>0)){
   const el=G.mm-G.mt,pop=1+Math.max(0,12-el)/12*.6,al=Math.min(1,G.mt/12);
   if(ART)arcMsg(el,al);else{ctx.save();ctx.globalAlpha=al;ctx.translate(W/2,G.phase==='over'?168:H/2-20);ctx.scale(pop*(G.phase==='over'?.6:1),pop*(G.phase==='over'?.6:1));ctx.font='900 76px '+FONT;ctx.textAlign='center';ctx.lineWidth=9;ctx.strokeStyle='#000';ctx.lineJoin='round';ctx.strokeText(G.msg,0,0);ctx.fillStyle='#ffe14d';ctx.fillText(G.msg,0,0);ctx.restore();}
