@@ -35,8 +35,10 @@ function step(){
  if((G.phase==='ko'||G.phase==='over')&&G.win>=0){const w=G.win?p2:p1;if(w.y>=GY&&(w.st==='idle'||w.st==='walk'||w.st==='block')){w.st='win';w.kt=0;w.vx=0}}
  if(!NOFX){for(const p of parts){if(!p.ring){p.x+=p.vx;p.y+=p.vy;p.vy+=p.text?0:(p.g===undefined?.25:p.g);p.vx*=(p.dr||.97);if(p.grow)p.s+=p.grow;if(p.vr)p.rot+=p.vr}p.l--}
  parts=parts.filter(p=>p.l>0);
- const dd=Math.abs(p1.x-p2.x),tz=Math.min(1.3,Math.max(1,640/(dd+260)));
- G.cam.z+=(tz+(G.pz||0)-G.cam.z)*.15;G.pz=(G.pz||0)*.85;G.cam.cx+=((p1.x+p2.x)/2-G.cam.cx)*.12}
+ const dd=Math.abs(p1.x-p2.x);let tz=Math.min(1.3,Math.max(1,640/(dd+260))),tcx=(p1.x+p2.x)/2;
+ // 街機畫風：超必殺發動時推近到發動者、KO 時推近到倒下的一方（只影響畫面）
+ if(ART&&!NOFX){const fc=camFocus();if(fc){tz=Math.max(tz,fc.z);tcx=fc.x}}
+ G.cam.z+=(tz+(G.pz||0)-G.cam.z)*.15;G.pz=(G.pz||0)*.85;G.cam.cx+=(tcx-G.cam.cx)*.12}
  if(G.phase==='intro'){if(--G.pt<=0){G.phase='fight';G.msg='FIGHT!';G.mt=G.mm=50;sfx('fight')}}
  else if(G.phase==='fight'){
   if(++G.tf>=60){G.tf=0;if(G.mode!==3){G.time--;if(G.time<=10&&G.time>0)sfx('tick')}}

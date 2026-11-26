@@ -51,7 +51,7 @@ function drawF(f){
  ctx.save();ctx.translate(f.x+(f.st==='hit'&&G.hitstop>0?(Math.random()-.5)*6:0),f.y);
  if(f.st==='ko')ctx.rotate(-d*Math.min(1.5,f.kt*.1));
  if(f.st==='down')ctx.rotate(-d*1.5*Math.min(1,f.dt/16));
- if(ART)ctx.scale(1.02,1.05);
+ if(ART){ctx.scale(1.02,1.05);const q=squash(f);if(q)ctx.scale(q[0],q[1])}
  ctx.lineCap='round';ctx.lineJoin='round';
  let hip=-52,sh=-98+Math.sin(G.frame*.12)*1.5,ln=0,ff=[16,0],bf=[-16,0],fh=[34,-84],bh=[22,-72],kl=0,trk=null;
  const a=f.atk;
@@ -62,7 +62,7 @@ function drawF(f){
  if(f.st==='ko'||f.st==='down'){fh=[-10,-60];bh=[-24,-70]}
  if(f.st==='dash'){ln=f.dd===d?10:-10;ff=[26,0];bf=[-26,0]}
  if(f.st==='atk'&&a){
-  const tot=a.su+a.ac,e=f.t<=a.su?f.t/a.su*.7:f.t<=tot?1:Math.max(0,1-(f.t-tot)/a.rc),k=a.key;
+  const tot=a.su+a.ac,e=f.t<=a.su?(ART?antic(f.t/Math.max(1,a.su)):f.t/a.su*.7):f.t<=tot?(ART&&f.t===a.su+1?1.08:1):Math.max(0,1-(f.t-tot)/a.rc),k=a.key;
   if(k==='lp'||k==='hp'||k==='ap'||k==='ahp'||k==='blp'||k==='bhp'||k==='lunge'||k==='jab'){ln=(k==='hp'?10:k==='lunge'?20:6)*e;fh=[34+(a.r-34)*e,k==='lunge'?-92:-86]}
   else if(k==='lk'||k==='hk'||k==='spin'||k==='push'||k==='flip'){kl=1;ln=-8*e;ff=[16+(a.r-16)*e,(k==='spin'?-70:a.h)*e]}
   else if(k==='ak'||a.dive){kl=1;ln=-6*e;ff=[20+(a.r-20)*e,-28-6*e];bf=[-6,-12]}
@@ -320,6 +320,7 @@ function drawF(f){
  const T=f.tr||(f.tr=[]);
  if(G.phase==='intro')T.length=0;
  if(f.lt!==G.frame){f.lt=G.frame;if(trk)T.push(trk);else if(T.length)T.shift();if(T.length>7)T.shift()}
+ if(ART&&trk&&a&&f.t>a.su&&f.t<=a.su+2&&!f.tint)smear(f,trk,kl?hip:sh,CC);
  if(T.length>1){ctx.save();ctx.lineCap='round';for(let i=1;i<T.length;i++){const al=i/T.length;ctx.beginPath();ctx.moveTo(T[i-1][0],T[i-1][1]);ctx.lineTo(T[i][0],T[i][1]);ctx.globalCompositeOperation='lighter';ctx.strokeStyle=CC;ctx.globalAlpha=al*.3;ctx.lineWidth=(2+i*1.6)*2.6;ctx.stroke();ctx.globalCompositeOperation='source-over';ctx.globalAlpha=al*.75;ctx.strokeStyle=CC2;ctx.lineWidth=2+i*1.6;ctx.stroke()}ctx.restore()}
  if(f.st==='dash'&&!f.tint){ctx.save();ctx.fillStyle=CC2;for(let i=0;i<4;i++){ctx.globalAlpha=.32-i*.07;ctx.fillRect(f.x-f.dd*(22+i*16)-(f.dd>0?36:0),f.y-100+i*24,36,3)}ctx.restore()}
 }
@@ -370,6 +371,7 @@ function draw(){
   if(G.win>=0&&(G.phase==='over'||(G.phase==='ko'&&G.pt<100))){const wf=G.win?p2:p1;if(wf.st==='win')quote(wf)}
  }
  ctx.restore();
+ fgDraw();
  if(!CALM&&now0()<G.rcF){ctx.save();ctx.globalCompositeOperation='lighter';ctx.fillStyle='rgba(90,200,255,'+((G.rcF-now0())/180*.22)+')';ctx.fillRect(0,0,W,H);ctx.restore()}
  if(p1&&qHigh())postFx();
  if(p1)hud();

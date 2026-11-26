@@ -48,6 +48,15 @@ h1{filter:drop-shadow(0 0 22px #ff4d4d55);background-size:100% 200%;animation:sh
 .mode{display:grid;grid-template-columns:40px 1fr;column-gap:6px;text-align:left;padding:10px 12px;border-radius:14px;background:linear-gradient(135deg,#2a1a44,#161a33);position:relative}
 .mode i{grid-row:1/3;font-style:normal;font-size:26px;align-self:center}.mode b{font-size:16px}.mode small{color:#aab;font-size:12px;line-height:1.3}
 .mode.main{background:linear-gradient(135deg,#ff5a4d,#a0203a);border-color:#ff9db8}.mode.main small{color:#ffe0e0}
+/* 街機畫風的選單：斜體標題、斜切卡片與面板、金色邊線 */
+body.art h1{font-style:italic;transform:skewX(-8deg);background:linear-gradient(#fffbe0 10%,#ffd21a 45%,#ff8a1a 70%,#c0200a);-webkit-background-clip:text;background-clip:text;filter:drop-shadow(0 3px 0 #120400) drop-shadow(0 0 14px #ff6a2a66)}
+body.art .sub{font-style:italic;color:#ffd27a}
+body.art .panel{border-radius:4px;border-color:#d9a64066;border-top:3px solid #d9a640;clip-path:polygon(0 0,calc(100% - 18px) 0,100% 18px,100% 100%,18px 100%,0 calc(100% - 18px))}
+body.art .mode{border-radius:3px;clip-path:polygon(10px 0,100% 0,calc(100% - 10px) 100%,0 100%);padding-left:18px;border-left:4px solid #d9a640}
+body.art .mode b{font-style:italic;letter-spacing:.04em}
+body.art .mode.main{border-left-color:#fff3d0}
+body.art .tabs button,body.art .seg button,body.art #hzbtn{border-radius:3px;font-style:italic}
+body.art .mode.hot::after{top:4px;right:16px}body.art .cell{border-radius:0}body.art #grid{border-radius:2px;border-color:#d9a64055}
 .mode.hot::after{content:"推薦";position:absolute;top:-8px;right:8px;background:#3ddc6a;color:#06210f;font-size:11px;font-weight:900;padding:1px 7px;border-radius:8px}
 #tpick{position:fixed;inset:0;background:#000c;z-index:20;display:flex;align-items:center;justify-content:center;padding:16px}.tp{background:#151832;border:1px solid #3a4080;border-radius:16px;padding:16px;max-width:560px;width:100%}.tp-row{display:flex;gap:10px;align-items:center;margin:8px 0}.tp-row>span{width:40px;color:#aab}.tp-slots{display:flex;gap:8px}.tp-slots span{border:2px solid #3a4080;border-radius:8px;padding:4px 14px;font-weight:900}.tp-slots .em{color:#555}#tpG{display:grid;grid-template-columns:repeat(8,1fr);gap:3px;margin:10px 0}#tpS:disabled{opacity:.4}
 #rec{color:#ffe14d;font-size:13px;text-align:center;margin:10px 0 2px}
@@ -949,8 +958,10 @@ function step(){
  if((G.phase==='ko'||G.phase==='over')&&G.win>=0){const w=G.win?p2:p1;if(w.y>=GY&&(w.st==='idle'||w.st==='walk'||w.st==='block')){w.st='win';w.kt=0;w.vx=0}}
  if(!NOFX){for(const p of parts){if(!p.ring){p.x+=p.vx;p.y+=p.vy;p.vy+=p.text?0:(p.g===undefined?.25:p.g);p.vx*=(p.dr||.97);if(p.grow)p.s+=p.grow;if(p.vr)p.rot+=p.vr}p.l--}
  parts=parts.filter(p=>p.l>0);
- const dd=Math.abs(p1.x-p2.x),tz=Math.min(1.3,Math.max(1,640/(dd+260)));
- G.cam.z+=(tz+(G.pz||0)-G.cam.z)*.15;G.pz=(G.pz||0)*.85;G.cam.cx+=((p1.x+p2.x)/2-G.cam.cx)*.12}
+ const dd=Math.abs(p1.x-p2.x);let tz=Math.min(1.3,Math.max(1,640/(dd+260))),tcx=(p1.x+p2.x)/2;
+ // 街機畫風：超必殺發動時推近到發動者、KO 時推近到倒下的一方（只影響畫面）
+ if(ART&&!NOFX){const fc=camFocus();if(fc){tz=Math.max(tz,fc.z);tcx=fc.x}}
+ G.cam.z+=(tz+(G.pz||0)-G.cam.z)*.15;G.pz=(G.pz||0)*.85;G.cam.cx+=(tcx-G.cam.cx)*.12}
  if(G.phase==='intro'){if(--G.pt<=0){G.phase='fight';G.msg='FIGHT!';G.mt=G.mm=50;sfx('fight')}}
  else if(G.phase==='fight'){
   if(++G.tf>=60){G.tf=0;if(G.mode!==3){G.time--;if(G.time<=10&&G.time>0)sfx('tick')}}
@@ -1018,7 +1029,7 @@ function drawF(f){
  ctx.save();ctx.translate(f.x+(f.st==='hit'&&G.hitstop>0?(Math.random()-.5)*6:0),f.y);
  if(f.st==='ko')ctx.rotate(-d*Math.min(1.5,f.kt*.1));
  if(f.st==='down')ctx.rotate(-d*1.5*Math.min(1,f.dt/16));
- if(ART)ctx.scale(1.02,1.05);
+ if(ART){ctx.scale(1.02,1.05);const q=squash(f);if(q)ctx.scale(q[0],q[1])}
  ctx.lineCap='round';ctx.lineJoin='round';
  let hip=-52,sh=-98+Math.sin(G.frame*.12)*1.5,ln=0,ff=[16,0],bf=[-16,0],fh=[34,-84],bh=[22,-72],kl=0,trk=null;
  const a=f.atk;
@@ -1029,7 +1040,7 @@ function drawF(f){
  if(f.st==='ko'||f.st==='down'){fh=[-10,-60];bh=[-24,-70]}
  if(f.st==='dash'){ln=f.dd===d?10:-10;ff=[26,0];bf=[-26,0]}
  if(f.st==='atk'&&a){
-  const tot=a.su+a.ac,e=f.t<=a.su?f.t/a.su*.7:f.t<=tot?1:Math.max(0,1-(f.t-tot)/a.rc),k=a.key;
+  const tot=a.su+a.ac,e=f.t<=a.su?(ART?antic(f.t/Math.max(1,a.su)):f.t/a.su*.7):f.t<=tot?(ART&&f.t===a.su+1?1.08:1):Math.max(0,1-(f.t-tot)/a.rc),k=a.key;
   if(k==='lp'||k==='hp'||k==='ap'||k==='ahp'||k==='blp'||k==='bhp'||k==='lunge'||k==='jab'){ln=(k==='hp'?10:k==='lunge'?20:6)*e;fh=[34+(a.r-34)*e,k==='lunge'?-92:-86]}
   else if(k==='lk'||k==='hk'||k==='spin'||k==='push'||k==='flip'){kl=1;ln=-8*e;ff=[16+(a.r-16)*e,(k==='spin'?-70:a.h)*e]}
   else if(k==='ak'||a.dive){kl=1;ln=-6*e;ff=[20+(a.r-20)*e,-28-6*e];bf=[-6,-12]}
@@ -1287,6 +1298,7 @@ function drawF(f){
  const T=f.tr||(f.tr=[]);
  if(G.phase==='intro')T.length=0;
  if(f.lt!==G.frame){f.lt=G.frame;if(trk)T.push(trk);else if(T.length)T.shift();if(T.length>7)T.shift()}
+ if(ART&&trk&&a&&f.t>a.su&&f.t<=a.su+2&&!f.tint)smear(f,trk,kl?hip:sh,CC);
  if(T.length>1){ctx.save();ctx.lineCap='round';for(let i=1;i<T.length;i++){const al=i/T.length;ctx.beginPath();ctx.moveTo(T[i-1][0],T[i-1][1]);ctx.lineTo(T[i][0],T[i][1]);ctx.globalCompositeOperation='lighter';ctx.strokeStyle=CC;ctx.globalAlpha=al*.3;ctx.lineWidth=(2+i*1.6)*2.6;ctx.stroke();ctx.globalCompositeOperation='source-over';ctx.globalAlpha=al*.75;ctx.strokeStyle=CC2;ctx.lineWidth=2+i*1.6;ctx.stroke()}ctx.restore()}
  if(f.st==='dash'&&!f.tint){ctx.save();ctx.fillStyle=CC2;for(let i=0;i<4;i++){ctx.globalAlpha=.32-i*.07;ctx.fillRect(f.x-f.dd*(22+i*16)-(f.dd>0?36:0),f.y-100+i*24,36,3)}ctx.restore()}
 }
@@ -1337,6 +1349,7 @@ function draw(){
   if(G.win>=0&&(G.phase==='over'||(G.phase==='ko'&&G.pt<100))){const wf=G.win?p2:p1;if(wf.st==='win')quote(wf)}
  }
  ctx.restore();
+ fgDraw();
  if(!CALM&&now0()<G.rcF){ctx.save();ctx.globalCompositeOperation='lighter';ctx.fillStyle='rgba(90,200,255,'+((G.rcF-now0())/180*.22)+')';ctx.fillRect(0,0,W,H);ctx.restore()}
  if(p1&&qHigh())postFx();
  if(p1)hud();
@@ -2048,8 +2061,47 @@ function crowdDraw(l){
  ctx.restore()}
 function calmLabel(){$('calmbtn').textContent='閃光：'+(CALM?'減少':'正常')}
 $('calmbtn').onclick=()=>{CALM=CALM?0:1;try{localStorage.setItem('fd_calm',CALM)}catch(e){}calmLabel();snd(600,.06)};calmLabel();
-function artLabel(){$('artbtn').textContent='畫風：'+(ART?'街機':'經典')}
+function artLabel(){$('artbtn').textContent='畫風：'+(ART?'街機':'經典');document.body.classList.toggle('art',!!ART)}
 $('artbtn').onclick=()=>{ART=ART?0:1;OLW=ART?1.6:1;OUTX=ART?2.4:0;try{localStorage.setItem('fd_art',ART)}catch(e){}artLabel();if(typeof makeHeads==='function'&&G.phase==='menu'){makeHeads();if(typeof selUI==='function')selUI()}snd(600,.06)};artLabel();
+// ---- 動作手感（只影響畫面）：預備動作、揮擊弧光、受擊擠壓、落地壓縮、鏡頭推近
+// 起手前段先往後收、再甩出去；p＝起手進度 0～1，回傳伸展量（負數＝往後收）
+const antic=p=>p<.4?-.22*Math.sin(p/.4*Math.PI/2):-.22+.92*Math.pow((p-.4)/.6,1.4);
+// 動畫暫存放在 WeakMap，不掛在角色身上：快照會複製角色的所有欄位，掛上去會讓連線雙方的雜湊不同
+const VIS=new WeakMap();
+function squash(f){
+ if(f.tint)return null;let v=VIS.get(f);if(!v){v={air:false,land:0,fr:-1};VIS.set(f,v)}
+ if(v.fr!==G.frame){v.fr=G.frame;const air=f.y<GY-2;if(v.air&&!air)v.land=6;else if(v.land>0)v.land--;v.air=air}
+ if(f.st==='hit'&&G.hitstop>0)return[1.08,.93];
+ if(f.st==='atk'&&f.hit&&G.hitstop>0)return[1.04,.97];
+ if(v.land>0){const k=v.land/6;return[1+.1*k,1-.12*k]}
+ if(f.y<GY-2&&f.vy<-4)return[.95,1.06];
+ return null}
+// 揮擊弧光：從肩（或腰）到拳腳尖端的一道實心月牙
+function smear(f,P,py,c){
+ const sx=f.x,sy=f.y+py,dx=P[0]-sx,dy=P[1]-sy,r=Math.hypot(dx,dy);if(!(r>=30)||!isFinite(sx+sy+r))return;
+ const a1=Math.atan2(dy,dx),sw=.9*(f.dir>0?-1:1),a0=a1+sw*(dy<0?-1:1);
+ ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=CALM?.25:.5;
+ const g=ctx.createRadialGradient(sx,sy,r*.55,sx,sy,r*1.05);g.addColorStop(0,'rgba(255,255,255,0)');g.addColorStop(.7,c);g.addColorStop(1,'#ffffff');ctx.fillStyle=g;
+ ctx.beginPath();ctx.arc(sx,sy,r*1.04,Math.min(a0,a1),Math.max(a0,a1));ctx.arc(sx,sy,r*.62,Math.max(a0,a1),Math.min(a0,a1),true);ctx.closePath();ctx.fill();ctx.restore()}
+function camFocus(){
+ const now=performance.now();
+ if(now<G.supEnd&&G.supSide!==undefined){const f=G.supSide?p2:p1;return{z:1.38,x:f.x}}
+ if(G.phase==='ko'&&G.pt>60){const l=p1.st==='ko'?p1:p2.st==='ko'?p2:null;if(l)return{z:1.3,x:l.x}}
+ return null}
+// 前景：畫面最下方兩側的剪影，移動得比地面快，增加景深（螢幕座標）
+function fgDraw(){
+ if(!ART||!p1||QM===3)return;const S=STG[G.stage],o=-(G.cam.cx-W/2)*.35,dk='#05040a';ctx.save();ctx.fillStyle=dk;ctx.strokeStyle=S.l;ctx.globalAlpha=.95;
+ const st=G.stage;
+ for(const k of[0,1]){const sx=(k?W-1:1),s=k?-1:1;ctx.save();ctx.translate(sx+o,H);ctx.scale(s,1);ctx.beginPath();
+  if(st===0){ctx.rect(0,-46,150,46);ctx.rect(20,-70,10,24);ctx.rect(120,-70,10,24);ctx.rect(14,-74,122,6)}
+  else if(st===1){ctx.rect(0,-34,170,34);ctx.moveTo(40,-34);ctx.arc(40,-46,14,Math.PI,0);ctx.rect(26,-46,28,12);ctx.moveTo(120,-34);ctx.arc(120,-44,11,Math.PI,0);ctx.rect(109,-44,22,10)}
+  else if(st===2){ctx.moveTo(0,0);ctx.lineTo(0,-40);ctx.quadraticCurveTo(40,-62,80,-38);ctx.quadraticCurveTo(120,-50,160,-20);ctx.lineTo(170,0);ctx.closePath()}
+  else if(st===3){ctx.moveTo(0,0);ctx.lineTo(0,-54);ctx.lineTo(36,-70);ctx.lineTo(70,-40);ctx.lineTo(110,-48);ctx.lineTo(150,-16);ctx.lineTo(160,0);ctx.closePath()}
+  else{for(let i=0;i<9;i++){const x=i*18,h=30+((i*37)%28);ctx.moveTo(x,0);ctx.quadraticCurveTo(x+4,-h*.6,x+10+(i%2?6:-6),-h);ctx.quadraticCurveTo(x+8,-h*.5,x+14,0)}}
+  ctx.fill();ctx.globalAlpha=.5;ctx.lineWidth=2;ctx.stroke();
+  if(st===3){ctx.globalAlpha=.6+.3*Math.sin(G.frame*.1);ctx.strokeStyle='#ff6a2a';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(20,-40);ctx.lineTo(44,-30);ctx.lineTo(60,-36);ctx.stroke()}
+  ctx.restore()}
+ ctx.restore()}
 // ===== 輸入集中：每次 step 取得雙方輸入（訓練木樁、錄製、重播都走這裡）=====
 let RP=null,REC=null;
 function inputs(hs){

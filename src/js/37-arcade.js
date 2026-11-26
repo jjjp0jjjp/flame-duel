@@ -77,5 +77,44 @@ function crowdDraw(l){
  ctx.restore()}
 function calmLabel(){$('calmbtn').textContent='閃光：'+(CALM?'減少':'正常')}
 $('calmbtn').onclick=()=>{CALM=CALM?0:1;try{localStorage.setItem('fd_calm',CALM)}catch(e){}calmLabel();snd(600,.06)};calmLabel();
-function artLabel(){$('artbtn').textContent='畫風：'+(ART?'街機':'經典')}
+function artLabel(){$('artbtn').textContent='畫風：'+(ART?'街機':'經典');document.body.classList.toggle('art',!!ART)}
 $('artbtn').onclick=()=>{ART=ART?0:1;OLW=ART?1.6:1;OUTX=ART?2.4:0;try{localStorage.setItem('fd_art',ART)}catch(e){}artLabel();if(typeof makeHeads==='function'&&G.phase==='menu'){makeHeads();if(typeof selUI==='function')selUI()}snd(600,.06)};artLabel();
+// ---- 動作手感（只影響畫面）：預備動作、揮擊弧光、受擊擠壓、落地壓縮、鏡頭推近
+// 起手前段先往後收、再甩出去；p＝起手進度 0～1，回傳伸展量（負數＝往後收）
+const antic=p=>p<.4?-.22*Math.sin(p/.4*Math.PI/2):-.22+.92*Math.pow((p-.4)/.6,1.4);
+// 動畫暫存放在 WeakMap，不掛在角色身上：快照會複製角色的所有欄位，掛上去會讓連線雙方的雜湊不同
+const VIS=new WeakMap();
+function squash(f){
+ if(f.tint)return null;let v=VIS.get(f);if(!v){v={air:false,land:0,fr:-1};VIS.set(f,v)}
+ if(v.fr!==G.frame){v.fr=G.frame;const air=f.y<GY-2;if(v.air&&!air)v.land=6;else if(v.land>0)v.land--;v.air=air}
+ if(f.st==='hit'&&G.hitstop>0)return[1.08,.93];
+ if(f.st==='atk'&&f.hit&&G.hitstop>0)return[1.04,.97];
+ if(v.land>0){const k=v.land/6;return[1+.1*k,1-.12*k]}
+ if(f.y<GY-2&&f.vy<-4)return[.95,1.06];
+ return null}
+// 揮擊弧光：從肩（或腰）到拳腳尖端的一道實心月牙
+function smear(f,P,py,c){
+ const sx=f.x,sy=f.y+py,dx=P[0]-sx,dy=P[1]-sy,r=Math.hypot(dx,dy);if(!(r>=30)||!isFinite(sx+sy+r))return;
+ const a1=Math.atan2(dy,dx),sw=.9*(f.dir>0?-1:1),a0=a1+sw*(dy<0?-1:1);
+ ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=CALM?.25:.5;
+ const g=ctx.createRadialGradient(sx,sy,r*.55,sx,sy,r*1.05);g.addColorStop(0,'rgba(255,255,255,0)');g.addColorStop(.7,c);g.addColorStop(1,'#ffffff');ctx.fillStyle=g;
+ ctx.beginPath();ctx.arc(sx,sy,r*1.04,Math.min(a0,a1),Math.max(a0,a1));ctx.arc(sx,sy,r*.62,Math.max(a0,a1),Math.min(a0,a1),true);ctx.closePath();ctx.fill();ctx.restore()}
+function camFocus(){
+ const now=performance.now();
+ if(now<G.supEnd&&G.supSide!==undefined){const f=G.supSide?p2:p1;return{z:1.38,x:f.x}}
+ if(G.phase==='ko'&&G.pt>60){const l=p1.st==='ko'?p1:p2.st==='ko'?p2:null;if(l)return{z:1.3,x:l.x}}
+ return null}
+// 前景：畫面最下方兩側的剪影，移動得比地面快，增加景深（螢幕座標）
+function fgDraw(){
+ if(!ART||!p1||QM===3)return;const S=STG[G.stage],o=-(G.cam.cx-W/2)*.35,dk='#05040a';ctx.save();ctx.fillStyle=dk;ctx.strokeStyle=S.l;ctx.globalAlpha=.95;
+ const st=G.stage;
+ for(const k of[0,1]){const sx=(k?W-1:1),s=k?-1:1;ctx.save();ctx.translate(sx+o,H);ctx.scale(s,1);ctx.beginPath();
+  if(st===0){ctx.rect(0,-46,150,46);ctx.rect(20,-70,10,24);ctx.rect(120,-70,10,24);ctx.rect(14,-74,122,6)}
+  else if(st===1){ctx.rect(0,-34,170,34);ctx.moveTo(40,-34);ctx.arc(40,-46,14,Math.PI,0);ctx.rect(26,-46,28,12);ctx.moveTo(120,-34);ctx.arc(120,-44,11,Math.PI,0);ctx.rect(109,-44,22,10)}
+  else if(st===2){ctx.moveTo(0,0);ctx.lineTo(0,-40);ctx.quadraticCurveTo(40,-62,80,-38);ctx.quadraticCurveTo(120,-50,160,-20);ctx.lineTo(170,0);ctx.closePath()}
+  else if(st===3){ctx.moveTo(0,0);ctx.lineTo(0,-54);ctx.lineTo(36,-70);ctx.lineTo(70,-40);ctx.lineTo(110,-48);ctx.lineTo(150,-16);ctx.lineTo(160,0);ctx.closePath()}
+  else{for(let i=0;i<9;i++){const x=i*18,h=30+((i*37)%28);ctx.moveTo(x,0);ctx.quadraticCurveTo(x+4,-h*.6,x+10+(i%2?6:-6),-h);ctx.quadraticCurveTo(x+8,-h*.5,x+14,0)}}
+  ctx.fill();ctx.globalAlpha=.5;ctx.lineWidth=2;ctx.stroke();
+  if(st===3){ctx.globalAlpha=.6+.3*Math.sin(G.frame*.1);ctx.strokeStyle='#ff6a2a';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(20,-40);ctx.lineTo(44,-30);ctx.lineTo(60,-36);ctx.stroke()}
+  ctx.restore()}
+ ctx.restore()}
