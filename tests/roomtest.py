@@ -59,12 +59,14 @@ with sync_playwright() as p:
     ha = A.evaluate("NET.hash"); hb = B.evaluate("NET.hash"); com = [k for k in ha if k in hb and int(k) > t0]; mm = [k for k in com if ha[k] != hb[k]]
     ok('對戰中斷線後自動重新連上並接續同一場', A.evaluate("G.mode===4&&NET.on&&!NET.rc") and B.evaluate("G.mode===4&&NET.on&&!NET.rc") and A.evaluate("NET.tick") > t0 + 20 and len(com) >= 2 and not mm, f'斷線前 {t0} 幀，接回後檢查點 {len(com)} 不一致 {len(mm)}')
     # 4. 打完再戰（走資料通道，不需要伺服器）
-    for i in range(1200):
+    # 隨機亂按常常打到時間到，一局最多三回合；CI 機器慢時要多等一點
+    for i in range(3600):
         if A.evaluate("G.phase") == 'over' and B.evaluate("G.phase") == 'over': break
         for pg in (A, B): pg.evaluate("ks=>{for(const k of ks){const v=Math.random()<.4?1:0;keys[k]=v;if(v)pend[k]=1}}", KS)
         A.wait_for_timeout(100)
     for pg in (A, B): pg.evaluate("for(const k of Object.keys(keys))keys[k]=0")
     A.wait_for_timeout(500)
+    ok('雙方打到結算畫面', A.evaluate("G.phase") == 'over' and B.evaluate("G.phase") == 'over', A.evaluate("[G.phase,G.round,p1.wins,p2.wins]"))
     # 再戰前換角：房客往右換兩個、房主往左換一個
     c0 = A.evaluate("NET.c[0]"); c1 = A.evaluate("NET.c[1]")
     B.keyboard.press('ArrowRight'); B.keyboard.press('ArrowRight'); A.keyboard.press('ArrowLeft')
