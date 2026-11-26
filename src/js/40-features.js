@@ -255,7 +255,7 @@ function helpRender(){
 <b>手把：</b>X 輕拳、Y 重拳、A 輕腳、B 重腳、RB／RT 必殺、LB／LT 投技，方向鍵或左搖桿移動。<br>
 <b>手機：</b>螢幕下方有按鈕（操作 P1）。<br>
 <b>減少閃光：</b>設定裡的「閃光：減少」會關掉全畫面閃色、大幅減弱畫面震動與命中星芒，HUD 也不再閃爍。系統開了「減少動態效果」時預設就會開啟。<br>
-<b>其他：</b>把對手逼到牆角時，你會被反彈後退。連線對戰使用 P1 按鍵，不能暫停，按 Esc 離開。`};
+<b>其他：</b>把對手逼到牆角時，你會被反彈後退。連線對戰使用 P1 按鍵，不能暫停，按 Esc 離開。結算時可按 ←／→ 換下一場的角色；用房間代碼配對時，中途斷線會自動重新連線。建立房間前勾選「開放觀戰」，別人就能用代碼按「觀戰」或打開觀戰連結觀看。`};
  $('htabs').innerHTML=Object.keys(T).map(n=>'<button'+(n===HTAB?' class="on"':'')+'>'+n+'</button>').join('');
  $('htabs').querySelectorAll('button').forEach(b=>b.onclick=()=>{HTAB=b.textContent;helpRender()});
  $('hbody').innerHTML=T[HTAB];

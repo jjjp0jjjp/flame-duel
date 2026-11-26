@@ -121,7 +121,7 @@ function netLeave(say){
  const R=NET.room;NET.room=null;NET.started=false;
  if(R){if(say)R.emit('bye',{}).catch(()=>{});setTimeout(()=>{R.leave().catch(()=>{})},300)}
 }
-function netQuit(say){netLeave(say);G.pause=false;toMenu()}
+function netQuit(say){if(typeof specClear==='function'){specClear();if(NET.wopen){NET.wopen=0;wsClose()}}netLeave(say);G.pause=false;toMenu()}
 function onBye(){
  NET.gone=true;
  if(!NET.on){setNs('對手已離開房間。');return}
@@ -132,7 +132,8 @@ let last=performance.now(),acc=0;
 let padOK=true;
 function pads(){if(!padOK)return;let gp=[];try{gp=navigator.getGamepads?navigator.getGamepads():[]}catch(e){padOK=false;return}let n=0;for(const p of gp){if(!p||n>1)continue;const q='P'+n++,ax=p.axes,b=i=>!!(p.buttons[i]&&p.buttons[i].pressed);keys[q+'l']=ax[0]<-.5||b(14);keys[q+'r']=ax[0]>.5||b(15);keys[q+'u']=ax[1]<-.6||b(12);keys[q+'d']=ax[1]>.6||b(13);keys[q+'a']=b(2);keys[q+'b']=b(3);keys[q+'x']=b(0);keys[q+'y']=b(1);keys[q+'s']=b(5)||b(7);keys[q+'t']=b(4)||b(6)}}
 function loop(ts){requestAnimationFrame(loop);pads();acc+=Math.min(100,ts-last);last=ts;
- if(NET.on){while(acc>=16.667){if(!netTick()){acc=Math.min(acc,33);break}acc-=16.667}netSend()}
+ if(NET.on){while(acc>=16.667){if(!netTick()){acc=Math.min(acc,33);break}acc-=16.667}netSend();if(typeof specPump==='function')specPump()}
+ else if(NET.watch&&typeof watchTick==='function')acc=watchTick(acc);
  else while(acc>=16.667){step();acc-=16.667}
  uiTick();menuTick();draw();qPerf()}
 requestAnimationFrame(loop);
@@ -142,19 +143,20 @@ addEventListener('keydown',e=>{if(KCAP){e.preventDefault();kcapDone(e.code);retu
  if(e.code==='F2'){e.preventDefault();G.hb=!G.hb;tbar();return}
  if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code))e.preventDefault();
  keys[e.code]=1;pend[e.code]=1;
+ if(G.mode===4&&NET.watch&&e.code==='Escape'){watchQuit();return}
  if(G.mode===4&&NET.on&&e.code==='Escape')netQuit(1);else if(((e.code==='KeyP'&&!bound(e.code))||e.code==='Escape')&&G.mode!==4&&G.phase!=='menu'&&G.phase!=='over')G.pause=!G.pause;
  if(G.vs>0&&G.mode!==4&&(e.code==='Enter'||e.code==='Space'))G.vs=1;
  if(e.code==='Enter'&&RP&&RP.end){toMenu();return}
  if(e.code==='KeyR'&&G.phase==='over'&&REC&&!bound(e.code))rpCopy();
  if(e.code==='Escape'&&G.phase==='over'&&(ARC||TEAM||SURV)){toMenu();return}
  if(G.phase==='over'&&(e.code==='ArrowLeft'||e.code==='KeyA'||e.code==='ArrowRight'||e.code==='KeyD')&&netPick(e.code==='ArrowLeft'||e.code==='KeyA'?-1:1))return;
- if(e.code==='Enter'&&G.phase==='over'){if(G.mode===4&&NET.on)netRematch();else chainNext()}
+ if(e.code==='Enter'&&G.phase==='over'&&!NET.watch){if(G.mode===4&&NET.on)netRematch();else chainNext()}
  if(e.code==='KeyQ'&&G.pause&&!bound(e.code)){G.pause=false;toMenu()}
  if(e.code==='KeyM'&&!bound(e.code))mute=!mute;
 });
 addEventListener('keyup',e=>{keys[e.code]=0});
 addEventListener('blur',()=>{for(const k in keys)keys[k]=0;if(G.phase==='fight'&&G.mode!==4)G.pause=true});
-cv.addEventListener('pointerdown',e=>{if(G.phase==='over'){if(G.mode===4&&NET.on){const r=cv.getBoundingClientRect(),fx=(e.clientX-r.left)/r.width;if(fx<.22&&netPick(-1))return;if(fx>.78&&netPick(1))return;netRematch()}else chainNext()}});
+cv.addEventListener('pointerdown',e=>{if(G.phase==='over'&&!NET.watch){if(G.mode===4&&NET.on){const r=cv.getBoundingClientRect(),fx=(e.clientX-r.left)/r.width;if(fx<.22&&netPick(-1))return;if(fx>.78&&netPick(1))return;netRematch()}else chainNext()}});
 document.querySelectorAll('#pad button').forEach(b=>{
  const ks=b.dataset.k.split(','),on=e=>{e.preventDefault();ks.forEach(k=>{keys[k]=1;pend[k]=1})},off=()=>{ks.forEach(k=>keys[k]=0)};
  b.addEventListener('pointerdown',on);['pointerup','pointercancel','pointerleave'].forEach(n=>b.addEventListener(n,off));

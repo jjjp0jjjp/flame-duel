@@ -384,13 +384,14 @@ function draw(){
   if(ART)arcMsg(el,al);else{ctx.save();ctx.globalAlpha=al;ctx.translate(W/2,G.phase==='over'?168:H/2-20);ctx.scale(pop*(G.phase==='over'?.6:1),pop*(G.phase==='over'?.6:1));ctx.font='900 76px '+FONT;ctx.textAlign='center';ctx.lineWidth=9;ctx.strokeStyle='#000';ctx.lineJoin='round';ctx.strokeText(G.msg,0,0);ctx.fillStyle='#ffe14d';ctx.fillText(G.msg,0,0);ctx.restore();}
  }
  if(now<G.supEnd)supCine((G.supEnd-now)/850);
+ if(G.mode===4&&NET.watch&&G.phase!=='menu'){ctx.save();ctx.textAlign='right';ctx.font='bold 13px '+FONT;ctx.fillStyle='#ff6b6b';ctx.fillText('● 觀戰中　Esc 離開',W-14,H-10);ctx.restore()}
  if(G.mode===4&&NET.on&&G.phase!=='menu'){
   ctx.save();ctx.textAlign='right';ctx.font='12px '+FONT;ctx.fillStyle=NET.desync?'#ff6b6b':'#ffffffaa';ctx.fillText('延遲 '+Math.round(NET.rtt)+'ms・輸入延遲 '+(NET.DL|0)+' 幀'+(NET.via==='relay'?'・經由中繼':'')+(NET.desync?'　⚠ 狀態不同步，重新同步中…':performance.now()-NET.rsT<2500?'　✔ 已重新同步':''),W-12,H-10);
   ctx.textAlign='center';ctx.lineWidth=5;ctx.strokeStyle='#000';ctx.fillStyle='#fff';ctx.font='bold 28px '+FONT;
   const st=NET.stallT?performance.now()-NET.stallT:0,tx=NET.gone?'對手已離開':NET.rc?'連線中斷，重新連線中…（'+Math.max(0,Math.ceil(20-(performance.now()-NET.rc.t)/1000))+' 秒）':st>8000?'連線中斷，按 Esc 離開':st>500?'等待對手…':'';
   if(tx){ctx.strokeText(tx,W/2,H/2+90);ctx.fillText(tx,W/2,H/2+90)}ctx.restore()}
- if(G.phase==='over'){ctx.textAlign='center';ctx.font='bold 24px '+FONT;ctx.fillStyle='#fff';ctx.fillStyle='rgba(0,0,0,.55)';ctx.fillRect(0,H-58,W,40);ctx.fillStyle='#fff';ctx.fillText(G.mode===4?(NET.reL?(NET.reR?'準備開始…':'已送出再戰邀請，等待對手…'):(NET.reR?'對手想再戰一局！按 Enter 接受　Esc 離開':'按 Enter 再戰一局　Esc 離開')):chainTip(),W/2,H-30);
-  if(G.mode===4&&NET.on){const pc=CH[NET.pk]||CH[0];ctx.font='bold 18px '+FONT;ctx.fillStyle='rgba(0,0,0,.55)';ctx.fillRect(W/2-230,H-92,460,30);ctx.fillStyle=pc.col;ctx.fillText((NET.reL?'下一場：':'◀ 下一場：')+pc.n+'・'+pc.ds+(NET.reL?'（已鎖定）':' ▶')+(NET.reR?'　對手：'+(CH[NET.rpk]||CH[0]).n:''),W/2,H-71)}}
+ if(G.phase==='over'){ctx.textAlign='center';ctx.font='bold 24px '+FONT;ctx.fillStyle='#fff';ctx.fillStyle='rgba(0,0,0,.55)';ctx.fillRect(0,H-58,W,40);ctx.fillStyle='#fff';ctx.fillText(G.mode===4&&NET.watch?'觀戰中：等待雙方再戰…　Esc 離開':G.mode===4?(NET.reL?(NET.reR?'準備開始…':'已送出再戰邀請，等待對手…'):(NET.reR?'對手想再戰一局！按 Enter 接受　Esc 離開':'按 Enter 再戰一局　Esc 離開')):chainTip(),W/2,H-30);
+  if(G.mode===4&&NET.on&&!NET.watch){const pc=CH[NET.pk]||CH[0];ctx.font='bold 18px '+FONT;ctx.fillStyle='rgba(0,0,0,.55)';ctx.fillRect(W/2-230,H-92,460,30);ctx.fillStyle=pc.col;ctx.fillText((NET.reL?'下一場：':'◀ 下一場：')+pc.n+'・'+pc.ds+(NET.reL?'（已鎖定）':' ▶')+(NET.reR?'　對手：'+(CH[NET.rpk]||CH[0]).n:''),W/2,H-71)}}
  if(G.pause)pauseScreen();
 }
 

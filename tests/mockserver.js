@@ -2,7 +2,7 @@
 const http = require('http'), crypto = require('crypto'), fs = require('fs');
 const FILE = process.argv[2], PORT = +process.argv[3] || 8790;
 const ICE = process.env.ICE ? JSON.parse(process.env.ICE) : [];
-const rooms = new Map(); // code -> {host, guest}
+const rooms = new Map(); // code -> {host, guest, specs}
 const stats = { opened: 0, msgs: 0 };
 // 和正式版相同的依 IP 限流（GATE 環境變數可調低來測試）
 let gateHit = null; import('../rooms-worker/src/gate.js').then((m) => { gateHit = m.gateHit; });
@@ -54,26 +54,33 @@ server.on('upgrade', (req, sock) => {
   const acc = crypto.createHash('sha1').update(req.headers['sec-websocket-key'] + '258EAFA5-E914-47DA-95CA-C5AB0DC85B11').digest('base64');
   sock.write('HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Accept: ' + acc + '\r\n\r\n');
   stats.opened++;
-  const R = rooms.get(code) || { host: null, guest: null };
+  const R = rooms.get(code) || { host: null, guest: null, specs: new Map() };
   if (role === 'host' && !rooms.has(code)) rooms.set(code, R);
   const alive = (s) => s && s.open;
   const S = mkSock(sock, (s, msg) => {
     stats.msgs++; s.n = (s.n || 0) + 1;
-    if (s.n > 40 || msg.length > 20000) { s.close(4002); return; }
+    if (s.n > (s.role === 'host' && s.watch ? 400 : 40) || msg.length > 20000) { s.close(4002); return; }
     let o; try { o = JSON.parse(msg); } catch (e) { return; }
-    if (!o || !['offer', 'answer', 'ice', 'bye'].includes(o.t)) return;
+    if (!o) return;
+    if (s.role === 'host' && ['open', 'playing', 'idle'].includes(o.t)) { if (o.t === 'open') s.watch = 1; else s.playing = o.t === 'playing'; return; }
+    if (!['offer', 'answer', 'ice', 'bye'].includes(o.t)) return;
+    if (s.role === 'spec') { if (alive(R.host)) R.host.send({ t: o.t, s: o.s, from: s.id }); return; }
+    if (s.role === 'host' && typeof o.to === 'string') { const sp = R.specs.get(o.to); if (alive(sp)) sp.send({ t: o.t, s: o.s }); return; }
     const other = s.role === 'host' ? R.guest : R.host; if (alive(other)) other.send(o);
   }, (s) => {
     if (!s.role) return;
+    if (s.role === 'spec') { R.specs.delete(s.id); if (alive(R.host)) R.host.send({ t: 'specleft', id: s.id }); return; }
+    if (s.role === 'host') for (const sp of R.specs.values()) if (alive(sp)) sp.send({ t: 'left' });
     if (R[s.role] === s) R[s.role] = null;
     const other = s.role === 'host' ? R.guest : R.host; if (alive(other)) other.send({ t: 'left' });
-    if (!R.host && !R.guest) rooms.delete(code);
+    if (!R.host && !R.guest && !R.specs.size) rooms.delete(code);
   });
   const reject = (t) => { S.send({ t }); S.close(4000); };
   const ip = req.socket.remoteAddress || ''; if (!hits.has(ip)) hits.set(ip, []);
   if (gateHit && !gateHit(hits.get(ip), Date.now(), GATE)) return reject('slow');
   if (role === 'host') { if (alive(R.host)) return reject('taken'); S.role = 'host'; R.host = S; S.send({ t: 'hosted' }); }
-  else if (role === 'guest') { if (!alive(R.host)) return reject('noroom'); if (alive(R.guest)) return reject('full'); S.role = 'guest'; R.guest = S; R.host.send({ t: 'peer', ice: ICE }); S.send({ t: 'joined', ice: ICE }); }
+  else if (role === 'spec') { if (!alive(R.host)) return reject('noroom'); if (!R.host.watch) return reject('nowatch'); if (R.specs.size >= 8) return reject('specfull'); S.role = 'spec'; S.id = Math.random().toString(36).slice(2, 8); R.specs.set(S.id, S); R.host.send({ t: 'spec', id: S.id, ice: ICE }); S.send({ t: 'watching', ice: ICE }); }
+  else if (role === 'guest') { if (!alive(R.host)) return reject('noroom'); if (alive(R.guest) || R.host.playing) return reject('full'); S.role = 'guest'; R.guest = S; R.host.send({ t: 'peer', ice: ICE }); S.send({ t: 'joined', ice: ICE }); }
   else reject('bad');
 });
 server.listen(PORT, () => console.log('mock on', PORT));

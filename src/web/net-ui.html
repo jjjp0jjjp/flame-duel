@@ -1,7 +1,8 @@
 <div id="net" class="help" style="display:none"><b>連線對戰</b>
 <div id="ns" style="margin:6px 0;color:#ffe14d">房主按「建立房間」，把 4 位數代碼告訴對手；對手輸入代碼按「加入」。</div>
-<div id="rm" class="row"><button id="rh">建立房間</button><input id="rc2" inputmode="numeric" maxlength="4" placeholder="代碼" autocomplete="off"><button id="rj">加入</button><button id="nx">取消</button></div>
-<div id="rcode"></div><div class="row"><button id="rl" style="display:none">複製邀請連結</button></div>
+<div id="rm" class="row"><button id="rh">建立房間</button><input id="rc2" inputmode="numeric" maxlength="4" placeholder="代碼" autocomplete="off"><button id="rj">加入</button><button id="rw" title="輸入代碼觀看別人的對戰">觀戰</button><button id="nx">取消</button></div>
+<div class="row" style="font-size:13px"><label><input type="checkbox" id="wopen"> 建立房間時開放觀戰（對戰中會保留與配對伺服器的連線）</label></div>
+<div id="rcode"></div><div class="row"><button id="rl" style="display:none">複製邀請連結</button><button id="rwl" style="display:none">複製觀戰連結</button></div>
 <details id="manual" style="margin:6px 0"><summary>手動交換代碼（直接開啟檔案、或配對伺服器連不上時使用）</summary>
 <div class="row"><button id="nh">① 房主：建立房間</button><button id="nj">② 房客：加入房間</button><button id="nc">③ 房主：連線</button></div>
 <div class="lb"><span>我的代碼（傳給對手）</span><button id="ncl">複製邀請連結</button><button id="ncp">複製代碼</button></div><textarea id="mine" readonly rows="3" placeholder="按①或②之後，代碼會出現在這裡"></textarea>

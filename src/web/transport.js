@@ -28,7 +28,7 @@ function wrapChannel(ch){
 function attach(R,slot){
  NET.room=R;NET.slot=slot;NET.started=false;NET.gone=false;NET.remote=null;NET.sid='';NET.pings=[];
  NET.unsub=subs(R);
- wsClose();NET.via='';viaInfo();
+ if(NET.wopen&&slot===0&&WS)sigSend(WS,{t:'playing'});else wsClose();NET.via='';viaInfo();
  setNs(slot?'已連線！等待房主開始…':'已連線！測量連線品質中…');
  clearInterval(NET.hb);NET.hb=setInterval(netHello,300);netHello();
 }
@@ -40,13 +40,16 @@ function netDrop(){
  if(!NET.on||NET.gone)return; // 對手主動離開（收到 bye）就不重連
  if(!NET.rcode||NET.rc){if(!NET.rc)onBye();return}
  NET.unsub.forEach(u=>{try{u()}catch(e){}});NET.unsub=[];const R=NET.room;NET.room=null;try{R&&R.leave()}catch(e){}
- NET.rc={t:performance.now()};NET.gone=false;const tok=NET.rid=(NET.rid||0)+1;
+ NET.rc={t:performance.now()};NET.gone=false;
+ // 開放觀戰的房主還連著配對伺服器：標記成空閒讓房客能重新加入，原本的握手迴圈會接手
+ const keep=NET.slot===0&&NET.wopen&&WS&&WS.readyState===1;if(keep)sigSend(WS,{t:'idle'});
+ const tok=keep?NET.rid:(NET.rid=(NET.rid||0)+1);
  setTimeout(()=>{if(NET.rc&&NET.rid===tok){NET.rc=null;wsClose();setNs('重新連線失敗，對手可能已經離開。');netQuit(0)}},RC_MAX);
- if(NET.slot===0)reHost(NET.rcode,tok);else reJoin(NET.rcode,tok);
+ if(keep)return;if(NET.slot===0)reHost(NET.rcode,tok);else reJoin(NET.rcode,tok);
 }
 function netResume(R){
  NET.room=R;NET.unsub=subs(R);NET.rc=null;NET.gone=false;NET.stallT=0;NET.lastSend=0;NET.desync=false;NET.rh={};
- wsClose();NET.via='';viaInfo();NET.reconn=(NET.reconn||0)+1;if(typeof toast==='function')toast('已重新連線');
+ if(NET.wopen&&NET.slot===0&&WS)sigSend(WS,{t:'playing'});else wsClose();NET.via='';viaInfo();NET.reconn=(NET.reconn||0)+1;if(typeof toast==='function')toast('已重新連線');
 }
 async function reHost(code,tok){
  for(let k=0;NET.rc&&NET.rid===tok;k++){
