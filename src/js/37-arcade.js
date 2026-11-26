@@ -2,6 +2,8 @@
 const para=(x0,x1,y,h,s)=>{ctx.beginPath();ctx.moveTo(x0+s,y);ctx.lineTo(x1+s,y);ctx.lineTo(x1,y+h);ctx.lineTo(x0,y+h);ctx.closePath()};
 const vgrad=(y,h,cs)=>{const g=ctx.createLinearGradient(0,y,0,y+h);cs.forEach((c,i)=>g.addColorStop(i/(cs.length-1),c));return g};
 const GOLD='#d9a640';
+// 手機橫放時按鈕疊在畫面下方，超必殺槽改放到血條下面
+const PADQ=window.matchMedia?matchMedia('(pointer:coarse) and (orientation:landscape)'):{matches:false};
 function artHud(){
  const BW=336,BH=22,Y=30,S=12,XR=W/2-54,XL=XR-BW,fl=!CALM&&G.frame%16<8;
  [p1,p2].forEach((f,k)=>{
@@ -21,7 +23,7 @@ function artHud(){
   // 勝場徽章
   for(let j=0;j<(G.ft||2);j++){const cx=XR-12-j*22,cy=Y+BH+24;ctx.beginPath();ctx.moveTo(cx,cy-8);ctx.lineTo(cx+8,cy);ctx.lineTo(cx,cy+8);ctx.lineTo(cx-8,cy);ctx.closePath();ctx.fillStyle=j<f.wins?'#ffe14d':'#1a1a2a';ctx.fill();ctx.strokeStyle=j<f.wins?'#fff':'#555';ctx.lineWidth=1.5;ctx.stroke()}
   // 底部超必殺槽（每 50 一格）
-  {const lv=Math.floor(f.mt/50),bx=26,by=H-34,sw=112;
+  {const lv=Math.floor(f.mt/50),top=PADQ.matches,bx=top?XL-62:26,by=top?Y+BH+42:H-34,sw=top?92:112;
    ctx.font='italic 900 26px '+FONT;ctx.textAlign='center';ctx.save();if(k){ctx.translate(bx+22,0);ctx.scale(-1,1);ctx.translate(-bx-22,0)}ctx.lineWidth=5;ctx.strokeStyle='#000';ctx.strokeText(lv,bx+22,by+20);ctx.fillStyle=vgrad(by,22,lv?['#fff6a8','#ff9d2e']:['#cfe6ff','#4d7bff']);ctx.fillText(lv,bx+22,by+20);ctx.font='bold 9px '+FONT;ctx.fillStyle='#fff';ctx.fillText('LV',bx+22,by-2);ctx.restore();
    for(let j=0;j<2;j++){const x0=bx+46+j*(sw+8),v=Math.max(0,Math.min(1,(f.mt-50*j)/50));para(x0-3,x0+sw+3,by-3,20,6);ctx.fillStyle='#07070f';ctx.fill();ctx.strokeStyle=GOLD;ctx.lineWidth=1.5;ctx.stroke();
     para(x0,x0+sw*v,by,14,5);ctx.fillStyle=v>=1?vgrad(by,14,fl?['#ffffff','#ffe14d','#ff8a2e']:['#fff6a8','#ffb020','#e06a10']):vgrad(by,14,['#bff6ff','#3fb0ff','#1f50c0']);ctx.fill()}}

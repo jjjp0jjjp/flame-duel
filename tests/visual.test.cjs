@@ -68,6 +68,18 @@ const SCENES = {
     console.log((pass ? 'PASS ' : 'FAIL ') + '畫面：' + name + '  變動格子 ' + (frac * 100).toFixed(1) + '%');
     if (!pass) { fails++; fs.mkdirSync(OUT, { recursive: true }); fs.writeFileSync(path.join(OUT, name + '.png'), Buffer.from(r.png.split(',')[1], 'base64')) }
   }
+  // 手機版面：畫面完整在螢幕內、按鈕不超出螢幕；橫放時畫面要佔滿高度
+  const { devices } = require('playwright');
+  for (const [nm, dev] of [['手機橫放', devices['iPhone 13 landscape']], ['手機直放', devices['iPhone 13']]]) {
+    const c2 = await b.newContext(dev), p2 = await c2.newPage();
+    await p2.goto('file://' + path.resolve(__dirname, '..', 'index.html'));
+    const m = await p2.evaluate(() => { sel[0] = 0; sel[1] = 1; startGame(1); const c = cv.getBoundingClientRect(), p = $('pad').getBoundingClientRect(); return { vw: innerWidth, vh: innerHeight, c: [c.left, c.top, c.right, c.bottom], p: [p.left, p.top, p.right, p.bottom] } });
+    const inV = (r) => r[0] >= -1 && r[1] >= -1 && r[2] <= m.vw + 1 && r[3] <= m.vh + 1;
+    const okL = inV(m.c) && inV(m.p) && (nm === '手機直放' ? m.c[3] <= m.p[1] + 1 : m.c[3] - m.c[1] >= m.vh - 2);
+    console.log((okL ? 'PASS ' : 'FAIL ') + '版面：' + nm + '  畫面 ' + m.c.map(Math.round) + '  按鈕 ' + m.p.map(Math.round));
+    if (!okL) fails++;
+    await c2.close();
+  }
   if (errs.length) { console.log('FAIL 繪製過程出錯  ' + errs.slice(0, 3).join(' | ')); fails++ }
   if (UPDATE) fs.writeFileSync(BASE, JSON.stringify(now, null, 1) + '\n');
   await b.close();
