@@ -331,7 +331,7 @@ function hud(){
   ctx.fillStyle='#000a';ctx.fillRect(x-3,y-3,w+6,h+6);
   ctx.fillStyle='#fff';ctx.fillRect(bx(lr),y,bw(lr),h);
   ctx.fillStyle=r>.5?'#3ddc6a':r>.25?'#ffd23d':'#ff4040';ctx.fillRect(bx(r),y,bw(r),h);
-  const mw=w*.6,mx=k?x+w-mw:x,my=y+h+10,fl=G.frame%16<8;
+  const mw=w*.6,mx=k?x+w-mw:x,my=y+h+10,fl=!CALM&&G.frame%16<8;
   ctx.fillStyle='#000a';ctx.fillRect(mx-2,my-2,mw+4,14);
   ctx.fillStyle=f.mt>=100?(fl?'#fff27a':'#ff9d2e'):f.mt>=50?(fl?'#ffb347':'#ff8a2e'):'#4dd2ff';const mbw=mw*f.mt/100;ctx.fillRect(k?mx+mw-mbw:mx,my,mbw,10);
   ctx.fillStyle='#fff8';ctx.fillRect(mx+mw/2-1,my,2,10);
@@ -356,7 +356,7 @@ function amb(){const t=performance.now(),s=G.stage;ctx.save();for(let i=0;i<46;i
 function draw(){
  ctx.setTransform(RS,0,0,RS,0,0);ctx.imageSmoothingQuality='high';
  ctx.save();
- if(G.shake>.5)ctx.translate((Math.random()-.5)*G.shake,(Math.random()-.5)*G.shake);
+ if(G.shake>.5){const sk=G.shake*(CALM?.2:1);ctx.translate((Math.random()-.5)*sk,(Math.random()-.5)*sk)}
  const z=G.cam.z,l=Math.max(0,Math.min(W-W/z,G.cam.cx-W/(2*z)));
  ctx.scale(z,z);ctx.translate(-l,-(H-H/z));
  bgDraw(l);amb();crowdDraw(l);hzDraw();
@@ -370,7 +370,7 @@ function draw(){
   if(G.win>=0&&(G.phase==='over'||(G.phase==='ko'&&G.pt<100))){const wf=G.win?p2:p1;if(wf.st==='win')quote(wf)}
  }
  ctx.restore();
- if(now0()<G.rcF){ctx.save();ctx.globalCompositeOperation='lighter';ctx.fillStyle='rgba(90,200,255,'+((G.rcF-now0())/180*.22)+')';ctx.fillRect(0,0,W,H);ctx.restore()}
+ if(!CALM&&now0()<G.rcF){ctx.save();ctx.globalCompositeOperation='lighter';ctx.fillStyle='rgba(90,200,255,'+((G.rcF-now0())/180*.22)+')';ctx.fillRect(0,0,W,H);ctx.restore()}
  if(p1&&qHigh())postFx();
  if(p1)hud();
  if(p1&&G.mode===3&&G.phase!=='menu'){if(TUT)tutHud();else trainHud()}

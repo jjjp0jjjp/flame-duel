@@ -107,7 +107,7 @@ input[type=range]{width:90px;padding:0}
 <div id="set" class="help" style="display:none"><b>設定</b>
 <div class="row" style="justify-content:flex-start">主音量 <input type="range" min="0" max="1" step=".05" data-v="all"> 音樂 <input type="range" min="0" max="1" step=".05" data-v="mus"> 音效 <input type="range" min="0" max="1" step=".05" data-v="sfx"></div>
 <div id="keytab"></div>
-<div class="row"><button id="qbtn"></button><button id="smbtn"></button><button id="artbtn"></button><button id="psz"></button><button id="kdef">恢復預設按鍵</button><button id="sclose">完成</button></div>
+<div class="row"><button id="qbtn"></button><button id="smbtn"></button><button id="artbtn"></button><button id="calmbtn"></button><button id="psz"></button><button id="kdef">恢復預設按鍵</button><button id="sclose">完成</button></div>
 <div style="font-size:12px;color:#aab">點按鈕後按下想用的鍵（Esc 取消）。同一個鍵只能對應一個動作，重複時會自動從舊的位置移除。設定只存在這個瀏覽器。</div></div>
 <div class="help" id="help"><div class="tabs" id="htabs"></div><div id="hbody"></div></div>
 </div>
@@ -250,7 +250,7 @@ function glowSpr(c){c=hex6(c);let s=GLW.get(c);if(s)return s;s=document.createEl
 // 細長光芒貼圖（星芒只畫兩條光芒＋中心光暈，比整張方形貼圖少填很多像素）
 function raySpr(c){c=hex6(c);const k='r'+c;let s=GLW.get(k);if(s)return s;s=document.createElement('canvas');s.width=128;s.height=12;const g=s.getContext('2d'),r=g.createLinearGradient(0,0,128,0);r.addColorStop(0,c+'00');r.addColorStop(.42,c);r.addColorStop(.5,'#ffffff');r.addColorStop(.58,c);r.addColorStop(1,c+'00');g.fillStyle=r;g.beginPath();g.ellipse(64,6,64,5,0,0,6.3);g.fill();GLW.set(k,s);return s}
 const glow=(x,y,r,c,a)=>{const o=ctx.globalCompositeOperation,ga=ctx.globalAlpha;ctx.globalCompositeOperation='lighter';if(a!==undefined)ctx.globalAlpha=ga*a;ctx.drawImage(glowSpr(c),x-r,y-r,r*2,r*2);ctx.globalCompositeOperation=o;ctx.globalAlpha=ga};
-const flare=(x,y,c,s,l)=>P({t:'fl',x,y,c,s,l:l||8,g:0,dr:1,rot:Math.random()*.6-.3});
+const flare=(x,y,c,s,l)=>P({t:'fl',x,y,c,s:CALM?s*.55:s,l:l||8,g:0,dr:1,rot:Math.random()*.6-.3});
 const fxLo=()=>QM===3||(QM===0&&QA>=2);
 const PGL=['#ff8a2a','#7fd6ff','#b46bff','#ffe680',null,'#9fe8ff','#7fffc0',null,null,'#a3e635','#ff9ff3','#ff9f1c','#e9ecef','#2a9d8f',null,'#4361ee']; // 各角色飛行道具的光色（岩是石頭，不發光）
 // ---- 招式動作特效(每幀,攻擊進行中)
@@ -1269,7 +1269,7 @@ function hud(){
   ctx.fillStyle='#000a';ctx.fillRect(x-3,y-3,w+6,h+6);
   ctx.fillStyle='#fff';ctx.fillRect(bx(lr),y,bw(lr),h);
   ctx.fillStyle=r>.5?'#3ddc6a':r>.25?'#ffd23d':'#ff4040';ctx.fillRect(bx(r),y,bw(r),h);
-  const mw=w*.6,mx=k?x+w-mw:x,my=y+h+10,fl=G.frame%16<8;
+  const mw=w*.6,mx=k?x+w-mw:x,my=y+h+10,fl=!CALM&&G.frame%16<8;
   ctx.fillStyle='#000a';ctx.fillRect(mx-2,my-2,mw+4,14);
   ctx.fillStyle=f.mt>=100?(fl?'#fff27a':'#ff9d2e'):f.mt>=50?(fl?'#ffb347':'#ff8a2e'):'#4dd2ff';const mbw=mw*f.mt/100;ctx.fillRect(k?mx+mw-mbw:mx,my,mbw,10);
   ctx.fillStyle='#fff8';ctx.fillRect(mx+mw/2-1,my,2,10);
@@ -1294,7 +1294,7 @@ function amb(){const t=performance.now(),s=G.stage;ctx.save();for(let i=0;i<46;i
 function draw(){
  ctx.setTransform(RS,0,0,RS,0,0);ctx.imageSmoothingQuality='high';
  ctx.save();
- if(G.shake>.5)ctx.translate((Math.random()-.5)*G.shake,(Math.random()-.5)*G.shake);
+ if(G.shake>.5){const sk=G.shake*(CALM?.2:1);ctx.translate((Math.random()-.5)*sk,(Math.random()-.5)*sk)}
  const z=G.cam.z,l=Math.max(0,Math.min(W-W/z,G.cam.cx-W/(2*z)));
  ctx.scale(z,z);ctx.translate(-l,-(H-H/z));
  bgDraw(l);amb();crowdDraw(l);hzDraw();
@@ -1308,7 +1308,7 @@ function draw(){
   if(G.win>=0&&(G.phase==='over'||(G.phase==='ko'&&G.pt<100))){const wf=G.win?p2:p1;if(wf.st==='win')quote(wf)}
  }
  ctx.restore();
- if(now0()<G.rcF){ctx.save();ctx.globalCompositeOperation='lighter';ctx.fillStyle='rgba(90,200,255,'+((G.rcF-now0())/180*.22)+')';ctx.fillRect(0,0,W,H);ctx.restore()}
+ if(!CALM&&now0()<G.rcF){ctx.save();ctx.globalCompositeOperation='lighter';ctx.fillStyle='rgba(90,200,255,'+((G.rcF-now0())/180*.22)+')';ctx.fillRect(0,0,W,H);ctx.restore()}
  if(p1&&qHigh())postFx();
  if(p1)hud();
  if(p1&&G.mode===3&&G.phase!=='menu'){if(TUT)tutHud();else trainHud()}
@@ -1376,7 +1376,9 @@ function postFx(){
  const now=performance.now();if(FL&&now<FL.t){ctx.globalAlpha=Math.min(1,(FL.t-now)/FL.d)*FL.a;ctx.fillStyle=FL.c;ctx.fillRect(0,0,W,H)}
  ctx.globalCompositeOperation='source-over';ctx.globalAlpha=1;ctx.drawImage(FX.v,0,0,W,H);ctx.restore();
 }
-const flash=(c,a,d)=>{if(!NOFX&&qHigh())FL={c,a,d,t:performance.now()+d}};
+// 減少閃光：關掉全畫面閃色、減弱震動與星芒、HUD 不閃爍。沒設定過時跟隨系統的「減少動態效果」
+let CALM=0;try{const v=localStorage.getItem('fd_calm');CALM=v!==null?(+v?1:0):(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches?1:0)}catch(e){}
+const flash=(c,a,d)=>{if(!NOFX&&qHigh()&&!CALM)FL={c,a,d,t:performance.now()+d}};
 function qLabel(){$('qbtn').textContent='畫質：'+QN[QM]+(QM===0?'（目前'+(QA===0?'高':QA===1?'標準':'省電')+'）':'')}
 addEventListener('resize',fitCanvas);
 // ===== 新角色（霜、嵐、月）的招式特效、飛行道具與超必殺背景（純視覺，不影響判定）=====
@@ -1943,7 +1945,7 @@ const para=(x0,x1,y,h,s)=>{ctx.beginPath();ctx.moveTo(x0+s,y);ctx.lineTo(x1+s,y)
 const vgrad=(y,h,cs)=>{const g=ctx.createLinearGradient(0,y,0,y+h);cs.forEach((c,i)=>g.addColorStop(i/(cs.length-1),c));return g};
 const GOLD='#d9a640';
 function artHud(){
- const BW=336,BH=22,Y=30,S=12,XR=W/2-54,XL=XR-BW,fl=G.frame%16<8;
+ const BW=336,BH=22,Y=30,S=12,XR=W/2-54,XL=XR-BW,fl=!CALM&&G.frame%16<8;
  [p1,p2].forEach((f,k)=>{
   const mh=f.ch.hp*(f.hm||1),r=Math.max(0,f.hp/mh),lr=Math.max(0,f.lag/mh),li=Math.max(0,CH.indexOf(f.ch));
   ctx.save();if(k){ctx.translate(W,0);ctx.scale(-1,1)}
@@ -1977,7 +1979,7 @@ function artHud(){
  });
  // 計時器
  {const x0=W/2-44,x1=W/2+44,y0=16,y1=74;ctx.beginPath();ctx.moveTo(x0-6,y0);ctx.lineTo(x1+6,y0);ctx.lineTo(x1-4,y1);ctx.lineTo(x0+4,y1);ctx.closePath();ctx.fillStyle=vgrad(y0,y1-y0,['#1a1a30','#07070f']);ctx.fill();ctx.strokeStyle=GOLD;ctx.lineWidth=2.5;ctx.stroke();
-  const t=G.mode===3?'∞':String(Math.max(0,G.time));ctx.textAlign='center';ctx.font='900 46px '+FONT;ctx.lineWidth=6;ctx.strokeStyle='#000';ctx.strokeText(t,W/2,64);ctx.fillStyle=vgrad(26,40,G.time<=10&&G.mode!==3&&G.frame%20<10?['#ffd0d0','#ff4040']:['#ffffff','#ffd27a']);ctx.fillText(t,W/2,64)}
+  const t=G.mode===3?'∞':String(Math.max(0,G.time));ctx.textAlign='center';ctx.font='900 46px '+FONT;ctx.lineWidth=6;ctx.strokeStyle='#000';ctx.strokeText(t,W/2,64);ctx.fillStyle=vgrad(26,40,G.time<=10&&G.mode!==3&&(CALM||G.frame%20<10)?['#ffd0d0','#ff4040']:['#ffffff','#ffd27a']);ctx.fillText(t,W/2,64)}
 }
 // 回合字樣：斜體、漸層、粗黑邊，從側邊滑入並帶一條橫幅
 function arcMsg(el,al){
@@ -1992,7 +1994,7 @@ function arcMsg(el,al){
 // 衝擊星芒：尖銳多角星＋白色核心＋速度線
 function impact(x,y,c,big,dir){if(NOFX)return;const n=big?12:9,k=[];for(let i=0;i<n;i++)k.push(.55+Math.random()*.45);P({t:'sb',x:x+dir*6,y,c,l:big?9:7,s:big?74:46,rot:Math.random()*6.28,k,g:0,dr:1});
  for(let i=0;i<(big?4:2);i++)slh(x+dir*rr_(0,20),y+rr_(-14,14),(dir>0?0:Math.PI)+rr_(-.35,.35),rr_(60,110),'#ffffff',7)}
-function drawStar(p,al){const pr=1-al,R=p.s*(.5+.6*Math.min(1,pr*2.2)),n=p.k.length;ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.rot);ctx.globalCompositeOperation='lighter';
+function drawStar(p,al){const pr=1-al,R=p.s*(.5+.6*Math.min(1,pr*2.2))*(CALM?.6:1),n=p.k.length;if(CALM)al*=.5;ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.rot);ctx.globalCompositeOperation='lighter';
  const star=(rs,ri)=>{ctx.beginPath();for(let i=0;i<n*2;i++){const a=i/(n*2)*6.283,r=i%2?ri:rs*p.k[i>>1];i?ctx.lineTo(Math.cos(a)*r,Math.sin(a)*r):ctx.moveTo(Math.cos(a)*r,Math.sin(a)*r)}ctx.closePath()};
  ctx.globalAlpha=al;star(R,R*.3);ctx.fillStyle=p.c;ctx.fill();ctx.globalAlpha=Math.min(1,al*1.4);star(R*.62,R*.2);ctx.fillStyle='#ffffff';ctx.fill();ctx.restore()}
 // 視差背景：天空與遠景比地面移動得慢
@@ -2013,6 +2015,8 @@ function crowdDraw(l){
  ctx.globalAlpha=.55;ctx.strokeStyle=S.l;ctx.lineWidth=1.5;ctx.beginPath();for(const m of CROWD){const b=Math.abs(Math.sin(t*(1+hype)+m.ph))*(1.5+hype*7),y=base-m.h-b;ctx.moveTo(m.x-6*m.w,y-3);ctx.arc(m.x,y,7*m.w,Math.PI*1.15,Math.PI*1.85)}ctx.stroke();
  if(hype>.4&&!NOFX){ctx.globalCompositeOperation='lighter';for(let i=0;i<3;i++){if(Math.random()<.5){const m=CROWD[Math.random()*CROWD.length|0];ctx.globalAlpha=.8;ctx.drawImage(glowSpr('#ffffff'),m.x-10,base-m.h-30,20,20)}}}
  ctx.restore()}
+function calmLabel(){$('calmbtn').textContent='閃光：'+(CALM?'減少':'正常')}
+$('calmbtn').onclick=()=>{CALM=CALM?0:1;try{localStorage.setItem('fd_calm',CALM)}catch(e){}calmLabel();snd(600,.06)};calmLabel();
 function artLabel(){$('artbtn').textContent='畫風：'+(ART?'街機':'經典')}
 $('artbtn').onclick=()=>{ART=ART?0:1;OLW=ART?1.6:1;OUTX=ART?2.4:0;try{localStorage.setItem('fd_art',ART)}catch(e){}artLabel();if(typeof makeHeads==='function'&&G.phase==='menu'){makeHeads();if(typeof selUI==='function')selUI()}snd(600,.06)};artLabel();
 // ===== 輸入集中：每次 step 取得雙方輸入（訓練木樁、錄製、重播都走這裡）=====
@@ -2271,6 +2275,7 @@ function helpRender(){
   '系統':`<b>暫停：</b>P 或 Esc（暫停時按 Q 回選單）　<b>靜音：</b>M　<b>判定框：</b>F2（藍＝受擊框、紅＝攻擊判定、紫＝投技、黃＝反擊架勢、白＝無敵）<br>
 <b>手把：</b>X 輕拳、Y 重拳、A 輕腳、B 重腳、RB／RT 必殺、LB／LT 投技，方向鍵或左搖桿移動。<br>
 <b>手機：</b>螢幕下方有按鈕（操作 P1）。<br>
+<b>減少閃光：</b>設定裡的「閃光：減少」會關掉全畫面閃色、大幅減弱畫面震動與命中星芒，HUD 也不再閃爍。系統開了「減少動態效果」時預設就會開啟。<br>
 <b>其他：</b>把對手逼到牆角時，你會被反彈後退。連線對戰使用 P1 按鍵，不能暫停，按 Esc 離開。`};
  $('htabs').innerHTML=Object.keys(T).map(n=>'<button'+(n===HTAB?' class="on"':'')+'>'+n+'</button>').join('');
  $('htabs').querySelectorAll('button').forEach(b=>b.onclick=()=>{HTAB=b.textContent;helpRender()});

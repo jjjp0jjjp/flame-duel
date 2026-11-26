@@ -5,7 +5,7 @@
   "scripts": {
     "build": "node tools/build.mjs",
     "check": "node tools/build.mjs --check",
-    "test": "node tools/build.mjs --check && node tests/game.test.cjs && node tests/visual.test.cjs && node tests/gate.test.cjs",
+    "test": "node tools/build.mjs --check && node tests/game.test.cjs && node tests/visual.test.cjs && node tests/perf.test.cjs && node tests/gate.test.cjs",
     "test:net": "python tests/roomtest.py",
     "pages": "node pages/build.mjs",
     "test:visual:update": "node tests/visual.test.cjs --update"

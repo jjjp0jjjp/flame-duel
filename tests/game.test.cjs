@@ -209,9 +209,11 @@ const ok = (name, cond, detail) => {
     out.hazard = dOn >= 7 && dOff === 0 && sOn > sOff + 5;
     // 兩種畫風都能正常繪製（只影響畫面，不影響模擬）
     setup(3, 9); run(20, (k) => [k % 4 === 0 ? { hp: 1 } : {}, {}]); const hb = hash0(); ART = 0; OLW = 1; OUTX = 0; draw(); ART = 1; OLW = 1.6; OUTX = 2.4; draw(); out.art = hash0() === hb;
+    // 減少閃光：不會設定全畫面閃色，且照常繪製
+    CALM = 1; FL = null; flash('#fff', .5, 200); const noFlash = FL === null; draw(); CALM = 0; flash('#fff', .5, 200); out.calm = noFlash && (FL !== null || !qHigh()); FL = null;
     return out;
   });
-  for (const [k, v] of Object.entries(mech)) ok('機制：' + { parry: '精準招架', punish: '確反加傷', tech: '受身與強制倒地', wall: '撞牆反彈', burst: '爆氣', guard: '防禦崩潰', simple: '簡易操作輔助連段', rc: '迅移取消', hazard: '場景機關（火山、雪原）', art: '街機／經典畫風繪製' }[k], v);
+  for (const [k, v] of Object.entries(mech)) ok('機制：' + { parry: '精準招架', punish: '確反加傷', tech: '受身與強制倒地', wall: '撞牆反彈', burst: '爆氣', guard: '防禦崩潰', simple: '簡易操作輔助連段', rc: '迅移取消', hazard: '場景機關（火山、雪原）', art: '街機／經典畫風繪製', calm: '減少閃光' }[k], v);
 
   // ---- 連段挑戰
   const tr = await pg.evaluate(() => {

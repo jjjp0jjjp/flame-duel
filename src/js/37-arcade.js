@@ -3,7 +3,7 @@ const para=(x0,x1,y,h,s)=>{ctx.beginPath();ctx.moveTo(x0+s,y);ctx.lineTo(x1+s,y)
 const vgrad=(y,h,cs)=>{const g=ctx.createLinearGradient(0,y,0,y+h);cs.forEach((c,i)=>g.addColorStop(i/(cs.length-1),c));return g};
 const GOLD='#d9a640';
 function artHud(){
- const BW=336,BH=22,Y=30,S=12,XR=W/2-54,XL=XR-BW,fl=G.frame%16<8;
+ const BW=336,BH=22,Y=30,S=12,XR=W/2-54,XL=XR-BW,fl=!CALM&&G.frame%16<8;
  [p1,p2].forEach((f,k)=>{
   const mh=f.ch.hp*(f.hm||1),r=Math.max(0,f.hp/mh),lr=Math.max(0,f.lag/mh),li=Math.max(0,CH.indexOf(f.ch));
   ctx.save();if(k){ctx.translate(W,0);ctx.scale(-1,1)}
@@ -37,7 +37,7 @@ function artHud(){
  });
  // 計時器
  {const x0=W/2-44,x1=W/2+44,y0=16,y1=74;ctx.beginPath();ctx.moveTo(x0-6,y0);ctx.lineTo(x1+6,y0);ctx.lineTo(x1-4,y1);ctx.lineTo(x0+4,y1);ctx.closePath();ctx.fillStyle=vgrad(y0,y1-y0,['#1a1a30','#07070f']);ctx.fill();ctx.strokeStyle=GOLD;ctx.lineWidth=2.5;ctx.stroke();
-  const t=G.mode===3?'∞':String(Math.max(0,G.time));ctx.textAlign='center';ctx.font='900 46px '+FONT;ctx.lineWidth=6;ctx.strokeStyle='#000';ctx.strokeText(t,W/2,64);ctx.fillStyle=vgrad(26,40,G.time<=10&&G.mode!==3&&G.frame%20<10?['#ffd0d0','#ff4040']:['#ffffff','#ffd27a']);ctx.fillText(t,W/2,64)}
+  const t=G.mode===3?'∞':String(Math.max(0,G.time));ctx.textAlign='center';ctx.font='900 46px '+FONT;ctx.lineWidth=6;ctx.strokeStyle='#000';ctx.strokeText(t,W/2,64);ctx.fillStyle=vgrad(26,40,G.time<=10&&G.mode!==3&&(CALM||G.frame%20<10)?['#ffd0d0','#ff4040']:['#ffffff','#ffd27a']);ctx.fillText(t,W/2,64)}
 }
 // 回合字樣：斜體、漸層、粗黑邊，從側邊滑入並帶一條橫幅
 function arcMsg(el,al){
@@ -52,7 +52,7 @@ function arcMsg(el,al){
 // 衝擊星芒：尖銳多角星＋白色核心＋速度線
 function impact(x,y,c,big,dir){if(NOFX)return;const n=big?12:9,k=[];for(let i=0;i<n;i++)k.push(.55+Math.random()*.45);P({t:'sb',x:x+dir*6,y,c,l:big?9:7,s:big?74:46,rot:Math.random()*6.28,k,g:0,dr:1});
  for(let i=0;i<(big?4:2);i++)slh(x+dir*rr_(0,20),y+rr_(-14,14),(dir>0?0:Math.PI)+rr_(-.35,.35),rr_(60,110),'#ffffff',7)}
-function drawStar(p,al){const pr=1-al,R=p.s*(.5+.6*Math.min(1,pr*2.2)),n=p.k.length;ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.rot);ctx.globalCompositeOperation='lighter';
+function drawStar(p,al){const pr=1-al,R=p.s*(.5+.6*Math.min(1,pr*2.2))*(CALM?.6:1),n=p.k.length;if(CALM)al*=.5;ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.rot);ctx.globalCompositeOperation='lighter';
  const star=(rs,ri)=>{ctx.beginPath();for(let i=0;i<n*2;i++){const a=i/(n*2)*6.283,r=i%2?ri:rs*p.k[i>>1];i?ctx.lineTo(Math.cos(a)*r,Math.sin(a)*r):ctx.moveTo(Math.cos(a)*r,Math.sin(a)*r)}ctx.closePath()};
  ctx.globalAlpha=al;star(R,R*.3);ctx.fillStyle=p.c;ctx.fill();ctx.globalAlpha=Math.min(1,al*1.4);star(R*.62,R*.2);ctx.fillStyle='#ffffff';ctx.fill();ctx.restore()}
 // 視差背景：天空與遠景比地面移動得慢
@@ -73,5 +73,7 @@ function crowdDraw(l){
  ctx.globalAlpha=.55;ctx.strokeStyle=S.l;ctx.lineWidth=1.5;ctx.beginPath();for(const m of CROWD){const b=Math.abs(Math.sin(t*(1+hype)+m.ph))*(1.5+hype*7),y=base-m.h-b;ctx.moveTo(m.x-6*m.w,y-3);ctx.arc(m.x,y,7*m.w,Math.PI*1.15,Math.PI*1.85)}ctx.stroke();
  if(hype>.4&&!NOFX){ctx.globalCompositeOperation='lighter';for(let i=0;i<3;i++){if(Math.random()<.5){const m=CROWD[Math.random()*CROWD.length|0];ctx.globalAlpha=.8;ctx.drawImage(glowSpr('#ffffff'),m.x-10,base-m.h-30,20,20)}}}
  ctx.restore()}
+function calmLabel(){$('calmbtn').textContent='閃光：'+(CALM?'減少':'正常')}
+$('calmbtn').onclick=()=>{CALM=CALM?0:1;try{localStorage.setItem('fd_calm',CALM)}catch(e){}calmLabel();snd(600,.06)};calmLabel();
 function artLabel(){$('artbtn').textContent='畫風：'+(ART?'街機':'經典')}
 $('artbtn').onclick=()=>{ART=ART?0:1;OLW=ART?1.6:1;OUTX=ART?2.4:0;try{localStorage.setItem('fd_art',ART)}catch(e){}artLabel();if(typeof makeHeads==='function'&&G.phase==='menu'){makeHeads();if(typeof selUI==='function')selUI()}snd(600,.06)};artLabel();

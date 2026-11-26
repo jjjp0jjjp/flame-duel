@@ -38,7 +38,7 @@ const SCENES = {
   await pg.goto('file://' + path.resolve(__dirname, '..', 'index.html'));
   await pg.evaluate(() => document.fonts.ready);
   await pg.evaluate(() => {
-    QM = 1; QA = 0; fitCanvas(); mute = true;
+    QM = 1; QA = 0; CALM = 0; fitCanvas(); mute = true;
     window.fight = (a, c, st) => { sel[0] = a; sel[1] = c; G.stage = st; startGame(2); G.vs = 0; while (G.phase !== 'fight') step(); p1.x = 400; p2.x = 520; p1.mt = 75; p2.mt = 100; };
     window.hitFor = (n) => { const H0 = human; let k = 0; human = (K) => Object.assign({}, NI, K === K1 ? ([0, 6].includes(k) ? (k ? { hp: 1 } : { lp: 1 }) : {}) : {}); for (let i = 0; i < 40; i++) { step(); if (G.hitstop === 0) k++; if (p2.combo >= 2 && G.hitstop > 0) break } human = H0 };
     window.pose = (f, m, t) => { f.start(m); f.t = (f.atk.su || 0) + t };

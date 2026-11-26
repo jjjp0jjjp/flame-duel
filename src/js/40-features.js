@@ -254,6 +254,7 @@ function helpRender(){
   '系統':`<b>暫停：</b>P 或 Esc（暫停時按 Q 回選單）　<b>靜音：</b>M　<b>判定框：</b>F2（藍＝受擊框、紅＝攻擊判定、紫＝投技、黃＝反擊架勢、白＝無敵）<br>
 <b>手把：</b>X 輕拳、Y 重拳、A 輕腳、B 重腳、RB／RT 必殺、LB／LT 投技，方向鍵或左搖桿移動。<br>
 <b>手機：</b>螢幕下方有按鈕（操作 P1）。<br>
+<b>減少閃光：</b>設定裡的「閃光：減少」會關掉全畫面閃色、大幅減弱畫面震動與命中星芒，HUD 也不再閃爍。系統開了「減少動態效果」時預設就會開啟。<br>
 <b>其他：</b>把對手逼到牆角時，你會被反彈後退。連線對戰使用 P1 按鍵，不能暫停，按 Esc 離開。`};
  $('htabs').innerHTML=Object.keys(T).map(n=>'<button'+(n===HTAB?' class="on"':'')+'>'+n+'</button>').join('');
  $('htabs').querySelectorAll('button').forEach(b=>b.onclick=()=>{HTAB=b.textContent;helpRender()});

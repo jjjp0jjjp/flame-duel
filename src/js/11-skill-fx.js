@@ -16,7 +16,7 @@ function glowSpr(c){c=hex6(c);let s=GLW.get(c);if(s)return s;s=document.createEl
 // 細長光芒貼圖（星芒只畫兩條光芒＋中心光暈，比整張方形貼圖少填很多像素）
 function raySpr(c){c=hex6(c);const k='r'+c;let s=GLW.get(k);if(s)return s;s=document.createElement('canvas');s.width=128;s.height=12;const g=s.getContext('2d'),r=g.createLinearGradient(0,0,128,0);r.addColorStop(0,c+'00');r.addColorStop(.42,c);r.addColorStop(.5,'#ffffff');r.addColorStop(.58,c);r.addColorStop(1,c+'00');g.fillStyle=r;g.beginPath();g.ellipse(64,6,64,5,0,0,6.3);g.fill();GLW.set(k,s);return s}
 const glow=(x,y,r,c,a)=>{const o=ctx.globalCompositeOperation,ga=ctx.globalAlpha;ctx.globalCompositeOperation='lighter';if(a!==undefined)ctx.globalAlpha=ga*a;ctx.drawImage(glowSpr(c),x-r,y-r,r*2,r*2);ctx.globalCompositeOperation=o;ctx.globalAlpha=ga};
-const flare=(x,y,c,s,l)=>P({t:'fl',x,y,c,s,l:l||8,g:0,dr:1,rot:Math.random()*.6-.3});
+const flare=(x,y,c,s,l)=>P({t:'fl',x,y,c,s:CALM?s*.55:s,l:l||8,g:0,dr:1,rot:Math.random()*.6-.3});
 const fxLo=()=>QM===3||(QM===0&&QA>=2);
 const PGL=['#ff8a2a','#7fd6ff','#b46bff','#ffe680',null,'#9fe8ff','#7fffc0',null,null,'#a3e635','#ff9ff3','#ff9f1c','#e9ecef','#2a9d8f',null,'#4361ee']; // 各角色飛行道具的光色（岩是石頭，不發光）
 // ---- 招式動作特效(每幀,攻擊進行中)

@@ -45,6 +45,8 @@ function postFx(){
  const now=performance.now();if(FL&&now<FL.t){ctx.globalAlpha=Math.min(1,(FL.t-now)/FL.d)*FL.a;ctx.fillStyle=FL.c;ctx.fillRect(0,0,W,H)}
  ctx.globalCompositeOperation='source-over';ctx.globalAlpha=1;ctx.drawImage(FX.v,0,0,W,H);ctx.restore();
 }
-const flash=(c,a,d)=>{if(!NOFX&&qHigh())FL={c,a,d,t:performance.now()+d}};
+// 減少閃光：關掉全畫面閃色、減弱震動與星芒、HUD 不閃爍。沒設定過時跟隨系統的「減少動態效果」
+let CALM=0;try{const v=localStorage.getItem('fd_calm');CALM=v!==null?(+v?1:0):(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches?1:0)}catch(e){}
+const flash=(c,a,d)=>{if(!NOFX&&qHigh()&&!CALM)FL={c,a,d,t:performance.now()+d}};
 function qLabel(){$('qbtn').textContent='畫質：'+QN[QM]+(QM===0?'（目前'+(QA===0?'高':QA===1?'標準':'省電')+'）':'')}
 addEventListener('resize',fitCanvas);
