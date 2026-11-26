@@ -23,6 +23,18 @@ function build(v) {
     .replace('/*@JS*/\n', () => js);
 }
 const out = { 'index.html': build('web'), 'claude-artifact/fighter_v2.html': build('artifact') };
+// 所有程式共用同一個全域範圍：兩個同名的頂層 function 不會報錯，後面的會悄悄蓋掉前面的。
+// 這裡先找出重複的頂層名稱（function／class／const／let／var，寫在行首的），有就停止建置。
+function dupNames(html) {
+  const seen = new Map(), dup = [];
+  const re = /^(?:async\s+)?function\s*\*?\s*([A-Za-z_$][\w$]*)|^(?:class|const|let|var)\s+([A-Za-z_$][\w$]*)/;
+  html.split('\n').forEach((ln, i) => { const m = ln.match(re); if (!m) return; const n = m[1] || m[2];
+    if (seen.has(n)) dup.push(`${n}（第 ${seen.get(n) + 1} 行與第 ${i + 1} 行）`); else seen.set(n, i) });
+  return dup;
+}
+let dupBad = 0;
+for (const [p, s] of Object.entries(out)) { const d = dupNames(s); if (d.length) { console.error('重複的頂層名稱：' + p + '\n  ' + d.join('\n  ')); dupBad = 1 } }
+if (dupBad) process.exit(1);
 const check = process.argv.includes('--check');
 let bad = 0;
 for (const [p, s] of Object.entries(out)) {
