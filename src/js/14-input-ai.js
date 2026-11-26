@@ -22,6 +22,19 @@ function aiInput(me,op){
  const oair=op.y<GY-2;if(oair&&!a.oa){h.jmp++;a.jc=(a.jc|0)+1}a.oa=oair;
  if(op.atk&&op.atk!==a.ok){a.ok=op.atk;a.done=0;if(op.atk.throw)h.thr++;if(op.atk.type==='proj')h.prj++}
  if(op.st==='block'&&me.st==='atk'&&me.hit&&me.t===me.atk.su+1)h.blk++;
+ // 火山口機關：地面發光時離開噴口（難度越高越會躲）
+ if(G.hz&&G.stage===3&&me.st!=='atk'&&me.st!=='hit'&&me.st!=='down'){const n=Math.floor(G.frame/VC),c=G.frame%VC,vx=vcX(n);
+  if(c>=360&&c<450&&Math.abs(me.x-vx)<90){if(a.vn!==n){a.vn=n;a.vd=Math.random()<[.35,.75,.95][lv]}if(a.vd){const away=me.x<vx?'l':'r';if(me.x<70||me.x>W-70)i.u=1;i[away]=1;if(lv>1&&c<400&&!(me.x<90||me.x>W-90))i.dash=away==='r'?1:-1;return i}}}
+ // 迅移取消：命中後延長連段（氣夠且不想留超必殺時），或揮空收招太長時保命
+ if(me.st==='atk'&&me.atk&&me.atk!==a.rcA&&me.mt>=50&&lv){const at=me.atk,rec=at.su+at.ac+at.rc-me.t;
+  if(me.hit&&op.st==='hit'&&me.t>at.su+at.ac&&rec>6&&(at.cn===4||at.cn===0||at.cn===undefined)&&me.mt>=(lv>1?60:75)){a.rcA=at;if(Math.random()<[0,.12,.3][lv]){i.lp=i.hp=i.lk=1;a.t=3;a.rcN=1;return i}}
+  else if(!me.hit&&me.t>at.su+at.ac&&rec>=14&&ad<130&&lv>1){a.rcA=at;if(Math.random()<.3){i.lp=i.hp=i.lk=1;a.t=8;return i}}}
+ if(a.rcN&&me.st==='idle'){a.rcN=0;if(ad<110){i[to]=1;i.hp=1;return i}}
+ // 精準招架：讀到對手出招快打到時往前按（難度越高越常用）
+ if(lv&&me.y>=GY&&(me.st==='idle'||me.st==='walk'||(me.st==='block'&&me.stun===0))&&!a.pfw){
+  const oa=op.atk;if(op.st==='atk'&&oa&&oa!==a.pa&&!oa.throw&&oa.type!=='proj'&&oa.type!=='strike'&&!op.hit){const left=oa.su-op.t;if(left>=1&&left<=4&&ad<(oa.r||80)+50){a.pa=oa;if(Math.random()<[0,.15,.28][lv]){a.pfw=2;i[to]=1;return i}}}
+  for(const p of projs)if(p.own===op&&p!==a.pp&&Math.sign(me.x-p.x)===Math.sign(p.vx)&&Math.abs(p.x-me.x)<40+Math.abs(p.vx)*3&&Math.abs(p.x-me.x)>10){a.pp=p;if(Math.random()<[0,.12,.3][lv]){a.pfw=2;i[to]=1;return i}}}
+ if(a.pfw>0){a.pfw--;return i}
  // 即時反應（普通以上）：拆投、確反揮空、對空
  const free=me.y>=GY&&(me.st==='idle'||me.st==='walk'||me.st==='block');
  if(lv&&free&&op.atk&&!a.done){const oa=op.atk,R=Math.random();
@@ -33,6 +46,7 @@ function aiInput(me,op){
   a.t=[24,14,7][lv]+rnd(0,10);a.mv=0;a.blk=0;a.act=null;
   const r=Math.random(),pj=me.ch.sp.type==='proj';
   if(op.st==='atk'&&ad<150&&r<[.25,.5,.78][lv]){a.blk=16;a.bw=Math.random()<[.35,.12,0][lv]}
+  else if(lv&&op.st==='block'&&op.gd<40&&ad<120&&r<[0,.45,.7][lv])a.act=[{hp:1},{hk:1},{[to]:1,hp:1},{[to]:1,hk:1}][rnd(0,4)];
   else if(me.ch.sp2.type==='strike'&&me.mt>=50&&ad>170&&ad<300&&(op.y<GY-30||r<.12))a.act={[to]:1,sp:1};
   else if(me.ch.ex.throw&&me.mt>=100&&ad<110&&r<.35)a.act={d:1,sp:1};
   else if(op.y<GY-40&&ad<125&&lv&&r<.6)a.act={d:1,lp:1};

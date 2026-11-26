@@ -37,7 +37,7 @@ CH.push(
  sp2:{d:14,su:10,ac:6,rc:24,r:148,h:-14,st:26,kb:6,knock:1,low:1,cost:50},
  sp3:{d:17,su:8,ac:14,rc:20,r:100,h:-40,st:26,kb:8,hop:-12,vx:6,knock:1,cost:50},
  asp:{d:8,su:4,ac:12,rc:6,r:90,h:-50,st:18,kb:5,air:1,around:1,hits:2,gap:6,cost:50}},
-{n:'拳',ds:'拳擊・連打',col:'#f72585',col2:'#ffc2e0',spd:4.2,jmp:13.5,hp:111,w:1.08,
+{n:'拳',ds:'拳擊・連打',col:'#f72585',col2:'#ffc2e0',spd:4.2,jmp:13.5,hp:115,w:1.08,
  mv:{lp:{su:2},hp:{su:6}},
  sp:{d:4,su:6,ac:20,rc:16,r:92,h:-84,st:14,kb:2,hits:5,gap:4,cost:50},
  ex:{d:6,su:10,ac:30,rc:28,vx:3,r:100,h:-84,st:30,kb:3,hits:8,gap:3,launch:1,ex:1,cost:100,name:'燃魂千拳'},
@@ -64,7 +64,7 @@ CH.push(
  sp3:{d:15,su:10,ac:12,rc:22,vx:11,r:80,h:-70,st:24,kb:12,arm:1,cost:50},
  asp:{d:18,su:8,ac:40,rc:10,r:70,h:-24,st:28,kb:8,knock:1,air:1,dive:1,arm:1,cost:50}});
 CH.push(
-{n:'刃',ds:'居合・一閃',col:'#e9ecef',col2:'#ffffff',spd:4.3,jmp:14.5,hp:92,w:1,blade:1,
+{n:'刃',ds:'居合・一閃',col:'#e9ecef',col2:'#ffffff',spd:4.3,jmp:14.5,hp:95,w:1,blade:1,
  mv:{hp:{r:100},hk:{r:112}},
  sp:{d:15,su:12,ac:6,rc:22,vx:16,r:80,h:-78,st:24,kb:6,thru:1,cost:50},
  ex:{d:40,su:16,ac:6,rc:30,vx:20,r:90,h:-78,st:34,kb:10,thru:1,launch:1,ex:1,cost:100,name:'一閃'},
@@ -83,7 +83,7 @@ CH.push(
  sp2:{d:5,su:6,ac:14,rc:18,r:76,h:-80,st:16,kb:2,hits:4,gap:3,cost:50},
  sp3:{d:0,su:10,ac:8,rc:20,r:140,h:-70,st:20,kb:16,around:1,drain:30,cost:50},
  asp:{d:18,su:6,ac:40,rc:8,r:76,h:-24,st:28,kb:8,knock:1,air:1,dive:1,cost:50}},
-{n:'羽',ds:'弓術・遠射',col:'#4361ee',col2:'#c7d2fe',spd:4,jmp:15,hp:117,w:.95,
+{n:'羽',ds:'弓術・遠射',col:'#4361ee',col2:'#c7d2fe',spd:4,jmp:15,hp:113,w:.95,
  sp:{type:'proj',d:11,su:8,ac:1,rc:16,spd:15,sl:120,cost:50},
  ex:{type:'strike',d:9,su:14,ac:1,rc:30,line:[90,150,210,270,330],launch:1,ex:1,cost:100,name:'天羽箭雨'},
  sp2:{type:'proj',d:14,su:12,ac:1,rc:20,spd:7,vy:-10,gr:.45,knock:1,cost:50},

@@ -26,7 +26,7 @@ const MV={
  burst:{d:0,su:3,ac:6,rc:22,r:140,h:-70,st:30,kb:18,around:1,knock:1,inv:1,iv:16,cn:0}
 };
 const CH=[
-{n:'烈',ds:'迅捷・波動彈',col:'#ff5a4d',col2:'#ffc4b3',spd:4.4,jmp:15,hp:100,w:1,
+{n:'烈',ds:'迅捷・波動彈',col:'#ff5a4d',col2:'#ffc4b3',spd:4.4,jmp:15,hp:97,w:1,
  sp:{type:'proj',d:15,su:11,ac:1,rc:19,spd:9,cost:50},
  ex:{type:'proj',d:30,su:14,ac:1,rc:26,spd:12,big:1,launch:1,ex:1,cost:100,name:'炎龍波'},
  sp2:{type:'proj',d:9,su:10,ac:1,rc:20,spd:7,n2:1,cost:50},
@@ -40,7 +40,7 @@ const CH=[
  armor:1,ar:.8,mv:{hp:{d:12},hk:{d:14}},
  sp3:{d:26,su:8,ac:2,rc:30,r:64,h:-70,st:40,kb:10,throw:1,cost:50},
  asp:{d:20,su:6,ac:40,rc:6,r:70,h:-24,st:30,kb:8,knock:1,air:1,dive:1,cost:50}},
-{n:'影',ds:'疾風・二段跳',col:'#b46bff',col2:'#e3ccff',spd:5,jmp:16,hp:103,w:.95,dj:1,
+{n:'影',ds:'疾風・二段跳',col:'#b46bff',col2:'#e3ccff',spd:5,jmp:16,hp:105,w:.95,dj:1,
  sp:{d:12,su:6,ac:10,rc:18,vx:16,r:76,h:-76,st:20,kb:7,cost:50},
  ex:{d:32,su:10,ac:18,rc:26,vx:18,r:100,h:-76,st:30,kb:15,launch:1,ex:1,cost:100,name:'影分身斬'},
  sp2:{d:14,su:10,ac:4,rc:18,r:80,h:-76,st:20,kb:6,tele:1,cost:50},

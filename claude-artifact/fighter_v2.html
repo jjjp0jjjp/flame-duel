@@ -141,7 +141,7 @@ const MV={
  burst:{d:0,su:3,ac:6,rc:22,r:140,h:-70,st:30,kb:18,around:1,knock:1,inv:1,iv:16,cn:0}
 };
 const CH=[
-{n:'烈',ds:'迅捷・波動彈',col:'#ff5a4d',col2:'#ffc4b3',spd:4.4,jmp:15,hp:100,w:1,
+{n:'烈',ds:'迅捷・波動彈',col:'#ff5a4d',col2:'#ffc4b3',spd:4.4,jmp:15,hp:97,w:1,
  sp:{type:'proj',d:15,su:11,ac:1,rc:19,spd:9,cost:50},
  ex:{type:'proj',d:30,su:14,ac:1,rc:26,spd:12,big:1,launch:1,ex:1,cost:100,name:'炎龍波'},
  sp2:{type:'proj',d:9,su:10,ac:1,rc:20,spd:7,n2:1,cost:50},
@@ -155,7 +155,7 @@ const CH=[
  armor:1,ar:.8,mv:{hp:{d:12},hk:{d:14}},
  sp3:{d:26,su:8,ac:2,rc:30,r:64,h:-70,st:40,kb:10,throw:1,cost:50},
  asp:{d:20,su:6,ac:40,rc:6,r:70,h:-24,st:30,kb:8,knock:1,air:1,dive:1,cost:50}},
-{n:'影',ds:'疾風・二段跳',col:'#b46bff',col2:'#e3ccff',spd:5,jmp:16,hp:103,w:.95,dj:1,
+{n:'影',ds:'疾風・二段跳',col:'#b46bff',col2:'#e3ccff',spd:5,jmp:16,hp:105,w:.95,dj:1,
  sp:{d:12,su:6,ac:10,rc:18,vx:16,r:76,h:-76,st:20,kb:7,cost:50},
  ex:{d:32,su:10,ac:18,rc:26,vx:18,r:100,h:-76,st:30,kb:15,launch:1,ex:1,cost:100,name:'影分身斬'},
  sp2:{d:14,su:10,ac:4,rc:18,r:80,h:-76,st:20,kb:6,tele:1,cost:50},
@@ -456,7 +456,7 @@ CH.push(
  sp2:{d:14,su:10,ac:6,rc:24,r:148,h:-14,st:26,kb:6,knock:1,low:1,cost:50},
  sp3:{d:17,su:8,ac:14,rc:20,r:100,h:-40,st:26,kb:8,hop:-12,vx:6,knock:1,cost:50},
  asp:{d:8,su:4,ac:12,rc:6,r:90,h:-50,st:18,kb:5,air:1,around:1,hits:2,gap:6,cost:50}},
-{n:'拳',ds:'拳擊・連打',col:'#f72585',col2:'#ffc2e0',spd:4.2,jmp:13.5,hp:111,w:1.08,
+{n:'拳',ds:'拳擊・連打',col:'#f72585',col2:'#ffc2e0',spd:4.2,jmp:13.5,hp:115,w:1.08,
  mv:{lp:{su:2},hp:{su:6}},
  sp:{d:4,su:6,ac:20,rc:16,r:92,h:-84,st:14,kb:2,hits:5,gap:4,cost:50},
  ex:{d:6,su:10,ac:30,rc:28,vx:3,r:100,h:-84,st:30,kb:3,hits:8,gap:3,launch:1,ex:1,cost:100,name:'燃魂千拳'},
@@ -483,7 +483,7 @@ CH.push(
  sp3:{d:15,su:10,ac:12,rc:22,vx:11,r:80,h:-70,st:24,kb:12,arm:1,cost:50},
  asp:{d:18,su:8,ac:40,rc:10,r:70,h:-24,st:28,kb:8,knock:1,air:1,dive:1,arm:1,cost:50}});
 CH.push(
-{n:'刃',ds:'居合・一閃',col:'#e9ecef',col2:'#ffffff',spd:4.3,jmp:14.5,hp:92,w:1,blade:1,
+{n:'刃',ds:'居合・一閃',col:'#e9ecef',col2:'#ffffff',spd:4.3,jmp:14.5,hp:95,w:1,blade:1,
  mv:{hp:{r:100},hk:{r:112}},
  sp:{d:15,su:12,ac:6,rc:22,vx:16,r:80,h:-78,st:24,kb:6,thru:1,cost:50},
  ex:{d:40,su:16,ac:6,rc:30,vx:20,r:90,h:-78,st:34,kb:10,thru:1,launch:1,ex:1,cost:100,name:'一閃'},
@@ -502,7 +502,7 @@ CH.push(
  sp2:{d:5,su:6,ac:14,rc:18,r:76,h:-80,st:16,kb:2,hits:4,gap:3,cost:50},
  sp3:{d:0,su:10,ac:8,rc:20,r:140,h:-70,st:20,kb:16,around:1,drain:30,cost:50},
  asp:{d:18,su:6,ac:40,rc:8,r:76,h:-24,st:28,kb:8,knock:1,air:1,dive:1,cost:50}},
-{n:'羽',ds:'弓術・遠射',col:'#4361ee',col2:'#c7d2fe',spd:4,jmp:15,hp:117,w:.95,
+{n:'羽',ds:'弓術・遠射',col:'#4361ee',col2:'#c7d2fe',spd:4,jmp:15,hp:113,w:.95,
  sp:{type:'proj',d:11,su:8,ac:1,rc:16,spd:15,sl:120,cost:50},
  ex:{type:'strike',d:9,su:14,ac:1,rc:30,line:[90,150,210,270,330],launch:1,ex:1,cost:100,name:'天羽箭雨'},
  sp2:{type:'proj',d:14,su:12,ac:1,rc:20,spd:7,vy:-10,gr:.45,knock:1,cost:50},
@@ -853,6 +853,19 @@ function aiInput(me,op){
  const oair=op.y<GY-2;if(oair&&!a.oa){h.jmp++;a.jc=(a.jc|0)+1}a.oa=oair;
  if(op.atk&&op.atk!==a.ok){a.ok=op.atk;a.done=0;if(op.atk.throw)h.thr++;if(op.atk.type==='proj')h.prj++}
  if(op.st==='block'&&me.st==='atk'&&me.hit&&me.t===me.atk.su+1)h.blk++;
+ // 火山口機關：地面發光時離開噴口（難度越高越會躲）
+ if(G.hz&&G.stage===3&&me.st!=='atk'&&me.st!=='hit'&&me.st!=='down'){const n=Math.floor(G.frame/VC),c=G.frame%VC,vx=vcX(n);
+  if(c>=360&&c<450&&Math.abs(me.x-vx)<90){if(a.vn!==n){a.vn=n;a.vd=Math.random()<[.35,.75,.95][lv]}if(a.vd){const away=me.x<vx?'l':'r';if(me.x<70||me.x>W-70)i.u=1;i[away]=1;if(lv>1&&c<400&&!(me.x<90||me.x>W-90))i.dash=away==='r'?1:-1;return i}}}
+ // 迅移取消：命中後延長連段（氣夠且不想留超必殺時），或揮空收招太長時保命
+ if(me.st==='atk'&&me.atk&&me.atk!==a.rcA&&me.mt>=50&&lv){const at=me.atk,rec=at.su+at.ac+at.rc-me.t;
+  if(me.hit&&op.st==='hit'&&me.t>at.su+at.ac&&rec>6&&(at.cn===4||at.cn===0||at.cn===undefined)&&me.mt>=(lv>1?60:75)){a.rcA=at;if(Math.random()<[0,.12,.3][lv]){i.lp=i.hp=i.lk=1;a.t=3;a.rcN=1;return i}}
+  else if(!me.hit&&me.t>at.su+at.ac&&rec>=14&&ad<130&&lv>1){a.rcA=at;if(Math.random()<.3){i.lp=i.hp=i.lk=1;a.t=8;return i}}}
+ if(a.rcN&&me.st==='idle'){a.rcN=0;if(ad<110){i[to]=1;i.hp=1;return i}}
+ // 精準招架：讀到對手出招快打到時往前按（難度越高越常用）
+ if(lv&&me.y>=GY&&(me.st==='idle'||me.st==='walk'||(me.st==='block'&&me.stun===0))&&!a.pfw){
+  const oa=op.atk;if(op.st==='atk'&&oa&&oa!==a.pa&&!oa.throw&&oa.type!=='proj'&&oa.type!=='strike'&&!op.hit){const left=oa.su-op.t;if(left>=1&&left<=4&&ad<(oa.r||80)+50){a.pa=oa;if(Math.random()<[0,.15,.28][lv]){a.pfw=2;i[to]=1;return i}}}
+  for(const p of projs)if(p.own===op&&p!==a.pp&&Math.sign(me.x-p.x)===Math.sign(p.vx)&&Math.abs(p.x-me.x)<40+Math.abs(p.vx)*3&&Math.abs(p.x-me.x)>10){a.pp=p;if(Math.random()<[0,.12,.3][lv]){a.pfw=2;i[to]=1;return i}}}
+ if(a.pfw>0){a.pfw--;return i}
  // 即時反應（普通以上）：拆投、確反揮空、對空
  const free=me.y>=GY&&(me.st==='idle'||me.st==='walk'||me.st==='block');
  if(lv&&free&&op.atk&&!a.done){const oa=op.atk,R=Math.random();
@@ -864,6 +877,7 @@ function aiInput(me,op){
   a.t=[24,14,7][lv]+rnd(0,10);a.mv=0;a.blk=0;a.act=null;
   const r=Math.random(),pj=me.ch.sp.type==='proj';
   if(op.st==='atk'&&ad<150&&r<[.25,.5,.78][lv]){a.blk=16;a.bw=Math.random()<[.35,.12,0][lv]}
+  else if(lv&&op.st==='block'&&op.gd<40&&ad<120&&r<[0,.45,.7][lv])a.act=[{hp:1},{hk:1},{[to]:1,hp:1},{[to]:1,hk:1}][rnd(0,4)];
   else if(me.ch.sp2.type==='strike'&&me.mt>=50&&ad>170&&ad<300&&(op.y<GY-30||r<.12))a.act={[to]:1,sp:1};
   else if(me.ch.ex.throw&&me.mt>=100&&ad<110&&r<.35)a.act={d:1,sp:1};
   else if(op.y<GY-40&&ad<125&&lv&&r<.6)a.act={d:1,lp:1};
