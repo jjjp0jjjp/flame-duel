@@ -51,6 +51,13 @@ with sync_playwright() as p:
     rs = B.evaluate("NET.resyncs"); sf = B.evaluate("NET.syncF"); ha = A.evaluate("NET.hash"); hb = B.evaluate("NET.hash")
     com = [k for k in hb if k in ha and int(k) >= sf]; mm = [k for k in com if ha[k] != hb[k]]
     ok('狀態錯開時自動重新同步', rs >= 1 and len(com) >= 2 and not mm and not A.evaluate("NET.desync") and not B.evaluate("NET.desync"), f'重新同步 {rs} 次，之後檢查點 {len(com)} 個、不一致 {len(mm)}')
+    # 3c. 對戰中途斷線 → 雙方用同一個房間代碼自動重新連上，接回原本的對戰
+    t0 = A.evaluate("NET.tick")
+    B.evaluate("(()=>{const pc=PC;PC=null;try{pc.close()}catch(e){}netDrop()})()")
+    A.wait_for_function("NET.reconn>=1", timeout=25000); B.wait_for_function("NET.reconn>=1", timeout=25000)
+    play([A, B], 60); A.wait_for_timeout(1500)
+    ha = A.evaluate("NET.hash"); hb = B.evaluate("NET.hash"); com = [k for k in ha if k in hb and int(k) > t0]; mm = [k for k in com if ha[k] != hb[k]]
+    ok('對戰中斷線後自動重新連上並接續同一場', A.evaluate("G.mode===4&&NET.on&&!NET.rc") and B.evaluate("G.mode===4&&NET.on&&!NET.rc") and A.evaluate("NET.tick") > t0 + 20 and len(com) >= 2 and not mm, f'斷線前 {t0} 幀，接回後檢查點 {len(com)} 不一致 {len(mm)}')
     # 4. 打完再戰（走資料通道，不需要伺服器）
     for i in range(1200):
         if A.evaluate("G.phase") == 'over' and B.evaluate("G.phase") == 'over': break
@@ -58,9 +65,15 @@ with sync_playwright() as p:
         A.wait_for_timeout(100)
     for pg in (A, B): pg.evaluate("for(const k of Object.keys(keys))keys[k]=0")
     A.wait_for_timeout(500)
+    # 再戰前換角：房客往右換兩個、房主往左換一個
+    c0 = A.evaluate("NET.c[0]"); c1 = A.evaluate("NET.c[1]")
+    B.keyboard.press('ArrowRight'); B.keyboard.press('ArrowRight'); A.keyboard.press('ArrowLeft')
     B.keyboard.press('Enter'); A.wait_for_timeout(600); A.keyboard.press('Enter')
     A.wait_for_function("NET.m===2&&G.phase!=='over'", timeout=10000); B.wait_for_function("NET.m===2&&G.phase!=='over'", timeout=10000)
     ok('整局打完後可直接再戰', True, A.evaluate("[NET.m,G.phase]"))
+    n = A.evaluate("CH.length"); want = [(c0 - 1) % n, (c1 + 2) % n]
+    got = [A.evaluate("[CH.indexOf(p1.ch),CH.indexOf(p2.ch)]"), B.evaluate("[CH.indexOf(p1.ch),CH.indexOf(p2.ch)]")]
+    ok('再戰前可以換角色，雙方看到的一致', got[0] == want and got[1] == want, f'{[c0, c1]} -> {got[0]}')
     A.keyboard.press('Escape'); B.wait_for_timeout(3500)
     ok('一方離開後雙方回到選單', A.evaluate("G.phase") == 'menu' and B.evaluate("G.phase") == 'menu')
     # 5. 邀請連結

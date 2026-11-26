@@ -33,7 +33,7 @@ $('ts').onclick=()=>{const u=$('tu').value.trim();
 var SIG=location.protocol==='https:'||location.protocol==='http:';
 var WS=null;
 function wsClose(){const w=WS;WS=null;try{w&&w.close()}catch(e){}}
-function sigStop(){NET.rid=(NET.rid||0)+1;wsClose();NET.code='';$('rcode').textContent='';$('rcode').style.display='none';$('rl').style.display='none'}
+function sigStop(){NET.rid=(NET.rid||0)+1;wsClose();NET.code='';NET.rcode='';$('rcode').textContent='';$('rcode').style.display='none';$('rl').style.display='none'}
 function wsOpen(code,role){return new Promise((res,rej)=>{
  let w;try{w=new WebSocket((location.protocol==='https:'?'wss://':'ws://')+location.host+'/api/ws?code='+code+'&role='+role)}catch(e){rej(e);return}
  w._q=[];w._r=null;let ok=false;
@@ -47,7 +47,7 @@ function wsNext(w,ms){return new Promise(res=>{if(w._q.length)return res(w._q.sh
 const sigSend=(w,o)=>{try{w.send(JSON.stringify(o))}catch(e){}};
 function cleanIce(ice){return Array.isArray(ice)?ice.filter(s=>s&&s.urls).slice(0,6):null}
 function connWatch(rid){setTimeout(()=>{if(rid===NET.rid&&!NET.room){setNs('連線逾時：雙方網路無法建立連線。請按「取消」後重新建立房間再試一次。');wsClose()}},25000)}
-function showCode(code){$('rcode').textContent=code;$('rcode').style.display='block';$('rl').style.display='inline-block';NET.code=code}
+function showCode(code){$('rcode').textContent=code;$('rcode').style.display='block';$('rl').style.display='inline-block';NET.code=code;NET.rcode=code}
 const SLOW='嘗試建立或加入房間的次數太多，請等幾分鐘再試。';
 async function roomHost(){
  if(!SIG){setNs('從檔案直接開啟時沒有配對伺服器，請改用下方「手動交換代碼」。');return}
@@ -81,6 +81,7 @@ async function hostLoop(w,code,rid){
    try{await PC.setRemoteDescription({type:'answer',sdp:String(m.s)})}catch(e){setNs('連線失敗：'+(e&&e.message||e));return}
    connWatch(rid);
   }else if(m.t==='left'){
+   if(PC&&PC.connectionState==='connected')continue; // 房客接上後才關掉配對連線，不是真的離開
    try{PC&&PC.close()}catch(e){}PC=null;
    setNs('對手離開了。房間 '+code+' 仍然開著，等待新的對手加入…');
   }else if(m.t==='closed'){
@@ -93,7 +94,7 @@ async function roomJoin(code){
  if(code.length!==4){setNs('請輸入 4 位數的房間代碼。');return}
  if(!SIG){setNs('從檔案直接開啟時沒有配對伺服器，請改用下方「手動交換代碼」。');return}
  if(!window.RTCPeerConnection){setNs('這個瀏覽器不支援 WebRTC，無法連線對戰。');return}
- netReset();sigStop();NET.role=1;const rid=NET.rid;
+ netReset();sigStop();NET.role=1;NET.rcode=code;const rid=NET.rid;
  setNs('加入房間 '+code+' 中…');
  let w;try{w=await wsOpen(code,'guest')}catch(e){if(rid===NET.rid)setNs('連不到配對伺服器，請稍後再試，或改用下方「手動交換代碼」。');return}
  if(rid!==NET.rid){try{w.close()}catch(e){}return}

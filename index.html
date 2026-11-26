@@ -1374,9 +1374,10 @@ function draw(){
  if(G.mode===4&&NET.on&&G.phase!=='menu'){
   ctx.save();ctx.textAlign='right';ctx.font='12px '+FONT;ctx.fillStyle=NET.desync?'#ff6b6b':'#ffffffaa';ctx.fillText('延遲 '+Math.round(NET.rtt)+'ms・輸入延遲 '+(NET.DL|0)+' 幀'+(NET.via==='relay'?'・經由中繼':'')+(NET.desync?'　⚠ 狀態不同步，重新同步中…':performance.now()-NET.rsT<2500?'　✔ 已重新同步':''),W-12,H-10);
   ctx.textAlign='center';ctx.lineWidth=5;ctx.strokeStyle='#000';ctx.fillStyle='#fff';ctx.font='bold 28px '+FONT;
-  const st=NET.stallT?performance.now()-NET.stallT:0,tx=NET.gone?'對手已離開':st>8000?'連線中斷，按 Esc 離開':st>500?'等待對手…':'';
+  const st=NET.stallT?performance.now()-NET.stallT:0,tx=NET.gone?'對手已離開':NET.rc?'連線中斷，重新連線中…（'+Math.max(0,Math.ceil(20-(performance.now()-NET.rc.t)/1000))+' 秒）':st>8000?'連線中斷，按 Esc 離開':st>500?'等待對手…':'';
   if(tx){ctx.strokeText(tx,W/2,H/2+90);ctx.fillText(tx,W/2,H/2+90)}ctx.restore()}
- if(G.phase==='over'){ctx.textAlign='center';ctx.font='bold 24px '+FONT;ctx.fillStyle='#fff';ctx.fillStyle='rgba(0,0,0,.55)';ctx.fillRect(0,H-58,W,40);ctx.fillStyle='#fff';ctx.fillText(G.mode===4?(NET.reL?(NET.reR?'準備開始…':'已送出再戰邀請，等待對手…'):(NET.reR?'對手想再戰一局！按 Enter 接受　Esc 離開':'按 Enter 再戰一局　Esc 離開')):chainTip(),W/2,H-30)}
+ if(G.phase==='over'){ctx.textAlign='center';ctx.font='bold 24px '+FONT;ctx.fillStyle='#fff';ctx.fillStyle='rgba(0,0,0,.55)';ctx.fillRect(0,H-58,W,40);ctx.fillStyle='#fff';ctx.fillText(G.mode===4?(NET.reL?(NET.reR?'準備開始…':'已送出再戰邀請，等待對手…'):(NET.reR?'對手想再戰一局！按 Enter 接受　Esc 離開':'按 Enter 再戰一局　Esc 離開')):chainTip(),W/2,H-30);
+  if(G.mode===4&&NET.on){const pc=CH[NET.pk]||CH[0];ctx.font='bold 18px '+FONT;ctx.fillStyle='rgba(0,0,0,.55)';ctx.fillRect(W/2-230,H-92,460,30);ctx.fillStyle=pc.col;ctx.fillText((NET.reL?'下一場：':'◀ 下一場：')+pc.n+'・'+pc.ds+(NET.reL?'（已鎖定）':' ▶')+(NET.reR?'　對手：'+(CH[NET.rpk]||CH[0]).n:''),W/2,H-71)}}
  if(G.pause)pauseScreen();
 }
 
@@ -1715,7 +1716,7 @@ function mkPC(ice){
  try{if(PC)PC.close()}catch(e){}
  PC=new RTCPeerConnection(rtcCfg(ice));
  const me=PC;
- PC.onconnectionstatechange=()=>{if(PC!==me)return;if(me.connectionState==='failed'){if(NET.on){NET.gone=true;setTimeout(()=>{if(NET.gone&&NET.room)netQuit(0)},2500)}else setNs('連線失敗：雙方網路無法建立連線。請按「取消」後重新建立房間再試一次。')}};
+ PC.onconnectionstatechange=()=>{if(PC!==me)return;if(me.connectionState==='failed'){if(NET.on)netDrop();else setNs('連線失敗：雙方網路無法建立連線。請按「取消」後重新建立房間再試一次。')}};
  return PC;
 }
 function gather(){return new Promise(res=>{if(PC.iceGatheringState==='complete')return res();const t=setTimeout(res,3000);PC.onicegatheringstatechange=()=>{if(PC.iceGatheringState==='complete'){clearTimeout(t);res()}}})}
@@ -1727,18 +1728,60 @@ function wrapChannel(ch){
   on:(t,h)=>{(hs[t]=hs[t]||[]).push(h);return()=>{hs[t]=(hs[t]||[]).filter(x=>x!==h)}},
   leave:async()=>{try{ch.close()}catch(e){}if(NET.room===null){try{PC&&PC.close()}catch(e){}PC=null}}
  };
- const opened=()=>{if(NET.room!==R&&!NET.room)attach(R,NET.role)};
+ const opened=()=>{if(NET.rc&&NET.on&&!NET.room){netResume(R);return}if(NET.room!==R&&!NET.room)attach(R,NET.role)};
  ch.onopen=opened;
- ch.onclose=()=>{if(NET.room===R){if(NET.on)onBye();else{setNs('連線已中斷，請重新建立房間。');netLeave(0)}}};
+ ch.onclose=()=>{if(NET.room===R){if(NET.on)netDrop();else{setNs('連線已中斷，請重新建立房間。');netLeave(0)}}};
  if(ch.readyState==='open')opened();
  return R;
 }
 function attach(R,slot){
  NET.room=R;NET.slot=slot;NET.started=false;NET.gone=false;NET.remote=null;NET.sid='';NET.pings=[];
- NET.unsub=[R.on('hello',m=>onHello(m.data)),R.on('start',m=>onStart(m.data)),R.on('ready',m=>onReady(m.data)),R.on('inp',m=>onInp(m.data)),R.on('bye',()=>onBye()),R.on('png',m=>{if(NET.slot===1&&NET.room)NET.room.emit('pog',{t:m.data&&m.data.t})}),R.on('pog',m=>onPog(m.data)),R.on('rem',m=>onRem(m.data)),R.on('rst',m=>onRst(m.data)),R.on('srq',m=>onSrq(m.data)),R.on('snp',m=>onSnp(m.data))];
+ NET.unsub=subs(R);
  wsClose();NET.via='';viaInfo();
  setNs(slot?'已連線！等待房主開始…':'已連線！測量連線品質中…');
  clearInterval(NET.hb);NET.hb=setInterval(netHello,300);netHello();
+}
+function subs(R){return[R.on('hello',m=>onHello(m.data)),R.on('start',m=>onStart(m.data)),R.on('ready',m=>onReady(m.data)),R.on('inp',m=>onInp(m.data)),R.on('bye',()=>onBye()),R.on('png',m=>{if(NET.slot===1&&NET.room)NET.room.emit('pog',{t:m.data&&m.data.t})}),R.on('pog',m=>onPog(m.data)),R.on('rem',m=>onRem(m.data)),R.on('rst',m=>onRst(m.data)),R.on('srq',m=>onSrq(m.data)),R.on('snp',m=>onSnp(m.data))]}
+// ===== 斷線重連（房間代碼配對才有）：對戰中資料通道斷了，雙方用同一個房間代碼重新握手，接回原本的對戰
+// 斷線期間遊戲會停在等待對手輸入；接回後雙方從各自保留的狀態繼續，沒送到的輸入會自動補送。
+const RC_MAX=20000;
+function netDrop(){
+ if(!NET.on||NET.gone)return; // 對手主動離開（收到 bye）就不重連
+ if(!NET.rcode||NET.rc){if(!NET.rc)onBye();return}
+ NET.unsub.forEach(u=>{try{u()}catch(e){}});NET.unsub=[];const R=NET.room;NET.room=null;try{R&&R.leave()}catch(e){}
+ NET.rc={t:performance.now()};NET.gone=false;const tok=NET.rid=(NET.rid||0)+1;
+ setTimeout(()=>{if(NET.rc&&NET.rid===tok){NET.rc=null;wsClose();setNs('重新連線失敗，對手可能已經離開。');netQuit(0)}},RC_MAX);
+ if(NET.slot===0)reHost(NET.rcode,tok);else reJoin(NET.rcode,tok);
+}
+function netResume(R){
+ NET.room=R;NET.unsub=subs(R);NET.rc=null;NET.gone=false;NET.stallT=0;NET.lastSend=0;NET.desync=false;NET.rh={};
+ wsClose();NET.via='';viaInfo();NET.reconn=(NET.reconn||0)+1;if(typeof toast==='function')toast('已重新連線');
+}
+async function reHost(code,tok){
+ for(let k=0;NET.rc&&NET.rid===tok;k++){
+  let w;try{w=await wsOpen(code,'host')}catch(e){await new Promise(r=>setTimeout(r,800));continue}
+  const m=await wsNext(w,5000);
+  if(!NET.rc||NET.rid!==tok){try{w.close()}catch(e){}return}
+  if(m.t==='hosted'){WS=w;return hostLoop(w,code,tok)}
+  try{w.close()}catch(e){}await new Promise(r=>setTimeout(r,800));
+ }
+}
+async function reJoin(code,tok){
+ for(;NET.rc&&NET.rid===tok;){
+  let w;try{w=await wsOpen(code,'guest')}catch(e){await new Promise(r=>setTimeout(r,800));continue}
+  if(!NET.rc||NET.rid!==tok){try{w.close()}catch(e){}return}
+  WS=w;let again=false;
+  for(;;){
+   const m=await wsNext(w,PC&&PC.signalingState!=='stable'?0:6000);
+   if(!NET.rc||NET.rid!==tok)return;
+   if(m.t==='noroom'||m.t==='full'||m.t==='timeout'||m.t==='closed'||m.t==='left'){wsClose();again=true;break}
+   if(m.t==='joined'){mkPC(cleanIce(m.ice));PC.ondatachannel=e=>wrapChannel(e.channel)}
+   else if(m.t==='offer'&&PC&&PC.signalingState==='stable'){const pc=PC;
+    try{await PC.setRemoteDescription({type:'offer',sdp:String(m.s)});await PC.setLocalDescription(await PC.createAnswer());await gather()}catch(e){again=true;break}
+    if(!NET.rc||NET.rid!==tok||PC!==pc)return;sigSend(w,{t:'answer',s:PC.localDescription.sdp})}
+  }
+  if(again)await new Promise(r=>setTimeout(r,800));
+ }
 }
 const emitErr=()=>{};
 async function hostCreate(){
@@ -1815,7 +1858,7 @@ function loadAll(s){const o=JSON.parse(s),g=o.g;G.frame=g[0];G.hitstop=g[1];G.ph
 function beginNet(c0,c1,g,D,m,sm,hz){
  clearInterval(NET.hb);
  const sv=[sel[0],sel[1],G.stage];
- NET.DL=Math.max(1,Math.min(4,D|0))||2;NET.m=m||1;NET.c=[c0,c1];NET.g=g;NET.sm=Array.isArray(sm)?[sm[0]?1:0,sm[1]?1:0]:[0,0];NET.hz=hz?1:0;
+ NET.DL=Math.max(1,Math.min(4,D|0))||2;NET.m=m||1;NET.c=[c0,c1];NET.g=g;NET.pk=NET.slot?c1:c0;NET.rpk=NET.slot?c0:c1;NET.sm=Array.isArray(sm)?[sm[0]?1:0,sm[1]?1:0]:[0,0];NET.hz=hz?1:0;
  NET.started=true;NET.on=true;NET.tick=0;NET.loc={};NET.rem={};NET.used={};NET.snaps={};NET.rbFrom=null;NET.rbCount=0;NET.rbMax=0;
  NET.sendT={};NET.hash={};NET.rh={};NET.hl=null;NET.nextHash=29;NET.desync=false;NET.syncF=0;NET.dsAt=0;NET.resyncs=0;NET.rsT=0;NET.lastSrq=0;NET.stallT=0;NET.rtt=NET.rtt||0;NET.gone=false;
  NET.remHigh=NET.DL-1;NET.remAck=NET.DL-1;NET.remAd=0;NET.skip=0;NET.inp=[0,0];NET.reL=0;NET.reR=0;NET.gotM=0;NET.lastRe=0;NET.rst=null;
@@ -1831,7 +1874,7 @@ function netSend(){
  const f=NET.remAck+1,t=Math.min(NET.tick-1+NET.DL,f+59),b=[];
  for(let k=f;k<=t;k++){b.push(NET.loc[k]|0);if(NET.sendT[k]===undefined)NET.sendT[k]=now}
  NET.room.emit('inp',{f,b,a:NET.remHigh,ad:NET.tick-1-NET.remHigh,h:NET.hl,m:NET.m}).catch(()=>{});
- if(G.phase==='over'&&NET.reL&&now-NET.lastRe>400){NET.lastRe=now;NET.room.emit('rem',{m:NET.m}).catch(()=>{})}
+ if(G.phase==='over'&&NET.reL&&now-NET.lastRe>400){NET.lastRe=now;NET.room.emit('rem',{m:NET.m,c:NET.pk}).catch(()=>{})}
  if(NET.desync&&NET.slot===1&&now-NET.lastSrq>500){NET.lastSrq=now;NET.room.emit('srq',{m:NET.m}).catch(()=>{})}
  if(NET.slot===0&&NET.rst&&!NET.gotM&&now-NET.lastRe>300){NET.lastRe=now;NET.room.emit('rst',NET.rst).catch(()=>{})}
 }
@@ -1888,8 +1931,10 @@ function onSnp(d){
  NET.hash={};NET.rh={};NET.syncF=T;NET.nextHash=T+((29-T%30)+30)%30;NET.desync=false;NET.rsT=performance.now();NET.resyncs++;
 }
 function netRematch(){if(!NET.on||G.phase!=='over'||NET.reL)return;NET.reL=1;NET.lastRe=0;netCheckRe()}
-function onRem(d){if(!NET.on||!d||d.m!==NET.m||G.phase!=='over')return;NET.reR=1;netCheckRe()}
-function netCheckRe(){if(NET.slot!==0||!NET.reL||!NET.reR)return;const m=NET.m+1,msg={m,c0:NET.c[0],c1:NET.c[1],g:NET.g,D:NET.DL,s:NET.sm,hz:NET.hz};beginNet(msg.c0,msg.c1,msg.g,msg.D,m,msg.s,msg.hz);NET.rst=msg;NET.gotM=0;NET.lastRe=0}
+function onRem(d){if(!NET.on||!d||d.m!==NET.m||G.phase!=='over')return;if(typeof d.c==='number')NET.rpk=Math.max(0,Math.min(CH.length-1,d.c|0));NET.reR=1;netCheckRe()}
+// 再戰前換角：結算畫面按 ←／→（手機點畫面左右兩側）挑下一場的角色，送出再戰邀請後就鎖定
+function netPick(s){if(G.mode!==4||!NET.on||G.phase!=='over'||NET.reL)return false;NET.pk=(NET.pk+s+CH.length)%CH.length;snd(500+NET.pk*20,.05);return true}
+function netCheckRe(){if(NET.slot!==0||!NET.reL||!NET.reR)return;const m=NET.m+1,msg={m,c0:NET.pk,c1:NET.rpk,g:NET.g,D:NET.DL,s:NET.sm,hz:NET.hz};beginNet(msg.c0,msg.c1,msg.g,msg.D,m,msg.s,msg.hz);NET.rst=msg;NET.gotM=0;NET.lastRe=0}
 function onRst(d){if(NET.slot!==1||!d||typeof d.m!=='number'||d.m<=(NET.m||0))return;beginNet(Math.max(0,Math.min(CH.length-1,d.c0|0)),Math.max(0,Math.min(CH.length-1,d.c1|0)),Math.max(0,Math.min(STG.length-1,d.g|0)),d.D,d.m,d.s,d.hz)}
 function netLeave(say){
  NET.on=false;clearInterval(NET.hb);
@@ -1923,13 +1968,14 @@ addEventListener('keydown',e=>{if(KCAP){e.preventDefault();kcapDone(e.code);retu
  if(e.code==='Enter'&&RP&&RP.end){toMenu();return}
  if(e.code==='KeyR'&&G.phase==='over'&&REC&&!bound(e.code))rpCopy();
  if(e.code==='Escape'&&G.phase==='over'&&(ARC||TEAM||SURV)){toMenu();return}
+ if(G.phase==='over'&&(e.code==='ArrowLeft'||e.code==='KeyA'||e.code==='ArrowRight'||e.code==='KeyD')&&netPick(e.code==='ArrowLeft'||e.code==='KeyA'?-1:1))return;
  if(e.code==='Enter'&&G.phase==='over'){if(G.mode===4&&NET.on)netRematch();else chainNext()}
  if(e.code==='KeyQ'&&G.pause&&!bound(e.code)){G.pause=false;toMenu()}
  if(e.code==='KeyM'&&!bound(e.code))mute=!mute;
 });
 addEventListener('keyup',e=>{keys[e.code]=0});
 addEventListener('blur',()=>{for(const k in keys)keys[k]=0;if(G.phase==='fight'&&G.mode!==4)G.pause=true});
-cv.addEventListener('pointerdown',()=>{if(G.phase==='over'){if(G.mode===4&&NET.on)netRematch();else chainNext()}});
+cv.addEventListener('pointerdown',e=>{if(G.phase==='over'){if(G.mode===4&&NET.on){const r=cv.getBoundingClientRect(),fx=(e.clientX-r.left)/r.width;if(fx<.22&&netPick(-1))return;if(fx>.78&&netPick(1))return;netRematch()}else chainNext()}});
 document.querySelectorAll('#pad button').forEach(b=>{
  const ks=b.dataset.k.split(','),on=e=>{e.preventDefault();ks.forEach(k=>{keys[k]=1;pend[k]=1})},off=()=>{ks.forEach(k=>keys[k]=0)};
  b.addEventListener('pointerdown',on);['pointerup','pointercancel','pointerleave'].forEach(n=>b.addEventListener(n,off));
@@ -1975,7 +2021,7 @@ $('ts').onclick=()=>{const u=$('tu').value.trim();
 var SIG=location.protocol==='https:'||location.protocol==='http:';
 var WS=null;
 function wsClose(){const w=WS;WS=null;try{w&&w.close()}catch(e){}}
-function sigStop(){NET.rid=(NET.rid||0)+1;wsClose();NET.code='';$('rcode').textContent='';$('rcode').style.display='none';$('rl').style.display='none'}
+function sigStop(){NET.rid=(NET.rid||0)+1;wsClose();NET.code='';NET.rcode='';$('rcode').textContent='';$('rcode').style.display='none';$('rl').style.display='none'}
 function wsOpen(code,role){return new Promise((res,rej)=>{
  let w;try{w=new WebSocket((location.protocol==='https:'?'wss://':'ws://')+location.host+'/api/ws?code='+code+'&role='+role)}catch(e){rej(e);return}
  w._q=[];w._r=null;let ok=false;
@@ -1989,7 +2035,7 @@ function wsNext(w,ms){return new Promise(res=>{if(w._q.length)return res(w._q.sh
 const sigSend=(w,o)=>{try{w.send(JSON.stringify(o))}catch(e){}};
 function cleanIce(ice){return Array.isArray(ice)?ice.filter(s=>s&&s.urls).slice(0,6):null}
 function connWatch(rid){setTimeout(()=>{if(rid===NET.rid&&!NET.room){setNs('連線逾時：雙方網路無法建立連線。請按「取消」後重新建立房間再試一次。');wsClose()}},25000)}
-function showCode(code){$('rcode').textContent=code;$('rcode').style.display='block';$('rl').style.display='inline-block';NET.code=code}
+function showCode(code){$('rcode').textContent=code;$('rcode').style.display='block';$('rl').style.display='inline-block';NET.code=code;NET.rcode=code}
 const SLOW='嘗試建立或加入房間的次數太多，請等幾分鐘再試。';
 async function roomHost(){
  if(!SIG){setNs('從檔案直接開啟時沒有配對伺服器，請改用下方「手動交換代碼」。');return}
@@ -2023,6 +2069,7 @@ async function hostLoop(w,code,rid){
    try{await PC.setRemoteDescription({type:'answer',sdp:String(m.s)})}catch(e){setNs('連線失敗：'+(e&&e.message||e));return}
    connWatch(rid);
   }else if(m.t==='left'){
+   if(PC&&PC.connectionState==='connected')continue; // 房客接上後才關掉配對連線，不是真的離開
    try{PC&&PC.close()}catch(e){}PC=null;
    setNs('對手離開了。房間 '+code+' 仍然開著，等待新的對手加入…');
   }else if(m.t==='closed'){
@@ -2035,7 +2082,7 @@ async function roomJoin(code){
  if(code.length!==4){setNs('請輸入 4 位數的房間代碼。');return}
  if(!SIG){setNs('從檔案直接開啟時沒有配對伺服器，請改用下方「手動交換代碼」。');return}
  if(!window.RTCPeerConnection){setNs('這個瀏覽器不支援 WebRTC，無法連線對戰。');return}
- netReset();sigStop();NET.role=1;const rid=NET.rid;
+ netReset();sigStop();NET.role=1;NET.rcode=code;const rid=NET.rid;
  setNs('加入房間 '+code+' 中…');
  let w;try{w=await wsOpen(code,'guest')}catch(e){if(rid===NET.rid)setNs('連不到配對伺服器，請稍後再試，或改用下方「手動交換代碼」。');return}
  if(rid!==NET.rid){try{w.close()}catch(e){}return}
