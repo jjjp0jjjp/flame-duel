@@ -149,12 +149,12 @@ const ok = (name, cond, detail) => {
     // 延續體力的一回合對戰，重播後結果相同
     const KS = ['KeyA', 'KeyD', 'KeyW', 'KeyS', 'KeyU', 'KeyI', 'KeyJ', 'KeyK', 'KeyO', 'KeyL'];
     const hash = () => { const o = JSON.parse(snapAll()); delete o.v1; delete o.v2; delete o.a.ai; delete o.b.ai; return rbFnv(canon(o)) };
-    HZ = 1; G.stage = 3;
+    HZ = 1; G.stage = 3; const MU0 = MU; MU = { m: 8 | 16, r: 0 };
     chainStart(2, 7, 1, 40, 70); G.vs = 0;
     for (let i = 0; i < 20000 && G.phase !== 'over'; i++) { for (const k of KS) { if (Math.random() < 0.06) { keys[k] = keys[k] ? 0 : 1; if (keys[k]) pend[k] = 1 } } step() }
     for (const k in keys) keys[k] = 0;
     const si = G.si, h = hash(), o = await codeDec(await codeEnc(rpPack())); startReplay(o); G.vs = 0; while (G.si < si) step();
-    out.replay = hash() === h && G.phase === 'over' && G.hz === 1; RP = null; HZ = 0; G.stage = 0; toMenu();
+    out.replay = hash() === h && G.phase === 'over' && G.hz === 1 && G.mu === 24; RP = null; HZ = 0; G.stage = 0; MU = MU0; toMenu();
     return out;
   });
   ok('隊伍戰：輪番上陣、輸的換人、最後判定勝負', chain.team);
@@ -198,6 +198,19 @@ const ok = (name, cond, detail) => {
     setup(0, 0); p1.x = 200; p2.x = 760; const d2 = dashes(60, (k) => (k === 0 || k === 45 ? { dash: 1 } : {}));
     setup(0, 0); let cancel = false, cd = 0; run(30, (k) => { if (!cancel && p1.st === 'dash') { cancel = true; cd = p1.dcd } return [k === 0 ? { lp: 1 } : k >= 5 && k <= 7 ? { dash: 1 } : {}, {}] });
     out.dashcd = d1 === 1 && d2 === 2 && cancel && cd >= 70;
+    // 突變規則：低重力跳得高、玻璃大砲傷害高、吸血會回血、持久戰 99 秒、劇毒扣血但不倒下、狂熱衝刺無冷卻
+    const MUb = MU, mu = (m, f) => { MU = { m, r: 0 }; const r = f(); MU = MUb; return r };
+    const jumpH = (m) => mu(m, () => { setup(0, 0); let top = GY; run(60, (k) => { top = Math.min(top, p1.y); return [k === 0 ? { u: 1 } : {}, {}] }); return GY - top });
+    const dmg = (m) => mu(m, () => { setup(0, 0); const h = p2.hp; p1.hp = 50; run(25, (k) => [k === 0 ? { hp: 1 } : {}, {}]); return [h - p2.hp, p1.hp] });
+    const n0 = dmg(0), ng = dmg(8), nv = dmg(16);
+    const tank = mu(32, () => { setup(0, 0); return G.time });
+    const psn = mu(4, () => { setup(0, 0); p1.hp = 3; run(200, () => [{}, {}]); return p1.hp });
+    const rush = mu(2, () => { setup(0, 0); p1.x = 200; p2.x = 760; let c = 0, prev = ''; run(40, (k) => { if (p1.st === 'dash' && prev !== 'dash') c++; prev = p1.st; return [k === 0 || k === 16 ? { dash: 1 } : {}, {}] }); return c });
+    out.mutators = jumpH(1) > jumpH(0) * 1.5 && ng[0] > n0[0] * 1.5 && nv[1] > 50 && n0[1] === 50 && tank === 99 && psn === 1 && rush === 2;
+    // 每日挑戰：同一天題目固定、不同天不同；開局套用規則與強化版對手
+    const sA = dailySpec('2026-01-01'), sB = dailySpec('2026-01-01'), sC = dailySpec('2026-01-02');
+    dailyStart(); const dOK = G.mu === dailySpec(today()).mu && G.mu > 0 && p2.hm === 1.15 && G.ft === 1 && G.diff === 2; toMenu();
+    out.daily = JSON.stringify(sA) === JSON.stringify(sB) && JSON.stringify(sA) !== JSON.stringify(sC) && dOK && !DAILY && G.diff !== undefined;
     // 簡易操作：連按輕拳自動接 輕→輕腳→重拳→必殺，傷害較低；並寫進重播
     const SV = SIMPLE; SIMPLE = [1, 0]; setup(0, 0); p1.mt = 60; let seen = [];
     run(70, (k) => { if (p1.st === 'atk' && p1.atk && !seen.includes(p1.atk.key)) seen.push(p1.atk.key); return [k % 3 === 0 ? { lp: 1 } : {}, {}] });
@@ -227,7 +240,7 @@ const ok = (name, cond, detail) => {
     CALM = 1; FL = null; flash('#fff', .5, 200); const noFlash = FL === null; draw(); CALM = 0; flash('#fff', .5, 200); out.calm = noFlash && (FL !== null || !qHigh()); FL = null;
     return out;
   });
-  for (const [k, v] of Object.entries(mech)) ok('機制：' + { parry: '精準招架', punish: '確反加傷', tech: '受身與強制倒地', wall: '撞牆反彈', burst: '爆氣', guard: '防禦崩潰', simple: '簡易操作輔助連段', rc: '迅移取消', hazard: '場景機關（火山、雪原、強風、鐘聲）', art: '街機／經典畫風繪製', calm: '減少閃光', dashcd: '衝刺冷卻（衝刺取消冷卻較長）' }[k], v);
+  for (const [k, v] of Object.entries(mech)) ok('機制：' + { parry: '精準招架', punish: '確反加傷', tech: '受身與強制倒地', wall: '撞牆反彈', burst: '爆氣', guard: '防禦崩潰', simple: '簡易操作輔助連段', rc: '迅移取消', hazard: '場景機關（火山、雪原、強風、鐘聲）', art: '街機／經典畫風繪製', calm: '減少閃光', dashcd: '衝刺冷卻（衝刺取消冷卻較長）', mutators: '突變規則（低重力、玻璃大砲、吸血、持久戰、劇毒、狂熱）', daily: '每日挑戰（同一天題目固定）' }[k], v);
 
   // ---- 連段挑戰
   const tr = await pg.evaluate(() => {

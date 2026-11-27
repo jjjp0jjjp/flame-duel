@@ -43,6 +43,7 @@ h1{filter:drop-shadow(0 0 22px #ff4d4d55);background-size:100% 200%;animation:sh
 .opt{display:flex;align-items:center;gap:10px;margin:4px 0 10px;flex-wrap:wrap}.opt>span{color:#aab;font-size:13px;width:32px}
 .seg{display:inline-flex;border:2px solid var(--bd);border-radius:10px;overflow:hidden}.seg button{border:0;border-radius:0;padding:6px 14px}.seg button.on{background:var(--ac);color:#fff}
 #stgs{display:flex;gap:6px;flex-wrap:wrap}#stgs button{padding:0;border-radius:8px;overflow:hidden;position:relative;line-height:0}#stgs canvas{width:84px;height:47px;max-width:none;background:none}
+.chips{display:flex;flex-wrap:wrap;gap:5px}.chips button{padding:4px 9px;font-size:13px}.chips button.on{border-color:#ff9d2e;background:#3a2410;box-shadow:0 0 8px #ff9d2e66}
 #hzbtn.on{border-color:#ff8a3a;box-shadow:0 0 8px #ff8a3a88}#stgs span{position:absolute;left:0;right:0;bottom:0;font-size:11px;line-height:1.5;background:#0008}#stgs button.on{border-color:#ffe14d;box-shadow:0 0 10px #ffe14d88}
 #mgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .mode{display:grid;grid-template-columns:40px 1fr;column-gap:6px;text-align:left;padding:10px 12px;border-radius:14px;background:linear-gradient(135deg,#2a1a44,#161a33);position:relative}
@@ -109,11 +110,13 @@ input[type=range]{width:90px;padding:0}
   <div class="opt"><span>難度</span><div class="seg" id="dfseg"><button data-v="0">簡單</button><button data-v="1">普通</button><button data-v="2">困難</button></div></div>
   <div class="opt"><span>場景</span><div id="stgs"></div></div>
   <div class="opt"><span>機關</span><button id="hzbtn"></button></div>
+  <div class="opt"><span>規則</span><div id="mutr" class="chips"></div></div>
   <div id="mgrid">
    <button class="mode main" id="b1"><i>🥊</i><b>單人 vs 電腦</b><small>三戰兩勝，挑戰電腦</small></button>
    <button class="mode" id="b7"><i>🏆</i><b>街機模式</b><small>連戰 5 場，最後挑戰強化版的自己</small></button>
    <button class="mode" id="b8"><i>⚔️</i><b>3 對 3 隊伍戰</b><small>各選 3 人輪番上陣，體力延續</small></button>
    <button class="mode" id="b9"><i>♾️</i><b>生存模式</b><small>無限連戰，看你能撐幾場</small></button>
+   <button class="mode" id="b10"><i>📅</i><b>每日挑戰</b><small></small></button>
    <button class="mode" id="b2"><i>👥</i><b>雙人對戰</b><small>同一台裝置兩人對打</small></button>
    <button class="mode" id="b4"><i>🌐</i><b>連線對戰</b><small>輸入房間代碼和朋友對戰</small></button>
    <button class="mode" id="b3"><i>🎯</i><b>訓練模式</b><small>判定框、幀數、連段挑戰</small></button>

@@ -37,14 +37,15 @@ function survNext(){const S=SURV;if(!S||!S.res)return;if(S.done){toMenu();return
  if(S.res==='a'){S.n++;S.hp=regen(p1,.25);survFight();return}
  S.done=1;try{const r=JSON.parse(localStorage.getItem('fd_surv')||'{}');if((r[S.me]||0)<S.n){r[S.me]=S.n;localStorage.setItem('fd_surv',JSON.stringify(r))}}catch(e){}
  G.msg='生存 '+S.n+' 勝';G.mt=G.mm=1e9}
-function chainResult(w){if(RP)return;const r=w===p1?'a':w===p2?'b':'b';if(TEAM)TEAM.res=r;if(SURV)SURV.res=r}
+function chainResult(w){if(RP)return;const r=w===p1?'a':w===p2?'b':'b';if(TEAM)TEAM.res=r;if(SURV)SURV.res=r;if(DAILY)DAILY.res=r}
 function chainNext(){if(ARC)arcNext();else if(TEAM)teamNext();else if(SURV)survNext();else toMenu()}
 function chainTip(){
  if(ARC)return arcTip();
  if(TEAM)return TEAM.done?'按 Enter 回選單':'按 Enter 下一場（剩 P1 '+(3-TEAM.ia-(TEAM.res==='b'?1:0))+' 人、對手 '+(3-TEAM.ib-(TEAM.res==='a'?1:0))+' 人）';
+ if(DAILY)return dailyTip();
  if(SURV)return SURV.done?'最佳紀錄已保存　按 Enter 回選單':'勝利！按 Enter 繼續（回復 25% 體力）';
  return'按 Enter 或點擊畫面回到選單'}
-function chainEnd(){if(SURV)G.diff=SURV.d0;TEAM=null;SURV=null;G.ft=0}
+function chainEnd(){if(SURV)G.diff=SURV.d0;TEAM=null;SURV=null;dailyEnd();G.ft=0;dailyCard()}
 function chainHud(){
  if(G.phase==='menu')return;ctx.save();ctx.textAlign='center';ctx.font='bold 14px '+FONT;
  if(TEAM){[[TEAM.A,TEAM.ia,0],[TEAM.B,TEAM.ib,1]].forEach(([L,ix,k])=>L.forEach((c,j)=>{const x=k?W-60-j*30:60+j*30,y=110;ctx.globalAlpha=j<ix?.25:1;ctx.drawImage(HEAD[c],x-13,y-13,26,26);ctx.strokeStyle=j===ix?'#ffe14d':'#555';ctx.lineWidth=2;ctx.strokeRect(x-13,y-13,26,26)}));ctx.globalAlpha=1;ctx.fillStyle='#ffe14d';ctx.fillText('隊伍戰',W/2,90)}
