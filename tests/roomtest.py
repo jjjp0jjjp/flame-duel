@@ -24,7 +24,7 @@ with sync_playwright() as p:
         pg = ctx.new_page(); pg.on('pageerror', lambda e: errs.append(str(e)[:150])); pg.goto(BASE); pg.wait_for_timeout(300); return pg
     A = page(); B = page(); st0 = stats(A)
     # 1. 房主建立房間
-    A.evaluate("sel[0]=3;G.stage=3;lab()"); B.evaluate("sel[0]=4;lab()")
+    A.evaluate("sel[0]=3;G.stage=3;MU={m:8,r:0};lab()"); B.evaluate("sel[0]=4;MU={m:0,r:0};lab()")
     A.click('#b4'); A.click('#rh')
     A.wait_for_function("document.getElementById('rcode').textContent.length===4", timeout=8000)
     code = A.inner_text('#rcode')
@@ -38,6 +38,7 @@ with sync_playwright() as p:
     B.fill('#rc2', code); B.press('#rc2', 'Enter')
     A.wait_for_function("G.mode===4&&G.phase!=='menu'", timeout=15000); B.wait_for_function("G.mode===4&&G.phase!=='menu'", timeout=15000)
     ok('房客輸入代碼後雙方自動連上並開戰', True, A.evaluate("[p1.ch.n,p2.ch.n,STG[G.stage].n]"))
+    ok('突變規則以房主為準，雙方一致', A.evaluate("G.mu") == 8 and B.evaluate("G.mu") == 8, [A.evaluate("G.mu"), B.evaluate("G.mu")])
     A.wait_for_timeout(500)
     st = stats(A); d = {'opened': st['opened'] - st0['opened'], 'msgs': st['msgs'] - st0['msgs'], 'rooms': st['rooms']}; st = d
     ok('連上後配對連線全部關閉（不再佔用伺服器）', len(st['rooms']) == 0, st)
