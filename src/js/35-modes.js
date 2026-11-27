@@ -34,7 +34,7 @@ function teamNext(){const T=TEAM;if(!T||!T.res)return;if(T.done){toMenu();return
 // 生存：無限連戰，勝場回復 25% 體力，每 3 勝難度提高
 function survFight(){const S=SURV;let c;do{c=Math.random()*CH.length|0}while(c===S.last&&CH.length>1);S.last=c;G.diff=Math.min(2,S.d0+Math.floor(S.n/3));chainStart(S.me,c,1,S.hp,null);S.res=null}
 function survNext(){const S=SURV;if(!S||!S.res)return;if(S.done){toMenu();return}
- if(S.res==='a'){S.n++;S.hp=regen(p1,.25);survFight();return}
+ if(S.res==='a'){S.n++;achEv('surv',S.n);S.hp=regen(p1,.25);survFight();return}
  S.done=1;try{const r=JSON.parse(localStorage.getItem('fd_surv')||'{}');if((r[S.me]||0)<S.n){r[S.me]=S.n;localStorage.setItem('fd_surv',JSON.stringify(r))}}catch(e){}
  G.msg='生存 '+S.n+' 勝';G.mt=G.mm=1e9}
 function chainResult(w){if(RP)return;const r=w===p1?'a':w===p2?'b':'b';if(TEAM)TEAM.res=r;if(SURV)SURV.res=r;if(DAILY)DAILY.res=r;if(TOWER)TOWER.res=r}

@@ -175,6 +175,20 @@ const ok = (name, cond, detail) => {
     towerFight(); ko(p1); towerNext(); out.lose = TOWER.done === 1 && towerBest(5) === 1; toMenu(); out.clean = !TOWER && !document.getElementById('tpick');
     return out;
   });
+  const ach = await pg.evaluate(() => {
+    ACS = { u: {}, n: {}, w: [] }; const out = {};
+    sel[0] = 3; sel[1] = 0; startGame(1); G.vs = 0; while (G.phase !== 'over') { if (G.phase === 'fight') p2.st = 'ko'; step() }
+    out.win = !!ACS.u.win && ACS.w.includes(3) && !ACS.u.online;
+    // 電腦贏了不算自己的成就；重播中不計
+    ACS = { u: {}, n: {}, w: [] }; startGame(1); G.vs = 0; while (G.phase !== 'over') { if (G.phase === 'fight') p1.st = 'ko'; step() } out.cpu = !ACS.u.win;
+    for (let i = 0; i < 9; i++) achEv('parry', p1); const p9 = !ACS.u.parry10; achEv('parry', p2); const p2no = !ACS.u.parry10; achEv('parry', p1);
+    out.count = p9 && p2no && !!ACS.u.parry10;
+    RP = { a: [], b: [], n: 0 }; achEv('match', p1); out.replay = !ACS.u.win; RP = null; toMenu();
+    achPanel(); out.panel = document.querySelectorAll('#tpick .achl > div').length === ACH.length; document.getElementById('tpick').remove();
+    localStorage.removeItem('fd_ach'); ACS = { u: {}, n: {}, w: [] };
+    return out;
+  });
+  ok('成就：自己獲勝才解鎖、電腦贏不算、累計型要達到次數、重播不計', ach.win && ach.cpu && ach.count && ach.replay && ach.panel, JSON.stringify(ach));
   ok('爬塔：贏了出現 3 張不同的強化卡，選了之後效果套用', tower.pick);
   ok('爬塔：帶強化的對戰可以正確重播', tower.replay);
   ok('爬塔：輸了保存最高層數、回選單清乾淨', tower.lose && tower.clean);
@@ -227,6 +241,12 @@ const ok = (name, cond, detail) => {
     const tank = mu(32, () => { setup(0, 0); return G.time });
     const psn = mu(4, () => { setup(0, 0); p1.hp = 3; run(200, () => [{}, {}]); return p1.hp });
     const rush = mu(2, () => { setup(0, 0); p1.x = 200; p2.x = 760; let c = 0, prev = ''; run(40, (k) => { if (p1.st === 'dash' && prev !== 'dash') c++; prev = p1.st; return [k === 0 || k === 16 ? { dash: 1 } : {}, {}] }); return c });
+    // 逆轉：第一回合輸的一方，第二回合開場 50 氣、傷害 +10%
+    const rev = mu(64, () => { setup(0, 0); p2.st = 'ko'; let n = 0; while (G.round < 2 && n++ < 3000) step(); while (G.phase !== 'fight' && n++ < 6000) step(); return p2.rv === 1 && p1.rv === 0 && p2.mt >= 50 });
+    // 天氣多變：每回合依回合數輪流，雨天地面濕滑（被擊退滑更遠）
+    const wxs = mu(128, () => { G.stage = 0; setup(0, 0); const a = [1, 2, 3].map((r) => { G.round = r; return wxNow() }); G.round = 1; return a });
+    const rainSlide = (m) => mu(m, () => { G.stage = 2; setup(0, 0); G.round = 1; run(30, (k) => [k === 0 ? { hp: 1 } : {}, {}]); G.stage = 0; return p2.x });
+    out.mutators2 = rev && new Set(wxs).size === 3 && wxs.every((w) => WXN[w]) && rainSlide(128) > rainSlide(0) + 5;
     out.mutators = jumpH(1) > jumpH(0) * 1.5 && ng[0] > n0[0] * 1.5 && nv[1] > 50 && n0[1] === 50 && tank === 99 && psn === 1 && rush === 2;
     // 電腦性格：預設依角色、可指定、可隨機；不影響雙人對戰的確定性
     const AIP0 = AIP; AIP = 'def'; sel[0] = 4; sel[1] = 3; startGame(1); const pd = [p1.ai.pt, p2.ai.pt];
@@ -271,7 +291,7 @@ const ok = (name, cond, detail) => {
     CALM = 1; FL = null; flash('#fff', .5, 200); const noFlash = FL === null; draw(); CALM = 0; flash('#fff', .5, 200); out.calm = noFlash && (FL !== null || !qHigh()); FL = null;
     return out;
   });
-  for (const [k, v] of Object.entries(mech)) ok('機制：' + { parry: '精準招架', punish: '確反加傷', tech: '受身與強制倒地', wall: '撞牆反彈', burst: '爆氣', guard: '防禦崩潰', simple: '簡易操作輔助連段', rc: '迅移取消', hazard: '場景機關（火山、雪原、強風、鐘聲）', art: '街機／經典畫風繪製', calm: '減少閃光', dashcd: '衝刺冷卻（衝刺取消冷卻較長）', mutators: '突變規則（低重力、玻璃大砲、吸血、持久戰、劇毒、狂熱）', daily: '每日挑戰（同一天題目固定）', aipt: '電腦性格（預設、指定、隨機）', style: '角色流派（體力、速度、招式覆寫）' }[k], v);
+  for (const [k, v] of Object.entries(mech)) ok('機制：' + { parry: '精準招架', punish: '確反加傷', tech: '受身與強制倒地', wall: '撞牆反彈', burst: '爆氣', guard: '防禦崩潰', simple: '簡易操作輔助連段', rc: '迅移取消', hazard: '場景機關（火山、雪原、強風、鐘聲）', art: '街機／經典畫風繪製', calm: '減少閃光', dashcd: '衝刺冷卻（衝刺取消冷卻較長）', mutators: '突變規則（低重力、玻璃大砲、吸血、持久戰、劇毒、狂熱）', daily: '每日挑戰（同一天題目固定）', mutators2: '突變規則（逆轉、天氣多變）', aipt: '電腦性格（預設、指定、隨機）', style: '角色流派（體力、速度、招式覆寫）' }[k], v);
 
   // ---- 連段挑戰
   const tr = await pg.evaluate(() => {

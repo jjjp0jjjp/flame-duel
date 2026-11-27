@@ -250,9 +250,10 @@ function helpRender(){
 <b>迅移取消：</b>出招中同時按<b>輕拳＋重拳＋輕腳</b>（50 氣），立刻取消招式回到可行動；命中時使用，對手會多硬直一點，可延長連段或掩護失誤。<br>
 <b>簡易操作：</b>設定裡可讓 P1／P2 各自切換。命中後不按方向、連按任一攻擊鍵會自動接 輕→輕腳→重拳→必殺（必殺要 50 氣），傷害 ×0.85。<br>
 <b>場景機關：</b>選單「機關」開啟後：夜城屋頂定時颳強風，把兩人往同一邊推（畫面會先預告方向）；黃昏港的木箱牆第一次被撞（血量 60% 以下）會碎裂、多受傷害；極光雪原被擊退會滑更遠；火山口定時噴發，地面發光的位置要閃開；竹林道場定時鐘響，雙方各加 15 氣。<br>
-<b>突變規則：</b>選單「規則」可複選：低重力、狂熱（氣快速回復、衝刺無冷卻）、劇毒擂台、玻璃大砲（傷害 ×1.7）、吸血擂台、持久戰（傷害 ×0.6、99 秒）；選「🎲 隨機」每場抽 1～2 條。連線時以房主的設定為準。<br>
+<b>突變規則：</b>選單「規則」可複選：低重力、狂熱（氣快速回復、衝刺無冷卻）、劇毒擂台、玻璃大砲（傷害 ×1.7）、吸血擂台、持久戰（傷害 ×0.6、99 秒）、逆轉（輸掉回合的一方下回合開場 50 氣、傷害 +10%）、天氣多變（每回合輪流雨天地滑、強風、濃霧）；選「🎲 隨機」每場抽 1～2 條。連線時以房主的設定為準。<br>
 <b>角色流派：</b>選角時在角色資訊下方切換「標準」或該角色的流派（每位角色一種，P1／P2 各自選）。流派會改動部分招式、體力、速度、傷害或集氣速度，說明會顯示在按鈕下方。街機與生存的對手流派隨機。<br>
 <b>電腦性格：</b>選單「電腦」可選：角色預設、猛攻型（一直逼近）、防守反擊型（等你出招再反擊）、遠攻型（保持距離、放飛行道具）、投技型（貼身就抓）或隨機。對戰時電腦名字旁會標出性格。<br>
+<b>成就：</b>選單下方的「🏆 成就」可查看 15 個成就與進度，只計算自己的對戰（重播、觀戰、訓練不算），保存在這台裝置。<br>
 <b>爬塔挑戰：</b>一路對戰電腦，每層一回合決勝，體力延續（每層回復 25%）。每贏一層從 3 張強化卡選 1 張（力量、強韌、鬥志、迅捷、嗜血、蓄勢、不屈、荊棘、靈動、休整），可以疊加；越高層對手越強，每 5 層是精英層並帶隨機規則。輸了結束，依角色保存最高層數。<br>
 <b>每日挑戰：</b>每天一題固定的對戰（指定角色、場景、規則與強化版對手），一回合決勝，依剩餘體力與時間計分，保存當天最佳成績。<br>
 <b>訓練模式：</b>畫面下方的幀數條（綠＝起手、紅＝攻擊判定、藍＝收招、黃＝硬直，白框＝無敵）與左右的輸入紀錄。`,
@@ -340,7 +341,7 @@ function arcFight(){const boss=ARC.i===ARC.L.length-1;sel[0]=ARC.me;sel[1]=ARC.L
  startGame(1);sel[1]=ARC.s1;G.stage=ARC.g0;if(boss){p2.hm=(p2.hm||1)*1.3;p2.reset();if(REC)REC.h=[p1.hm||1,p2.hm]}ARC.res=null;
  ARC.dlg=boss?BOSSL:[INTRO[ARC.me],INTRO[ARC.L[ARC.i]]];G.vs=G.vm=200}
 function arcNext(){if(!ARC||!ARC.res)return;if(ARC.done){toMenu();return}
- if(ARC.res==='win'){ARC.i++;if(ARC.i>=ARC.L.length){ARC.done=1;G.msg='街機模式 通關！';G.mt=G.mm=0;sfx('round');
+ if(ARC.res==='win'){ARC.i++;if(ARC.i>=ARC.L.length){ARC.done=1;G.msg='街機模式 通關！';G.mt=G.mm=0;achEv('arc',ARC.cont);sfx('round');
   try{const r=JSON.parse(localStorage.getItem('fd_arc')||'{}');r[ARC.me]=Math.min(r[ARC.me]===undefined?99:r[ARC.me],ARC.cont);localStorage.setItem('fd_arc',JSON.stringify(r))}catch(e){}return}}
  else ARC.cont++;rpSaveLast();arcFight()}
 function arcEnd(){if(!ARC)return;G.diff=ARC.d0;G.stage=ARC.g0;ARC=null}

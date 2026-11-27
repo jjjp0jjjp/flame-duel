@@ -1,6 +1,6 @@
 // ===== 迅移取消、場景機關 =====
 // ---- 迅移取消：輕拳＋重拳＋輕腳（4 幀內）耗 50 氣，取消任何招式的收招；命中中使用會讓對手多硬直
-function rcFx(f){if(NOFX)return;const c=colOf(f);gho(f,c);ring(f.x,f.y-70,'#fff');ring(f.x,f.y-70,c);emb(f.x,f.y-70,c,18,6,16,4,1);pp({x:f.x,y:f.y-160,vx:0,vy:-.6,l:45,m:45,txt:'迅移！',c:'#7fe3ff',text:1,big:1});G.rcF=performance.now()+180;snd(1200,.12,'sine',.06,300);sfx('cancel')}
+function rcFx(f){if(NOFX)return;achEv('rc',f);const c=colOf(f);gho(f,c);ring(f.x,f.y-70,'#fff');ring(f.x,f.y-70,c);emb(f.x,f.y-70,c,18,6,16,4,1);pp({x:f.x,y:f.y-160,vx:0,vy:-.6,l:45,m:45,txt:'迅移！',c:'#7fe3ff',text:1,big:1});G.rcF=performance.now()+180;snd(1200,.12,'sine',.06,300);sfx('cancel')}
 // ---- 場景機關（選單可開關；開關值會跟著連線開局訊息與重播一起保存）
 let HZ=0;try{HZ=+(localStorage.getItem('fd_hz')||0)?1:0}catch(e){}
 const HZN=['夜城：屋頂定時颳強風','黃昏港：木箱牆可撞破','極光雪原：地面濕滑','火山口：定時噴發','竹林道場：定時鐘響，雙方加氣'];

@@ -35,7 +35,7 @@ function towerPick(){const T=TOWER,pool=Object.keys(PERKS).filter(id=>!(PERKS[id
  d.querySelector('.tp').insertAdjacentHTML('beforeend','<div style="font-size:12px;color:#8a8fa8">也可以按 1／2／3 選擇</div>');
  T.pick=d}
 function towerNext(){const T=TOWER;if(!T||!T.res||T.pick)return;if(T.done){toMenu();return}
- if(T.res==='a'){towerPick();return}
+ if(T.res==='a'){achEv('tower',T.floor);towerPick();return}
  T.done=1;try{const r=JSON.parse(localStorage.getItem('fd_tower')||'{}');if((r[T.me]||0)<T.floor-1){r[T.me]=T.floor-1;localStorage.setItem('fd_tower',JSON.stringify(r))}}catch(e){}
  G.msg='止步第 '+T.floor+' 層';G.mt=G.mm=1e9}
 function towerTip(){const T=TOWER;return T.done?'突破 '+(T.floor-1)+' 層（最佳 '+towerBest(T.me)+'）　按 Enter 回選單':T.res==='a'?'第 '+T.floor+' 層突破！按 Enter 選擇強化':'按 Enter 結算'}

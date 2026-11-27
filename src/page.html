@@ -60,6 +60,7 @@ body.art .mode.main{border-left-color:#fff3d0}
 body.art .tabs button,body.art .seg button,body.art #hzbtn{border-radius:3px;font-style:italic}
 body.art .mode.hot::after{top:4px;right:16px}body.art .cell{border-radius:0}body.art #grid{border-radius:2px;border-color:#d9a64055}
 .mode.hot::after{content:"推薦";position:absolute;top:-8px;right:8px;background:#3ddc6a;color:#06210f;font-size:11px;font-weight:900;padding:1px 7px;border-radius:8px}
+.achl{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:6px;margin:10px 0;max-height:60vh;overflow:auto}.achl>div{background:#0b0b1e;border:1px solid #2a2f5a;border-radius:6px;padding:6px 8px;opacity:.55}.achl>div.on{opacity:1;border-color:#d9a640}.achl b{display:block;font-size:14px}.achl small{color:#aab;font-size:12px}
 .cards{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:12px 0}.cards button{width:min(170px,28vw);min-height:110px;display:flex;flex-direction:column;gap:8px;align-items:center;justify-content:center;border-color:#d9a640;background:linear-gradient(160deg,#2a1a44,#161a33)}.cards button b{font-size:20px;color:#ffd21a}.cards button small{color:#cfd2ff;font-size:13px}.cards button:hover{transform:translateY(-3px);box-shadow:0 6px 18px #d9a64055}
 #tpick{position:fixed;inset:0;background:#000c;z-index:20;display:flex;align-items:center;justify-content:center;padding:16px}.tp{background:#151832;border:1px solid #3a4080;border-radius:16px;padding:16px;max-width:560px;width:100%}.tp-row{display:flex;gap:10px;align-items:center;margin:8px 0}.tp-row>span{width:40px;color:#aab}.tp-slots{display:flex;gap:8px}.tp-slots span{border:2px solid #3a4080;border-radius:8px;padding:4px 14px;font-weight:900}.tp-slots .em{color:#555}#tpG{display:grid;grid-template-columns:repeat(8,1fr);gap:3px;margin:10px 0}#tpS:disabled{opacity:.4}
 #rec{color:#ffe14d;font-size:13px;text-align:center;margin:10px 0 2px}
@@ -128,7 +129,7 @@ input[type=range]{width:90px;padding:0}
    <button class="mode" id="b6" style="display:none"><i>🎬</i><b>觀看上一場重播</b><small>重看最近一場對戰</small></button>
   </div>
   <div id="rec"></div>
-  <div class="row"><button id="bset">⚙ 設定（按鍵・音量・畫質）</button></div>
+  <div class="row"><button id="bset">⚙ 設定（按鍵・音量・畫質）</button><button id="bach">🏆 成就</button></div>
  </section>
 </div>
 <!--@NETUI-->

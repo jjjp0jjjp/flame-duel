@@ -62,6 +62,7 @@ body.art .mode.main{border-left-color:#fff3d0}
 body.art .tabs button,body.art .seg button,body.art #hzbtn{border-radius:3px;font-style:italic}
 body.art .mode.hot::after{top:4px;right:16px}body.art .cell{border-radius:0}body.art #grid{border-radius:2px;border-color:#d9a64055}
 .mode.hot::after{content:"推薦";position:absolute;top:-8px;right:8px;background:#3ddc6a;color:#06210f;font-size:11px;font-weight:900;padding:1px 7px;border-radius:8px}
+.achl{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:6px;margin:10px 0;max-height:60vh;overflow:auto}.achl>div{background:#0b0b1e;border:1px solid #2a2f5a;border-radius:6px;padding:6px 8px;opacity:.55}.achl>div.on{opacity:1;border-color:#d9a640}.achl b{display:block;font-size:14px}.achl small{color:#aab;font-size:12px}
 .cards{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:12px 0}.cards button{width:min(170px,28vw);min-height:110px;display:flex;flex-direction:column;gap:8px;align-items:center;justify-content:center;border-color:#d9a640;background:linear-gradient(160deg,#2a1a44,#161a33)}.cards button b{font-size:20px;color:#ffd21a}.cards button small{color:#cfd2ff;font-size:13px}.cards button:hover{transform:translateY(-3px);box-shadow:0 6px 18px #d9a64055}
 #tpick{position:fixed;inset:0;background:#000c;z-index:20;display:flex;align-items:center;justify-content:center;padding:16px}.tp{background:#151832;border:1px solid #3a4080;border-radius:16px;padding:16px;max-width:560px;width:100%}.tp-row{display:flex;gap:10px;align-items:center;margin:8px 0}.tp-row>span{width:40px;color:#aab}.tp-slots{display:flex;gap:8px}.tp-slots span{border:2px solid #3a4080;border-radius:8px;padding:4px 14px;font-weight:900}.tp-slots .em{color:#555}#tpG{display:grid;grid-template-columns:repeat(8,1fr);gap:3px;margin:10px 0}#tpS:disabled{opacity:.4}
 #rec{color:#ffe14d;font-size:13px;text-align:center;margin:10px 0 2px}
@@ -130,7 +131,7 @@ input[type=range]{width:90px;padding:0}
    <button class="mode" id="b6" style="display:none"><i>🎬</i><b>觀看上一場重播</b><small>重看最近一場對戰</small></button>
   </div>
   <div id="rec"></div>
-  <div class="row"><button id="bset">⚙ 設定（按鍵・音量・畫質）</button></div>
+  <div class="row"><button id="bset">⚙ 設定（按鍵・音量・畫質）</button><button id="bach">🏆 成就</button></div>
  </section>
 </div>
 <div id="net" class="help" style="display:none"><b>連線對戰</b>
@@ -837,7 +838,7 @@ tryHit(o){
 getHit(src,a,px){
  if(this.st==='down'||this.st==='ko'||(this.st==='dash'&&this.inv>0)||(this.atk&&this.atk.inv&&this.t<=(this.atk.iv||this.atk.su+3)))return false;
  if(a.throw&&(this.y<GY||this.st==='hit'))return false;
- if(this.pf>0&&!a.throw&&this.y>=GY&&(this.st==='idle'||this.st==='walk'||this.st==='block')){this.pf=0;this.stun=0;this.st='idle';this.mt=Math.min(100,this.mt+8);G.hitstop=Math.max(G.hitstop,14);if(!NOFX)parryFx(this,px);return 'p'}
+ if(this.pf>0&&!a.throw&&this.y>=GY&&(this.st==='idle'||this.st==='walk'||this.st==='block')){this.pf=0;this.stun=0;this.st='idle';this.mt=Math.min(100,this.mt+8);G.hitstop=Math.max(G.hitstop,14);if(!NOFX){parryFx(this,px);achEv('parry',this)};return 'p'}
  if(this.st==='atk'&&this.atk&&this.atk.counter&&this.t>this.atk.su&&this.t<=this.atk.su+this.atk.ac&&!a.throw){
   ctrFx(this);this.atk=Object.assign({key:'ctr'},CTR);this.t=CTR.su;this.hit=false;this.cl.push('ctr');this.dir=px>=this.x?1:-1;
   if(Math.abs(src.x-this.x)<140&&src.st!=='ko'&&src.st!=='down'&&src.getHit(this,this.atk,this.x))this.hit=true;
@@ -856,7 +857,7 @@ getHit(src,a,px){
   this.hp=Math.max(1,this.hp-a.d*(a.ex?.2:.1));this.stun=a.gb?28:9;this.vx=sgn*a.kb*.9*(this.ch.kbr||1);this.mt=Math.min(100,this.mt+3);
   spark(this.x+this.dir*24,this.y-85,'#7ec8ff',8);if(!NOFX)P({t:'sh',x:this.x+this.dir*26,y:this.y-70,dir:this.dir,c:'#7ec8ff',l:12,g:0,dr:1});sfx('block');G.hitstop=Math.max(G.hitstop,3);return true}
  const ct=this.st==='atk'&&this.atk&&this.t<=this.atk.su&&!a.throw,pun=this.st==='atk'&&this.atk&&this.t>this.atk.su+this.atk.ac&&!a.throw,dm=a.d*Math.max(.4,1-.12*this.combo)*(ct?1.3:pun?1.2:1)*(src.pw>0?1.25:1)*(a.mk?(this.ch.pr||1):1)*(src.wk>0?.75:1)*(src.sm?.85:1)*(src.sdm||1)*(src.rv?1.1:1)*(G.mu&8?1.7:1)*(G.mu&32?.6:1)*(src.ch.rg&&src.hp<src.ch.hp*(src.hm||1)*.35?1.3:1),last=!a.hits||(src.hc||0)+1>=a.hits;if(pun&&!NOFX)pp({x:this.x,y:this.y-150,vx:0,vy:-.6,l:55,m:55,txt:'確反！',c:'#ff4d6d',text:1,big:1});if(ct){pp({x:this.x,y:this.y-150,vx:0,vy:-.6,l:55,m:55,txt:'COUNTER!',c:'#ff7a3d',text:1,big:1});sfx('cancel')}
- this.jh=0;this.hp-=dm;if(src.pls&&src.hp>0)src.hp=Math.min(src.ch.hp*(src.hm||1),src.hp+dm*src.pls);if(this.pth&&src.hp>1)src.hp=Math.max(1,src.hp-dm*this.pth);if(G.mu&16&&src.hp>0)src.hp=Math.min(src.ch.hp*(src.hm||1),src.hp+dm*.35);this.cd+=dm;this.combo++;if(G.mode===3&&this===p2&&src===p1)trHit(a,this.combo);this.stun=Math.max(10,a.st-Math.min(8,Math.max(0,this.combo-4)*2))+(pun?4:0);this.st='hit';this.atk=null;this.flash=5;if(a.rev)this.x=Math.max(50,Math.min(W-50,2*px-this.x));this.vx=(this.x>=px?1:-1)*a.kb*(this.ch.kbr||1);if(a.su&&a.kb>0&&(this.x<=42||this.x>=W-42))src.vx=-sgn*Math.min(7,a.kb*.7);
+ this.jh=0;this.hp-=dm;if(src.pls&&src.hp>0)src.hp=Math.min(src.ch.hp*(src.hm||1),src.hp+dm*src.pls);if(this.pth&&src.hp>1)src.hp=Math.max(1,src.hp-dm*this.pth);if(G.mu&16&&src.hp>0)src.hp=Math.min(src.ch.hp*(src.hm||1),src.hp+dm*.35);this.cd+=dm;this.combo++;if(this.combo>=10&&!NOFX)achEv('combo',{src,n:this.combo});if(G.mode===3&&this===p2&&src===p1)trHit(a,this.combo);this.stun=Math.max(10,a.st-Math.min(8,Math.max(0,this.combo-4)*2))+(pun?4:0);this.st='hit';this.atk=null;this.flash=5;if(a.rev)this.x=Math.max(50,Math.min(W-50,2*px-this.x));this.vx=(this.x>=px?1:-1)*a.kb*(this.ch.kbr||1);if(a.su&&a.kb>0&&(this.x<=42||this.x>=W-42))src.vx=-sgn*Math.min(7,a.kb*.7);
  if(a.psn)this.pz=Math.max(this.pz||0,a.psn);
  if(a.wk)this.wk=Math.max(this.wk||0,a.wk);if(a.sl)this.sl=Math.max(this.sl||0,a.sl);if(a.drain)this.mt=Math.max(0,this.mt-a.drain);
  {const ls=(a.ls||0)+(src.ch.ls||0);if(ls)src.hp=Math.min(src.ch.hp*(src.hm||1),src.hp+dm*ls)}
@@ -959,7 +960,7 @@ function toMenu(){if(NET.room){netQuit(1);return}if(NET.watch&&typeof watchStop=
 function endRound(why){
  const ko1=p1.st==='ko',ko2=p2.st==='ko';let w=null;
  if(why==='ko'){if(ko1&&!ko2)w=p2;else if(ko2&&!ko1)w=p1}else w=p1.hp>p2.hp?p1:p2.hp>p1.hp?p2:null;
- G.win=w?(w===p1?0:1):-1;if(w)w.wins++;else{p1.wins++;p2.wins++}
+ G.win=w?(w===p1?0:1):-1;if(w)w.wins++;else{p1.wins++;p2.wins++}if(w&&!NOFX)achEv('round',w);
  G.phase='ko';G.pt=140;G.msg=why==='ko'?(w&&w.hp>=w.ch.hp*(w.hm||1)?'PERFECT!':'K.O.!'):'TIME UP';G.mt=G.mm=140;
  if(why==='ko'){G.hitstop=14;G.shake=16;sfx('ko')}
 }
@@ -1001,7 +1002,7 @@ function step(){
  }else if(G.phase==='ko'){
   if(--G.pt<=0){
    if(p1.wins>=(G.ft||2)||p2.wins>=(G.ft||2)){
-    G.phase='over';const w=p1.wins>p2.wins?p1:p2.wins>p1.wins?p2:null;if(G.mode===1&&w&&!RP&&!TEAM&&!SURV)rec(w===p1);if(ARC&&!RP)ARC.res=w===p1?'win':'lose';chainResult(w);
+    G.phase='over';const w=p1.wins>p2.wins?p1:p2.wins>p1.wins?p2:null;if(G.mode===1&&w&&!RP&&!TEAM&&!SURV)rec(w===p1);if(ARC&&!RP)ARC.res=w===p1?'win':'lose';chainResult(w);if(!NOFX)achEv('match',w);
     G.msg=w?(w===p1?'P1 ':G.mode===1?'電腦 ':'P2 ')+w.ch.n+' 獲勝!':'平手';G.mt=G.mm=1e9;snd(660,.4,'triangle',.07,990)
    }else{G.round++;startRound()}
   }
@@ -2266,7 +2267,7 @@ function teamNext(){const T=TEAM;if(!T||!T.res)return;if(T.done){toMenu();return
 // 生存：無限連戰，勝場回復 25% 體力，每 3 勝難度提高
 function survFight(){const S=SURV;let c;do{c=Math.random()*CH.length|0}while(c===S.last&&CH.length>1);S.last=c;G.diff=Math.min(2,S.d0+Math.floor(S.n/3));chainStart(S.me,c,1,S.hp,null);S.res=null}
 function survNext(){const S=SURV;if(!S||!S.res)return;if(S.done){toMenu();return}
- if(S.res==='a'){S.n++;S.hp=regen(p1,.25);survFight();return}
+ if(S.res==='a'){S.n++;achEv('surv',S.n);S.hp=regen(p1,.25);survFight();return}
  S.done=1;try{const r=JSON.parse(localStorage.getItem('fd_surv')||'{}');if((r[S.me]||0)<S.n){r[S.me]=S.n;localStorage.setItem('fd_surv',JSON.stringify(r))}}catch(e){}
  G.msg='生存 '+S.n+' 勝';G.mt=G.mm=1e9}
 function chainResult(w){if(RP)return;const r=w===p1?'a':w===p2?'b':'b';if(TEAM)TEAM.res=r;if(SURV)SURV.res=r;if(DAILY)DAILY.res=r;if(TOWER)TOWER.res=r}
@@ -2306,7 +2307,7 @@ function smLabel(){$('smbtn').textContent='操作：P1 '+smName(0)+'／P2 '+smNa
 $('smbtn').onclick=()=>{const n=((SIMPLE[0]?1:0)+(SIMPLE[1]?2:0)+1)%4;SIMPLE=[n&1,n>>1&1];try{localStorage.setItem('fd_sm',JSON.stringify(SIMPLE))}catch(e){}smLabel();snd(600,.06)};smLabel();
 // ===== 迅移取消、場景機關 =====
 // ---- 迅移取消：輕拳＋重拳＋輕腳（4 幀內）耗 50 氣，取消任何招式的收招；命中中使用會讓對手多硬直
-function rcFx(f){if(NOFX)return;const c=colOf(f);gho(f,c);ring(f.x,f.y-70,'#fff');ring(f.x,f.y-70,c);emb(f.x,f.y-70,c,18,6,16,4,1);pp({x:f.x,y:f.y-160,vx:0,vy:-.6,l:45,m:45,txt:'迅移！',c:'#7fe3ff',text:1,big:1});G.rcF=performance.now()+180;snd(1200,.12,'sine',.06,300);sfx('cancel')}
+function rcFx(f){if(NOFX)return;achEv('rc',f);const c=colOf(f);gho(f,c);ring(f.x,f.y-70,'#fff');ring(f.x,f.y-70,c);emb(f.x,f.y-70,c,18,6,16,4,1);pp({x:f.x,y:f.y-160,vx:0,vy:-.6,l:45,m:45,txt:'迅移！',c:'#7fe3ff',text:1,big:1});G.rcF=performance.now()+180;snd(1200,.12,'sine',.06,300);sfx('cancel')}
 // ---- 場景機關（選單可開關；開關值會跟著連線開局訊息與重播一起保存）
 let HZ=0;try{HZ=+(localStorage.getItem('fd_hz')||0)?1:0}catch(e){}
 const HZN=['夜城：屋頂定時颳強風','黃昏港：木箱牆可撞破','極光雪原：地面濕滑','火山口：定時噴發','竹林道場：定時鐘響，雙方加氣'];
@@ -2539,7 +2540,7 @@ let DAILY=null;
 function dailyBest(day){try{return(JSON.parse(localStorage.getItem('fd_daily')||'{}'))[day]||null}catch(e){return null}}
 function dailyDesc(s){return'用「'+CH[s.me].n+'」在'+STG[s.g].n+'打倒強化版「'+CH[s.op].n+'」（體力 ×'+s.hm+'）　規則：'+muNames(s.mu)}
 function dailyStart(){const s=dailySpec(today());DAILY={s,res:null,d0:G.diff,g0:G.stage};G.diff=2;G.stage=s.g;G.muo=s.mu;chainStart(s.me,s.op,1,null,null);p2.hm=(p2.hm||1)*s.hm;p2.reset();if(REC){REC.h=[p1.hm||1,p2.hm];REC.ini={ft:1,hp:[p1.hp,p2.hp]}}}
-function dailyDone(){const D=DAILY;if(!D||D.score!=null||D.res!=='a')return;D.score=Math.round(p1.hp/(p1.ch.hp*(p1.hm||1))*100)+G.time*2;
+function dailyDone(){const D=DAILY;if(!D||D.score!=null||D.res!=='a')return;achEv('daily');D.score=Math.round(p1.hp/(p1.ch.hp*(p1.hm||1))*100)+G.time*2;
  try{const r=JSON.parse(localStorage.getItem('fd_daily')||'{}');if(!r[D.s.day]||r[D.s.day]<D.score){r[D.s.day]=D.score;localStorage.setItem('fd_daily',JSON.stringify(r))}}catch(e){}}
 function dailyTip(){const D=DAILY;if(D.res==='a'){dailyDone();return'挑戰成功！得分 '+D.score+'（剩餘體力％＋剩餘秒數×2）　今日最佳 '+dailyBest(D.s.day)+'　按 Enter 回選單'}return'挑戰失敗…明天會有新題目，今天也可以再挑戰　按 Enter 回選單'}
 function dailyEnd(){if(DAILY){G.diff=DAILY.d0;G.stage=DAILY.g0;DAILY=null}}
@@ -2628,7 +2629,7 @@ function towerPick(){const T=TOWER,pool=Object.keys(PERKS).filter(id=>!(PERKS[id
  d.querySelector('.tp').insertAdjacentHTML('beforeend','<div style="font-size:12px;color:#8a8fa8">也可以按 1／2／3 選擇</div>');
  T.pick=d}
 function towerNext(){const T=TOWER;if(!T||!T.res||T.pick)return;if(T.done){toMenu();return}
- if(T.res==='a'){towerPick();return}
+ if(T.res==='a'){achEv('tower',T.floor);towerPick();return}
  T.done=1;try{const r=JSON.parse(localStorage.getItem('fd_tower')||'{}');if((r[T.me]||0)<T.floor-1){r[T.me]=T.floor-1;localStorage.setItem('fd_tower',JSON.stringify(r))}}catch(e){}
  G.msg='止步第 '+T.floor+' 層';G.mt=G.mm=1e9}
 function towerTip(){const T=TOWER;return T.done?'突破 '+(T.floor-1)+' 層（最佳 '+towerBest(T.me)+'）　按 Enter 回選單':T.res==='a'?'第 '+T.floor+' 層突破！按 Enter 選擇強化':'按 Enter 結算'}
@@ -2636,6 +2637,46 @@ function towerEnd(){if(TOWER){if(TOWER.pick)TOWER.pick.remove();G.diff=TOWER.d0;
 function towerHud(){if(!TOWER||G.phase==='menu')return;ctx.save();ctx.textAlign='center';ctx.font='bold 14px '+FONT;ctx.fillStyle=TOWER.floor%5===0?'#ff6b6b':'#ffe14d';ctx.fillText('爬塔 第 '+TOWER.floor+' 層'+(TOWER.floor%5===0?'　精英':'')+(TOWER.perks.length?'　強化：'+TOWER.perks.map(id=>PERKS[id].n).join('・'):''),W/2,110);ctx.restore()}
 function towerCard(){const b=$('b11');if(!b)return;const best=Math.max(0,...CH.map((_,i)=>towerBest(i)));b.querySelector('small').textContent='每層選一張強化卡，看你能爬多高'+(best?'　最佳 '+best+' 層':'')}
 $('b11').onclick=()=>{snd(500,.1);towerStart()};towerCard();
+// ===== 成就（只存在本機，不影響對戰）=====
+// 只計算「自己」：單人與雙人是 P1、連線是自己的位置；重播、觀戰、訓練不算
+const ACH=[
+ ['win','初次勝利','贏下一場對戰'],
+ ['perfect','完美勝利','一滴血都沒掉就拿下一回合'],
+ ['combo10','十連擊','打出 10 段以上的連段'],
+ ['exko','華麗收尾','用超必殺技 KO 對手'],
+ ['parry10','招架大師','累計精準招架 10 次'],
+ ['rc20','迅移自如','累計迅移取消 20 次'],
+ ['arc','街機通關','打通街機模式'],
+ ['arc0','一命通關','不接關打通街機模式'],
+ ['surv10','生存專家','生存模式連勝 10 場'],
+ ['tower10','登高','爬塔突破第 10 層'],
+ ['daily','每日一戰','完成一次每日挑戰'],
+ ['online','連線勝利','在連線對戰中獲勝'],
+ ['allchar','全角色制霸','用全部 16 位角色各贏過一場'],
+ ['style','流派使用者','用流派贏下一場對戰'],
+ ['mut','逆境求生','在突變規則下獲勝']];
+let ACS={};try{ACS=JSON.parse(localStorage.getItem('fd_ach')||'{}')||{}}catch(e){ACS={}}
+ACS.u=ACS.u||{};ACS.n=ACS.n||{};ACS.w=ACS.w||[];
+const achSave=()=>{try{localStorage.setItem('fd_ach',JSON.stringify(ACS))}catch(e){}};
+function achGet(id){if(ACS.u[id])return;ACS.u[id]=Date.now();achSave();const a=ACH.find(x=>x[0]===id);if(a&&typeof toast==='function')toast('🏆 成就解鎖：'+a[1]+'　'+a[2]);snd(880,.15,'triangle',.06,1320);achLabel()}
+const achMe=f=>!RP&&!NET.watch&&G.mode!==3&&!TUT&&(G.mode===4?f===(NET.slot?p2:p1):f===p1);
+// 事件：match（整場結束）、round（回合結束）、combo、parry、rc、arc、surv、tower、daily
+function achEv(t,x){
+ if(t==='parry'||t==='rc'){if(!achMe(x))return;ACS.n[t]=(ACS.n[t]||0)+1;achSave();if(t==='parry'&&ACS.n.parry>=10)achGet('parry10');if(t==='rc'&&ACS.n.rc>=20)achGet('rc20');return}
+ if(t==='combo'){if(achMe(x.src)&&x.n>=10)achGet('combo10');return}
+ if(t==='round'){const w=x;if(!w||!achMe(w))return;if(w.hp>=w.ch.hp*(w.hm||1))achGet('perfect');if(w.atk&&w.atk.ex&&(p1.st==='ko'||p2.st==='ko'))achGet('exko');return}
+ if(t==='match'){const w=x;if(!w||!achMe(w))return;achGet('win');if(G.mode===4)achGet('online');if(w.sty)achGet('style');if(G.mu)achGet('mut');
+  const c=CH.indexOf(w.ch);if(!ACS.w.includes(c)){ACS.w.push(c);achSave()}if(ACS.w.length>=CH.length)achGet('allchar');return}
+ if(t==='arc'){achGet('arc');if(x===0)achGet('arc0');return}
+ if(t==='surv'&&x>=10)achGet('surv10');
+ if(t==='tower'&&x>=10)achGet('tower10');
+ if(t==='daily')achGet('daily');
+}
+function achLabel(){const b=$('bach');if(b)b.textContent='🏆 成就 '+ACH.filter(a=>ACS.u[a[0]]).length+'／'+ACH.length}
+function achPanel(){const d=document.createElement('div');d.id='tpick';
+ d.innerHTML='<div class="tp" style="width:min(620px,94vw);max-width:none"><b>成就（'+ACH.filter(a=>ACS.u[a[0]]).length+'／'+ACH.length+'）</b><div class="achl">'+ACH.map(([id,n,ds])=>{const u=ACS.u[id],p=id==='parry10'?' （'+Math.min(10,ACS.n.parry||0)+'／10）':id==='rc20'?' （'+Math.min(20,ACS.n.rc||0)+'／20）':id==='allchar'?' （'+ACS.w.length+'／'+CH.length+'）':'';return'<div class="'+(u?'on':'')+'"><b>'+(u?'🏆':'🔒')+' '+n+'</b><small>'+ds+p+'</small></div>'}).join('')+'</div><div class="row"><button id="achx">關閉</button></div></div>';
+ document.body.appendChild(d);$('achx').onclick=()=>d.remove();d.onclick=e=>{if(e.target===d)d.remove()}}
+$('bach').onclick=()=>{snd(500,.08);achPanel()};achLabel();
 // ===== 輸入集中：每次 step 取得雙方輸入（訓練木樁、錄製、重播都走這裡）=====
 let RP=null,REC=null;
 function inputs(hs){
@@ -2888,9 +2929,10 @@ function helpRender(){
 <b>迅移取消：</b>出招中同時按<b>輕拳＋重拳＋輕腳</b>（50 氣），立刻取消招式回到可行動；命中時使用，對手會多硬直一點，可延長連段或掩護失誤。<br>
 <b>簡易操作：</b>設定裡可讓 P1／P2 各自切換。命中後不按方向、連按任一攻擊鍵會自動接 輕→輕腳→重拳→必殺（必殺要 50 氣），傷害 ×0.85。<br>
 <b>場景機關：</b>選單「機關」開啟後：夜城屋頂定時颳強風，把兩人往同一邊推（畫面會先預告方向）；黃昏港的木箱牆第一次被撞（血量 60% 以下）會碎裂、多受傷害；極光雪原被擊退會滑更遠；火山口定時噴發，地面發光的位置要閃開；竹林道場定時鐘響，雙方各加 15 氣。<br>
-<b>突變規則：</b>選單「規則」可複選：低重力、狂熱（氣快速回復、衝刺無冷卻）、劇毒擂台、玻璃大砲（傷害 ×1.7）、吸血擂台、持久戰（傷害 ×0.6、99 秒）；選「🎲 隨機」每場抽 1～2 條。連線時以房主的設定為準。<br>
+<b>突變規則：</b>選單「規則」可複選：低重力、狂熱（氣快速回復、衝刺無冷卻）、劇毒擂台、玻璃大砲（傷害 ×1.7）、吸血擂台、持久戰（傷害 ×0.6、99 秒）、逆轉（輸掉回合的一方下回合開場 50 氣、傷害 +10%）、天氣多變（每回合輪流雨天地滑、強風、濃霧）；選「🎲 隨機」每場抽 1～2 條。連線時以房主的設定為準。<br>
 <b>角色流派：</b>選角時在角色資訊下方切換「標準」或該角色的流派（每位角色一種，P1／P2 各自選）。流派會改動部分招式、體力、速度、傷害或集氣速度，說明會顯示在按鈕下方。街機與生存的對手流派隨機。<br>
 <b>電腦性格：</b>選單「電腦」可選：角色預設、猛攻型（一直逼近）、防守反擊型（等你出招再反擊）、遠攻型（保持距離、放飛行道具）、投技型（貼身就抓）或隨機。對戰時電腦名字旁會標出性格。<br>
+<b>成就：</b>選單下方的「🏆 成就」可查看 15 個成就與進度，只計算自己的對戰（重播、觀戰、訓練不算），保存在這台裝置。<br>
 <b>爬塔挑戰：</b>一路對戰電腦，每層一回合決勝，體力延續（每層回復 25%）。每贏一層從 3 張強化卡選 1 張（力量、強韌、鬥志、迅捷、嗜血、蓄勢、不屈、荊棘、靈動、休整），可以疊加；越高層對手越強，每 5 層是精英層並帶隨機規則。輸了結束，依角色保存最高層數。<br>
 <b>每日挑戰：</b>每天一題固定的對戰（指定角色、場景、規則與強化版對手），一回合決勝，依剩餘體力與時間計分，保存當天最佳成績。<br>
 <b>訓練模式：</b>畫面下方的幀數條（綠＝起手、紅＝攻擊判定、藍＝收招、黃＝硬直，白框＝無敵）與左右的輸入紀錄。`,
@@ -2978,7 +3020,7 @@ function arcFight(){const boss=ARC.i===ARC.L.length-1;sel[0]=ARC.me;sel[1]=ARC.L
  startGame(1);sel[1]=ARC.s1;G.stage=ARC.g0;if(boss){p2.hm=(p2.hm||1)*1.3;p2.reset();if(REC)REC.h=[p1.hm||1,p2.hm]}ARC.res=null;
  ARC.dlg=boss?BOSSL:[INTRO[ARC.me],INTRO[ARC.L[ARC.i]]];G.vs=G.vm=200}
 function arcNext(){if(!ARC||!ARC.res)return;if(ARC.done){toMenu();return}
- if(ARC.res==='win'){ARC.i++;if(ARC.i>=ARC.L.length){ARC.done=1;G.msg='街機模式 通關！';G.mt=G.mm=0;sfx('round');
+ if(ARC.res==='win'){ARC.i++;if(ARC.i>=ARC.L.length){ARC.done=1;G.msg='街機模式 通關！';G.mt=G.mm=0;achEv('arc',ARC.cont);sfx('round');
   try{const r=JSON.parse(localStorage.getItem('fd_arc')||'{}');r[ARC.me]=Math.min(r[ARC.me]===undefined?99:r[ARC.me],ARC.cont);localStorage.setItem('fd_arc',JSON.stringify(r))}catch(e){}return}}
  else ARC.cont++;rpSaveLast();arcFight()}
 function arcEnd(){if(!ARC)return;G.diff=ARC.d0;G.stage=ARC.g0;ARC=null}

@@ -7,7 +7,7 @@ function toMenu(){if(NET.room){netQuit(1);return}if(NET.watch&&typeof watchStop=
 function endRound(why){
  const ko1=p1.st==='ko',ko2=p2.st==='ko';let w=null;
  if(why==='ko'){if(ko1&&!ko2)w=p2;else if(ko2&&!ko1)w=p1}else w=p1.hp>p2.hp?p1:p2.hp>p1.hp?p2:null;
- G.win=w?(w===p1?0:1):-1;if(w)w.wins++;else{p1.wins++;p2.wins++}
+ G.win=w?(w===p1?0:1):-1;if(w)w.wins++;else{p1.wins++;p2.wins++}if(w&&!NOFX)achEv('round',w);
  G.phase='ko';G.pt=140;G.msg=why==='ko'?(w&&w.hp>=w.ch.hp*(w.hm||1)?'PERFECT!':'K.O.!'):'TIME UP';G.mt=G.mm=140;
  if(why==='ko'){G.hitstop=14;G.shake=16;sfx('ko')}
 }
@@ -49,7 +49,7 @@ function step(){
  }else if(G.phase==='ko'){
   if(--G.pt<=0){
    if(p1.wins>=(G.ft||2)||p2.wins>=(G.ft||2)){
-    G.phase='over';const w=p1.wins>p2.wins?p1:p2.wins>p1.wins?p2:null;if(G.mode===1&&w&&!RP&&!TEAM&&!SURV)rec(w===p1);if(ARC&&!RP)ARC.res=w===p1?'win':'lose';chainResult(w);
+    G.phase='over';const w=p1.wins>p2.wins?p1:p2.wins>p1.wins?p2:null;if(G.mode===1&&w&&!RP&&!TEAM&&!SURV)rec(w===p1);if(ARC&&!RP)ARC.res=w===p1?'win':'lose';chainResult(w);if(!NOFX)achEv('match',w);
     G.msg=w?(w===p1?'P1 ':G.mode===1?'電腦 ':'P2 ')+w.ch.n+' 獲勝!':'平手';G.mt=G.mm=1e9;snd(660,.4,'triangle',.07,990)
    }else{G.round++;startRound()}
   }
