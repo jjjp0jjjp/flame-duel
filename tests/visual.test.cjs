@@ -1,6 +1,7 @@
 // 畫面比對測試：把固定的對戰場景畫出來，縮成 96×54 格（每格 10px）的平均亮度，和 tests/visual-baseline.json 比對。
 // 抓的是「整塊東西沒畫出來／畫錯位置」這類問題（例如 HUD 消失、角色沒畫），抗鋸齒之類的小差異會被平均掉。
 // 文字一律不畫：不同機器的字型不同，畫出來的字會不一樣。
+// 每個場景開始前重設隨機種子與觀眾，場景之間互不影響（改了一個場景的招式，不會連帶改變其他場景）。
 //   node tests/visual.test.cjs            比對
 //   node tests/visual.test.cjs --update   畫面是刻意改的：更新基準
 // 不一致時，實際畫面會存到 tests/visual-out/<場景>.png（已加入 .gitignore）。
@@ -29,7 +30,7 @@ const SCENES = {
   pg.on('pageerror', (e) => errs.push(e.message));
   // 固定亂數、時間，並停掉自動迴圈：每次畫出來都一樣
   await pg.addInitScript(() => {
-    let s = 12345; Math.random = () => (s = (s * 16807) % 2147483647) / 2147483647;
+    window.__seed = (v) => { window.__s = v }; window.__s = 12345; Math.random = () => (window.__s = (window.__s * 16807) % 2147483647) / 2147483647;
     window.__T = 1000; performance.now = () => window.__T;
     window.requestAnimationFrame = () => 0;
     CanvasRenderingContext2D.prototype.fillText = CanvasRenderingContext2D.prototype.strokeText = function () {};
@@ -56,7 +57,7 @@ const SCENES = {
   const now = {};
   let fails = 0;
   for (const [name, fn] of Object.entries(SCENES)) {
-    const r = await pg.evaluate(`(() => { const keep = (${String(fn)})(); if (keep !== 'keepMsg') G.mt = 0; G.shake = 0; draw(); return { s: sample(), png: cv.toDataURL('image/png') } })()`);
+    const r = await pg.evaluate(`(() => { __seed(12345); CROWD = null; const keep = (${String(fn)})(); if (keep !== 'keepMsg') G.mt = 0; G.shake = 0; draw(); return { s: sample(), png: cv.toDataURL('image/png') } })()`);
     now[name] = r.s;
     if (UPDATE) { console.log('更新 ' + name); continue }
     if (!base[name]) { console.log('FAIL ' + name + '  沒有基準（請執行 --update）'); fails++; continue }

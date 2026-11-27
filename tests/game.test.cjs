@@ -253,8 +253,8 @@ const ok = (name, cond, detail) => {
     AIP = 'grab'; startGame(1); const pg2 = p2.ai.pt; AIP = 'rand'; startGame(1); const pr = p2.ai.pt; AIP = AIP0; toMenu();
     out.aipt = pd[0] === 'grab' && pd[1] === 'zone' && pg2 === 'grab' && !!PTN[pr];
     // 角色流派：體力、速度、傷害倍率與招式覆寫都會套用
-    const SSTb = SST; SST = [1, 0]; sel[0] = 1; sel[1] = 0; startGame(2); const sOK = p1.sty === 1 && p2.sty === 0 && p1.hm === 1.06 && p1.hp === p1.ch.hp * 1.06 && p1.sspd === .9; p1.start('hp'); const arm = !!p1.atk.arm;
-    SST = [0, 0]; startGame(2); p1.start('hp'); const arm0 = !!p1.atk.arm; SST = SSTb; toMenu();
+    const SSTb = SST; SST = [1, 0]; sel[0] = 1; sel[1] = 0; startGame(2); const sOK = p1.sty === 1 && p2.sty === 0 && p1.hm === 1.06 && p1.hp === p1.ch.hp * 1.06 && p1.sspd === .9; p1.start('hk'); const arm = !!p1.atk.arm;
+    SST = [0, 0]; startGame(2); p1.start('hk'); const arm0 = !!p1.atk.arm; SST = SSTb; toMenu();
     out.style = sOK && arm && !arm0;
     // 重播資料：流派讓體力倍率低於 1、魔王與爬塔高於 1，都要能播放
     out.style = out.style && rpValid({ v: 1, m: 1, c: [2, 4], g: 0, a: [0], b: [0], h: [0.9, 1.3 * 1.04] });

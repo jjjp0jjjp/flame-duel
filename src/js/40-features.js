@@ -34,7 +34,7 @@ function selUI(){
  [...g.children].forEach((b,i)=>{const a=sel[0]===i,c=sel[1]===i;b.classList.toggle('p1',a);b.classList.toggle('p2',c);b.classList.toggle('cur',sel[PT]===i);b.querySelector('.b1').style.display=a?'':'none';b.querySelector('.b2').style.display=c?'':'none'});
  [...$('ptabs').querySelectorAll('[data-p]')].forEach(b=>b.classList.toggle('on',+b.dataset.p===PT));
  const i=selUI.hv>=0?selUI.hv:sel[PT],ch=CH[i];
- $('pvinfo').innerHTML='<h3 style="color:'+ch.col+'">'+ch.n+'</h3><div>'+ch.ds+'</div>'+STAT.map(s=>'<div class="st"><span>'+s[0]+'</span><i><u style="width:'+Math.round(100*(ch[s[1]]-s[2])/(s[3]-s[2]))+'%;background:'+ch.col+'"></u></i><span>'+ch[s[1]]+'</span></div>').join('')+'<div class="ps">被動：'+CHM[i].p+'</div><div class="mv">'+CHM[i].m.slice(0,3).map(x=>x[0]+' '+x[1].replace(/（.*）/,'')).join('　')+'</div>';
+ $('pvinfo').innerHTML='<h3 style="color:'+ch.col+'">'+ch.n+'</h3><div>'+ch.ds+'</div>'+STAT.map(s=>'<div class="st"><span>'+s[0]+'</span><i><u style="width:'+Math.round(100*(ch[s[1]]-s[2])/(s[3]-s[2]))+'%;background:'+ch.col+'"></u></i><span>'+ch[s[1]]+'</span></div>').join('')+'<div class="ps">被動：'+CHM[i].p+'</div><div class="mv">基本技：'+BKEYS.slice(0,4).map(k=>ch.nm[k]).join('・')+'</div><div class="mv">'+CHM[i].m.slice(0,3).map(x=>x[0]+' '+x[1].replace(/（.*）/,'')).join('　')+'</div>';
  styUI();
  $('vsline').innerHTML='<span style="color:'+CH[sel[0]].col+'">P1 '+CH[sel[0]].n+'</span>　VS　<span style="color:'+CH[sel[1]].col+'">'+CH[sel[1]].n+' P2</span>';
  [...$('dfseg').children].forEach(b=>b.classList.toggle('on',+b.dataset.v===G.diff));
@@ -97,7 +97,7 @@ const TRIALS=[
  [['lp','hp'],['lk','hk','sp'],['lp','lk','lunge'],['lk','hp','sp','ex']],
  [['lp','hp'],['lp','lk','hk','sp'],['jab','lunge','sp'],['lp','hp','sp','ex']],
  [['lp','hp'],['lk','hk','sp'],['jab','lunge','sp'],['lp','upper','ak']],
- [['lp','hp'],['lp','lk','hk'],['lk','push'],['lp','hk','sp2']],
+ [['lp','hp'],['lp','lk','hk'],['lk','push'],['lp','lk','sp2']],
  [['lp','hp'],['lp','lk','hk'],['lk','hk','sp3'],['lp','hp','ex']],
  [['lp','hp'],['lk','hk','sp'],['jab','push','sp'],['lp','hp','ex']],
  [['lp','hp'],['lk','hk','sp'],['jab','lunge','sp2'],['lp','hp','ex']],
@@ -224,6 +224,8 @@ const CHM=[
 const CMDK=[['jab','→+輕拳'],['lunge','→+重拳'],['push','→+輕腳'],['spin','→+重腳'],['flip','←+重腳'],['upper','↓+輕拳'],['dhp','↓+重拳'],['dlk','↓+輕腳'],['blp','←+輕拳'],['bhp','←+重拳'],['ahp','空中 重拳']];
 const cmdTag=a=>a.ovh?'（中段）':a.low?'（下段）':a.hits?'（'+a.hits+'段）':a.arm?'（霸體）':a.nohit?'（閃避）':a.kb<0?'（拉近）':a.rev?'（打到身後）':a.psn?'（中毒）':a.wk?'（詛咒）':a.ls?'（吸血）':a.sl?'（緩速）':a.type==='proj'?'（射擊）':a.hop?'（跳起）':'';
 const cmdList=ch=>CMDK.map(([k,l])=>[l,ch.nm[k]+cmdTag(ch.mv[k])]);
+const BKL=[['lp','輕拳'],['hp','重拳'],['lk','輕腳'],['hk','重腳'],['ap','空中輕拳'],['ak','空中腳']];
+const basicList=ch=>BKL.filter(([k])=>ch.nm&&ch.nm[k]).map(([k,l])=>[l,ch.nm[k]+cmdTag(ch.mv[k])]);
 const spList=i=>CHM[i].m.concat(CH[i].sp4n?[['↓+投技',CH[i].sp4n]]:[]);
 let HTAB='基本';
 function helpRender(){
@@ -236,6 +238,7 @@ function helpRender(){
 按鍵可在上方「設定」更改。第一次玩建議先到「訓練模式」熟悉操作。`,
   '組合招':`方向以角色為準：<b>↓</b>＝蹲（${k(3)}），<b>→</b>＝朝向對手，<b>←</b>＝背向對手。<br>
 <b>共通：</b>↓+重腳 掃堂腿（下段擊倒）　←+投技 背摔　↓+必殺 超必殺（100 氣）　↓+投技 第六個必殺技（50 氣）<br>
+<b>基本技：</b>每個角色的輕拳、重拳、輕腳、重腳、空中輕拳、空中腳也各不相同（距離、速度、段數、中段／下段、霸體、中毒、緩速、吸血等），名稱見「角色」分頁或暫停畫面。<br>
 <b>每個角色專屬：</b>→+輕拳、→+重拳、→+輕腳、→+重腳、←+輕拳、←+重拳、←+重腳、↓+輕拳、↓+重拳、↓+輕腳、空中重拳 這 11 個指令技每人都不同，名稱與特性見「角色」分頁或暫停畫面。<br>
 <b>上下段：</b>標示<b>中段</b>的招式和所有跳躍攻擊要<b>站著擋</b>（按住後方），<b>下段</b>要<b>蹲著擋</b>，擋錯會被打中。<br>
 <b>空中：</b>輕拳／重拳 空拳　輕腳／重腳 飛踢　↓+輕腳／重腳 俯衝踢<br>
@@ -257,7 +260,7 @@ function helpRender(){
 <b>爬塔挑戰：</b>一路對戰電腦，每層一回合決勝，體力延續（每層回復 25%）。每贏一層從 3 張強化卡選 1 張（力量、強韌、鬥志、迅捷、嗜血、蓄勢、不屈、荊棘、靈動、休整），可以疊加；越高層對手越強，每 5 層是精英層並帶隨機規則。輸了結束，依角色保存最高層數。<br>
 <b>每日挑戰：</b>每天一題固定的對戰（指定角色、場景、規則與強化版對手），一回合決勝，依剩餘體力與時間計分，保存當天最佳成績。<br>
 <b>訓練模式：</b>畫面下方的幀數條（綠＝起手、紅＝攻擊判定、藍＝收招、黃＝硬直，白框＝無敵）與左右的輸入紀錄。`,
-  '角色':CH.map((c,i)=>`<b style="color:${c.col}">${c.n}・${c.ds}</b>（體力 ${c.hp}）　被動：${CHM[i].p}<br>　指令技：`+cmdList(c).map(x=>x[0]+' '+x[1]).join('　')+'<br>　必殺技：'+spList(i).map(x=>x[0]+' '+x[1]).join('　')).join('<br>'),
+  '角色':CH.map((c,i)=>`<b style="color:${c.col}">${c.n}・${c.ds}</b>（體力 ${c.hp}）　被動：${CHM[i].p}<br>　基本技：`+basicList(c).map(x=>x[0]+' '+x[1]).join('　')+'<br>　指令技：'+cmdList(c).map(x=>x[0]+' '+x[1]).join('　')+'<br>　必殺技：'+spList(i).map(x=>x[0]+' '+x[1]).join('　')).join('<br>'),
   '系統':`<b>暫停：</b>P 或 Esc（暫停時按 Q 回選單）　<b>靜音：</b>M　<b>判定框：</b>F2（藍＝受擊框、紅＝攻擊判定、紫＝投技、黃＝反擊架勢、白＝無敵）<br>
 <b>手把：</b>X 輕拳、Y 重拳、A 輕腳、B 重腳、RB／RT 必殺、LB／LT 投技，方向鍵或左搖桿移動。<br>
 <b>手機：</b>螢幕下方有按鈕（操作 P1）。<br>
@@ -275,7 +278,7 @@ function pauseScreen(){
   ['↓+重腳 掃堂腿（下段）　←+投技 背摔　↓+必殺 超必殺（100 氣）　↓+投技 第六必殺　中段要站著擋、下段要蹲著擋','#fff'],
   ['連段：輕→重→必殺→超必殺；同一連段每招只能用一次；命中後可衝刺或跳躍取消；輕拳＋重拳＋輕腳 迅移取消（50 氣）','#cfd2ff'],['','#fff']];
  const who=[p1].concat(G.mode===2&&p2.ch!==p1.ch?[p2]:[]);
- who.forEach(f=>{const i=CH.indexOf(f.ch);const cl=cmdList(f.ch).map(x=>x[0]+' '+x[1].replace(/（.*）/,''));L.push([f.ch.n+'：'+cl.slice(0,6).join('　'),f.ch.col]);L.push([cl.slice(6).join('　'),f.ch.col]);L.push([spList(i).map(x=>x[0]+' '+x[1].replace(/（.*）/,'')).join('　'),f.ch.col]);L.push(['被動：'+CHM[i].p,f.ch.col2])});
+ who.forEach(f=>{const i=CH.indexOf(f.ch);const cl=cmdList(f.ch).map(x=>x[0]+' '+x[1].replace(/（.*）/,''));L.push([f.ch.n+' 基本技：'+basicList(f.ch).map(x=>x[0]+' '+x[1].replace(/（.*）/,'')).join('　'),f.ch.col]);L.push([cl.slice(0,6).join('　'),f.ch.col]);L.push([cl.slice(6).join('　'),f.ch.col]);L.push([spList(i).map(x=>x[0]+' '+x[1].replace(/（.*）/,'')).join('　'),f.ch.col]);L.push(['被動：'+CHM[i].p,f.ch.col2])});
  L.push(['','#fff'],['按 P 或 Esc 繼續　按 Q 回到選單　F2 判定框'+(G.hb?'（開）':''),'#ffe14d']);
  ctx.font='15px '+FONT;L.forEach((l,i)=>{ctx.fillStyle=l[1];ctx.fillText(l[0],W/2,120+i*30)});ctx.restore();
 }
