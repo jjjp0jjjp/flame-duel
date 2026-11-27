@@ -93,7 +93,7 @@ const ok = (name, cond, detail) => {
         for (const k in keys) keys[k] = 0;
         const si = G.si, h = hash(), link = await codeEnc(rpPack());
         const o = await codeDec(link);
-        startReplay(o); G.vs = 0;
+        if (!startReplay(o)) throw new Error("重播資料被判為無效"); G.vs = 0;
         while (G.si < si) step();
         out.push({ m, c, si, len: link.length, same: hash() === h, over: G.phase === 'over' });
         RP = null; toMenu();
@@ -153,7 +153,7 @@ const ok = (name, cond, detail) => {
     chainStart(2, 7, 1, 40, 70); G.vs = 0;
     for (let i = 0; i < 20000 && G.phase !== 'over'; i++) { for (const k of KS) { if (Math.random() < 0.06) { keys[k] = keys[k] ? 0 : 1; if (keys[k]) pend[k] = 1 } } step() }
     for (const k in keys) keys[k] = 0;
-    const si = G.si, h = hash(), o = await codeDec(await codeEnc(rpPack())); startReplay(o); G.vs = 0; while (G.si < si) step();
+    const si = G.si, h = hash(), o = await codeDec(await codeEnc(rpPack())); const started = startReplay(o); if (!started) throw new Error("重播資料被判為無效"); G.vs = 0; while (G.si < si) step();
     out.replay = hash() === h && G.phase === 'over' && G.hz === 1 && G.mu === 24 && p1.sty === 1 && p2.sty === 1; RP = null; HZ = 0; G.stage = 0; MU = MU0; SST = SST0; toMenu();
     return out;
   });
@@ -170,8 +170,8 @@ const ok = (name, cond, detail) => {
     for (let i = 0; i < 1500 && G.phase !== 'over'; i++) { for (const k of KS) { if (Math.random() < 0.08) { keys[k] = keys[k] ? 0 : 1; if (keys[k]) pend[k] = 1 } } step() }
     for (const k in keys) keys[k] = 0;
     const hash = () => { const o = JSON.parse(snapAll()); delete o.v1; delete o.v2; delete o.a.ai; delete o.b.ai; return rbFnv(canon(o)) };
-    const si = G.si, h = hash(), T = TOWER, o = await codeDec(await codeEnc(rpPack())); TOWER = null; startReplay(o); G.vs = 0; while (G.si < si) step();
-    out.replay = hash() === h && p1.bu >= 1 && JSON.stringify(o.pk[0]) === '["atk","bu"]'; RP = null; TOWER = T;
+    const si = G.si, h = hash(), T = TOWER, o = await codeDec(await codeEnc(rpPack())); TOWER = null; const started = startReplay(o); G.vs = 0; while (started && G.si < si) step();
+    out.replay = started && hash() === h && p1.bu >= 1 && JSON.stringify(o.pk[0]) === '["atk","bu"]'; RP = null; TOWER = T;
     towerFight(); ko(p1); towerNext(); out.lose = TOWER.done === 1 && towerBest(5) === 1; toMenu(); out.clean = !TOWER && !document.getElementById('tpick');
     return out;
   });
@@ -236,6 +236,8 @@ const ok = (name, cond, detail) => {
     const SSTb = SST; SST = [1, 0]; sel[0] = 1; sel[1] = 0; startGame(2); const sOK = p1.sty === 1 && p2.sty === 0 && p1.hm === 1.06 && p1.hp === p1.ch.hp * 1.06 && p1.sspd === .9; p1.start('hp'); const arm = !!p1.atk.arm;
     SST = [0, 0]; startGame(2); p1.start('hp'); const arm0 = !!p1.atk.arm; SST = SSTb; toMenu();
     out.style = sOK && arm && !arm0;
+    // 重播資料：流派讓體力倍率低於 1、魔王與爬塔高於 1，都要能播放
+    out.style = out.style && rpValid({ v: 1, m: 1, c: [2, 4], g: 0, a: [0], b: [0], h: [0.9, 1.3 * 1.04] });
     // 每日挑戰：同一天題目固定、不同天不同；開局套用規則與強化版對手
     const sA = dailySpec('2026-01-01'), sB = dailySpec('2026-01-01'), sC = dailySpec('2026-01-02');
     dailyStart(); const dOK = G.mu === dailySpec(today()).mu && G.mu > 0 && p2.hm === 1.15 && G.ft === 1 && G.diff === 2; toMenu();

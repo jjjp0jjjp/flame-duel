@@ -371,7 +371,7 @@ function draw(){
   if(G.win>=0&&(G.phase==='over'||(G.phase==='ko'&&G.pt<100))){const wf=G.win?p2:p1;if(wf.st==='win')quote(wf)}
  }
  ctx.restore();
- fgDraw();
+ fgDraw();wxFog();
  if(!CALM&&now0()<G.rcF){ctx.save();ctx.globalCompositeOperation='lighter';ctx.fillStyle='rgba(90,200,255,'+((G.rcF-now0())/180*.22)+')';ctx.fillRect(0,0,W,H);ctx.restore()}
  if(p1&&qHigh())postFx();
  if(p1)hud();

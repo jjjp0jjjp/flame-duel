@@ -298,13 +298,13 @@ function rpNext(){const k=G.si-1,a=RP.a[k],b=RP.b[k];return[decI(a===undefined?0
 function rle(arr){const o=[];let v=null,c=0;for(let i=0;i<arr.length;i++){const x=arr[i]===undefined?0:arr[i];if(x===v)c++;else{if(c)o.push(v,c);v=x;c=1}}if(c)o.push(v,c);return o}
 function unrle(o){const a=[];for(let i=0;i+1<o.length;i+=2){const v=o[i]|0,c=Math.min(o[i+1]|0,40000);for(let k=0;k<c&&a.length<40000;k++)a.push(v)}return a}
 const rpPack=()=>({v:1,m:REC.m,c:REC.c,g:REC.g,h:REC.h||[1,1],ini:REC.ini,s:REC.s,hz:REC.hz,mu:REC.mu,st:REC.st,pk:REC.pk,a:rle(REC.a),b:rle(REC.b)});
-function rpValid(o){return o&&o.v===1&&[1,2,4].includes(o.m)&&Array.isArray(o.c)&&o.c.length===2&&o.c.every(x=>Number.isInteger(x)&&x>=0&&x<CH.length)&&Number.isInteger(o.g)&&o.g>=0&&o.g<STG.length&&Array.isArray(o.a)&&Array.isArray(o.b)&&o.a.concat(o.b).every(Number.isInteger)&&(o.h===undefined||Array.isArray(o.h)&&o.h.length===2&&o.h.every(x=>typeof x==='number'&&x>=1&&x<=2))}
+function rpValid(o){return o&&o.v===1&&[1,2,4].includes(o.m)&&Array.isArray(o.c)&&o.c.length===2&&o.c.every(x=>Number.isInteger(x)&&x>=0&&x<CH.length)&&Number.isInteger(o.g)&&o.g>=0&&o.g<STG.length&&Array.isArray(o.a)&&Array.isArray(o.b)&&o.a.concat(o.b).every(Number.isInteger)&&(o.h===undefined||Array.isArray(o.h)&&o.h.length===2&&o.h.every(x=>typeof x==='number'&&x>=.5&&x<=3))} // 體力倍率：流派可低於 1，魔王／爬塔高層可高於 1
 function rpSaveLast(){if(!REC||RP||G.si<300)return;try{localStorage.setItem('fd_last',JSON.stringify(rpPack()))}catch(e){}}
 function startReplay(o){
  if(!rpValid(o))return false;
  const sv=[sel[0],sel[1],G.stage];REC=null;
  RP={a:unrle(o.a),b:unrle(o.b),end:0,m:o.m};RP.n=Math.max(RP.a.length,RP.b.length);
- sel[0]=o.c[0];sel[1]=o.c[1];G.stage=o.g;G.smo=Array.isArray(o.s)?o.s:[0,0];G.hzo=o.hz?1:0;G.muo=(o.mu|0)&63;G.sto=Array.isArray(o.st)?o.st:[0,0];G.pko=Array.isArray(o.pk)?o.pk.map(l=>Array.isArray(l)?l.filter(id=>PERKS[id]):[]):[[],[]];startGame(o.m===4?2:o.m);if(o.h)[p1,p2].forEach((f,k)=>{if(o.h[k]!==1){f.hm=o.h[k];f.reset()}});if(o.ini&&typeof o.ini.ft==='number'&&Array.isArray(o.ini.hp)){G.ft=o.ini.ft;p1.hp=p1.lag=+o.ini.hp[0]||p1.hp;p2.hp=p2.lag=+o.ini.hp[1]||p2.hp}sel[0]=sv[0];sel[1]=sv[1];G.stage=sv[2];
+ sel[0]=o.c[0];sel[1]=o.c[1];G.stage=o.g;G.smo=Array.isArray(o.s)?o.s:[0,0];G.hzo=o.hz?1:0;G.muo=(o.mu|0)&255;G.sto=Array.isArray(o.st)?o.st:[0,0];G.pko=Array.isArray(o.pk)?o.pk.map(l=>Array.isArray(l)?l.filter(id=>PERKS[id]):[]):[[],[]];startGame(o.m===4?2:o.m);if(o.h)[p1,p2].forEach((f,k)=>{if(o.h[k]!==1){f.hm=o.h[k];f.reset()}});if(o.ini&&typeof o.ini.ft==='number'&&Array.isArray(o.ini.hp)){G.ft=o.ini.ft;p1.hp=p1.lag=+o.ini.hp[0]||p1.hp;p2.hp=p2.lag=+o.ini.hp[1]||p2.hp}sel[0]=sv[0];sel[1]=sv[1];G.stage=sv[2];
  return true;
 }
 const pageURL=()=>location.href.split('#')[0];

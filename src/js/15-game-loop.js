@@ -1,4 +1,7 @@
-function startRound(){G.win=-1;G.wbk=0;p1.reset();p2.reset();projs=[];parts=[];G.cam={z:1,cx:W/2};G.phase='intro';G.pt=100;G.time=G.mu&32?99:60;G.tf=0;G.msg='ROUND '+G.round;G.mt=G.mm=100;sfx('round')}
+function startRound(){const pw=G.win;G.win=-1;G.wbk=0;p1.reset();p2.reset();
+ // 逆轉規則：上一回合輸的一方開場 50 氣、這回合傷害 +10%
+ p1.rv=p2.rv=0;if(G.mu&64&&G.round>1&&pw>=0){const l=pw===0?p2:p1;l.mt=Math.max(l.mt,50);l.rv=1}
+ projs=[];parts=[];G.cam={z:1,cx:W/2};G.phase='intro';G.pt=100;G.time=G.mu&32?99:60;G.tf=0;G.msg='ROUND '+G.round;G.mt=G.mm=100;sfx('round')}
 function startGame(m){rpSaveLast();REC=(m===1||m===2||m===4)&&!RP?{m,c:[sel[0],sel[1]],g:G.stage,a:[],b:[]}:null;G.mode=m;G.frame=0;G.hitstop=0;G.shake=0;for(const o of[pv1,pv2])for(const k in o)delete o[k];bg=makeBg(STG[G.stage]);p1=new F(CH[sel[0]],0);p2=new F(CH[sel[1]],1);smApply(m);hzApply();muApply();aiApply();styApply(m);perkApply();G.round=1;G.si=0;G.pause=false;document.getElementById('menu').style.display='none';startRound();G.vs=m===3?0:110;G.vm=110;if(G.vs)sfx('vs');if(m!==3)TUT=null;TR.rec=0;TR.tr=-1;TR.ok=0;FD=null;tbar()}
 function toMenu(){if(NET.room){netQuit(1);return}if(NET.watch&&typeof watchStop==='function')watchStop();rpSaveLast();RP=null;REC=null;arcEnd();chainEnd();G.phase='menu';G.mt=0;TUT=null;lab();tbar();rpLastBtn();document.getElementById('menu').style.display='flex'}
 function endRound(why){

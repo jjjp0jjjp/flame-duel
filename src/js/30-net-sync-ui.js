@@ -37,7 +37,7 @@ function loadAll(s){const o=JSON.parse(s),g=o.g;G.frame=g[0];G.hitstop=g[1];G.ph
 function beginNet(c0,c1,g,D,m,sm,hz,mu,st){
  clearInterval(NET.hb);
  const sv=[sel[0],sel[1],G.stage];
- NET.DL=Math.max(1,Math.min(4,D|0))||2;NET.m=m||1;NET.c=[c0,c1];NET.g=g;NET.pk=NET.slot?c1:c0;NET.rpk=NET.slot?c0:c1;NET.sm=Array.isArray(sm)?[sm[0]?1:0,sm[1]?1:0]:[0,0];NET.hz=hz?1:0;NET.mu=(mu|0)&63;NET.mup=null;NET.st=Array.isArray(st)?[st[0]?1:0,st[1]?1:0]:[0,0];
+ NET.DL=Math.max(1,Math.min(4,D|0))||2;NET.m=m||1;NET.c=[c0,c1];NET.g=g;NET.pk=NET.slot?c1:c0;NET.rpk=NET.slot?c0:c1;NET.sm=Array.isArray(sm)?[sm[0]?1:0,sm[1]?1:0]:[0,0];NET.hz=hz?1:0;NET.mu=(mu|0)&255;NET.mup=null;NET.st=Array.isArray(st)?[st[0]?1:0,st[1]?1:0]:[0,0];
  NET.started=true;NET.on=true;NET.tick=0;NET.loc={};NET.rem={};NET.used={};NET.snaps={};NET.rbFrom=null;NET.rbCount=0;NET.rbMax=0;
  NET.sendT={};NET.hash={};NET.rh={};NET.hl=null;NET.nextHash=29;NET.desync=false;NET.syncF=0;NET.dsAt=0;NET.resyncs=0;NET.rsT=0;NET.lastSrq=0;NET.stallT=0;NET.rtt=NET.rtt||0;NET.gone=false;
  NET.remHigh=NET.DL-1;NET.remAck=NET.DL-1;NET.remAd=0;NET.skip=0;NET.inp=[0,0];NET.reL=0;NET.reR=0;NET.gotM=0;NET.lastRe=0;NET.rst=null;
