@@ -207,6 +207,10 @@ const ok = (name, cond, detail) => {
     const psn = mu(4, () => { setup(0, 0); p1.hp = 3; run(200, () => [{}, {}]); return p1.hp });
     const rush = mu(2, () => { setup(0, 0); p1.x = 200; p2.x = 760; let c = 0, prev = ''; run(40, (k) => { if (p1.st === 'dash' && prev !== 'dash') c++; prev = p1.st; return [k === 0 || k === 16 ? { dash: 1 } : {}, {}] }); return c });
     out.mutators = jumpH(1) > jumpH(0) * 1.5 && ng[0] > n0[0] * 1.5 && nv[1] > 50 && n0[1] === 50 && tank === 99 && psn === 1 && rush === 2;
+    // 電腦性格：預設依角色、可指定、可隨機；不影響雙人對戰的確定性
+    const AIP0 = AIP; AIP = 'def'; sel[0] = 4; sel[1] = 3; startGame(1); const pd = [p1.ai.pt, p2.ai.pt];
+    AIP = 'grab'; startGame(1); const pg2 = p2.ai.pt; AIP = 'rand'; startGame(1); const pr = p2.ai.pt; AIP = AIP0; toMenu();
+    out.aipt = pd[0] === 'grab' && pd[1] === 'zone' && pg2 === 'grab' && !!PTN[pr];
     // 每日挑戰：同一天題目固定、不同天不同；開局套用規則與強化版對手
     const sA = dailySpec('2026-01-01'), sB = dailySpec('2026-01-01'), sC = dailySpec('2026-01-02');
     dailyStart(); const dOK = G.mu === dailySpec(today()).mu && G.mu > 0 && p2.hm === 1.15 && G.ft === 1 && G.diff === 2; toMenu();
@@ -240,7 +244,7 @@ const ok = (name, cond, detail) => {
     CALM = 1; FL = null; flash('#fff', .5, 200); const noFlash = FL === null; draw(); CALM = 0; flash('#fff', .5, 200); out.calm = noFlash && (FL !== null || !qHigh()); FL = null;
     return out;
   });
-  for (const [k, v] of Object.entries(mech)) ok('機制：' + { parry: '精準招架', punish: '確反加傷', tech: '受身與強制倒地', wall: '撞牆反彈', burst: '爆氣', guard: '防禦崩潰', simple: '簡易操作輔助連段', rc: '迅移取消', hazard: '場景機關（火山、雪原、強風、鐘聲）', art: '街機／經典畫風繪製', calm: '減少閃光', dashcd: '衝刺冷卻（衝刺取消冷卻較長）', mutators: '突變規則（低重力、玻璃大砲、吸血、持久戰、劇毒、狂熱）', daily: '每日挑戰（同一天題目固定）' }[k], v);
+  for (const [k, v] of Object.entries(mech)) ok('機制：' + { parry: '精準招架', punish: '確反加傷', tech: '受身與強制倒地', wall: '撞牆反彈', burst: '爆氣', guard: '防禦崩潰', simple: '簡易操作輔助連段', rc: '迅移取消', hazard: '場景機關（火山、雪原、強風、鐘聲）', art: '街機／經典畫風繪製', calm: '減少閃光', dashcd: '衝刺冷卻（衝刺取消冷卻較長）', mutators: '突變規則（低重力、玻璃大砲、吸血、持久戰、劇毒、狂熱）', daily: '每日挑戰（同一天題目固定）', aipt: '電腦性格（預設、指定、隨機）' }[k], v);
 
   // ---- 連段挑戰
   const tr = await pg.evaluate(() => {

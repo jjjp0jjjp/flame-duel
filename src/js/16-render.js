@@ -340,7 +340,7 @@ function hud(){
   {const gw=w*.45,gx=k?x+w-gw:x,gy=y+h+2,gr=Math.max(0,f.gd??100)/100;ctx.fillStyle='#000a';ctx.fillRect(gx,gy,gw,5);ctx.fillStyle=gr<.35?(fl?'#ff6b6b':'#ff9f9f'):'#7ec8ff';ctx.fillRect(k?gx+gw-gw*gr:gx,gy,gw*gr,5)}
   {const bx2=k?mx-16:mx+mw+16,by2=my+5;ctx.beginPath();ctx.arc(bx2,by2,9,0,6.3);ctx.fillStyle=f.bu?'#ff4d6d':'#333a';ctx.fill();ctx.strokeStyle=f.bu?'#ffe14d':'#555';ctx.lineWidth=2;ctx.stroke();ctx.fillStyle=f.bu?'#fff':'#777';ctx.font='bold 11px '+FONT;ctx.textAlign='center';ctx.fillText('爆',bx2,by2+4);ctx.textAlign=k?'right':'left';dashIcon(k?bx2-22:bx2+22,by2,f)}
   ctx.font='bold 18px '+FONT;ctx.textAlign=k?'right':'left';ctx.fillStyle='#fff';
-  ctx.fillText((k?(G.mode===1?'電腦 ':G.mode===3?'木樁 ':'P2 '):'P1 ')+f.ch.n+(G.mode===4&&k===NET.slot?'（你）':'')+(f.sm?'　簡易':''),k?x+w:x,24);
+  ctx.fillText((k?(G.mode===1?'電腦 ':G.mode===3?'木樁 ':'P2 '):'P1 ')+f.ch.n+(G.mode===4&&k===NET.slot?'（你）':'')+(f.sm?'　簡易':'')+(k&&G.mode===1&&!RP&&f.ai.pt?'　'+PTN[f.ai.pt]:''),k?x+w:x,24);
   for(let j=0;j<2;j++){ctx.fillStyle=j<f.wins?'#ffe14d':'#fff3';ctx.beginPath();ctx.arc(k?x+w-8-j*20:x+8+j*20,my+30,7,0,6.3);ctx.fill()}
   const o=k?p1:p2;
   if(o.combo>=2){ctx.font='900 34px '+FONT;ctx.fillStyle='#ffe14d';ctx.strokeStyle='#000';ctx.lineWidth=5;const t=o.combo+' HIT! '+Math.round(o.cd);ctx.strokeText(t,k?x+w:x,150);ctx.fillText(t,k?x+w:x,150)}

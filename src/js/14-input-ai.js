@@ -37,7 +37,7 @@ function aiInput(me,op){
  if(a.pfw>0){a.pfw--;return i}
  // 即時反應（普通以上）：拆投、確反揮空、對空
  const free=me.y>=GY&&(me.st==='idle'||me.st==='walk'||me.st==='block');
- if(lv&&free&&op.atk&&!a.done){const oa=op.atk,R=Math.random();
+ if(lv&&free&&op.atk&&!a.done){const oa=op.atk,R=Math.random()/(a.pt==='counter'?1.25:1);
   if(oa.throw&&(oa.key==='th'||oa.key==='th2')&&op.t<=oa.su&&ad<100){a.done=1;if(R<[0,.35,.7][lv]){i.th=1;return i}}
   else if(op.st==='atk'&&!op.hit&&!oa.air&&op.t>oa.su+oa.ac&&oa.su+oa.ac+oa.rc-op.t>=10&&ad<115){a.done=1;if(R<[0,.4,.75][lv]){Object.assign(i,lv>1&&me.mt>=100?{d:1,sp:1}:{hp:1});return i}}
  }
@@ -45,7 +45,17 @@ function aiInput(me,op){
  if(a.t--<=0){
   a.t=[24,14,7][lv]+rnd(0,10);a.mv=0;a.blk=0;a.act=null;
   const r=Math.random(),pj=me.ch.sp.type==='proj';
-  if(op.st==='atk'&&ad<150&&r<[.25,.5,.78][lv]){a.blk=16;a.bw=Math.random()<[.35,.12,0][lv]}
+  const P=a.pt||'bal';if(P==='rush')a.t=Math.round(a.t*.7); // bal＝無性格（平衡模擬用）
+  if(op.st==='atk'&&ad<150&&r<Math.min(.95,[.25,.5,.78][lv]*(P==='counter'?1.25:P==='rush'?.65:1))){a.blk=16;a.bw=Math.random()<[.35,.12,0][lv]}
+  // 性格：猛攻型一直逼近；防守反擊型等對手出招；遠攻型保持距離放飛行道具；投技型貼身就抓
+  else if(P==='rush'&&ad>=115&&r<.55){a.mv=1;if(r<.3)a.act={dash:sg}}
+  else if(P==='counter'&&ad<220&&op.st!=='atk'&&r<.4){a.blk=12;a.bw=Math.random()<[.35,.12,0][lv]}
+  else if(P==='zone'&&ad<125&&r<.55)a.act=[{[to]:1,lp:1},{[to]:1,hk:1},{d:1,lk:1},{[aw]:1,hk:1}][rnd(0,4)];
+  else if(P==='zone'&&ad<240&&r<.8){a.mv=-1;if(r<.18&&me.x>110&&me.x<W-110)a.act={dash:-sg}}
+  else if(P==='zone'&&me.mt>=50&&r<.75)a.act=pj?{sp:1}:me.ch.sp2&&me.ch.sp2.type?{[to]:1,sp:1}:{[to]:1,hk:1};
+  else if(P==='zone'&&r<.6)a.mv=0;
+  else if(P==='grab'&&ad<95&&r<.5)a.act=me.ch.sp&&me.ch.sp.throw&&me.mt>=50?{sp:1}:me.ch.sp3&&me.ch.sp3.throw&&me.mt>=50?{[aw]:1,sp:1}:{th:1};
+  else if(P==='grab'&&ad>=95&&r<.55){a.mv=1;if(r<.18)a.act={dash:sg}}
   else if(lv&&op.st==='block'&&op.gd<40&&ad<120&&r<[0,.45,.7][lv])a.act=[{hp:1},{hk:1},{[to]:1,hp:1},{[to]:1,hk:1}][rnd(0,4)];
   else if(me.ch.sp2.type==='strike'&&me.mt>=50&&ad>170&&ad<300&&(op.y<GY-30||r<.12))a.act={[to]:1,sp:1};
   else if(me.ch.ex.throw&&me.mt>=100&&ad<110&&r<.35)a.act={d:1,sp:1};

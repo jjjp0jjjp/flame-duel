@@ -113,6 +113,7 @@ input[type=range]{width:90px;padding:0}
   <div class="opt"><span>場景</span><div id="stgs"></div></div>
   <div class="opt"><span>機關</span><button id="hzbtn"></button></div>
   <div class="opt"><span>規則</span><div id="mutr" class="chips"></div></div>
+  <div class="opt"><span>電腦</span><div id="aipr" class="chips"></div></div>
   <div id="mgrid">
    <button class="mode main" id="b1"><i>🥊</i><b>單人 vs 電腦</b><small>三戰兩勝，挑戰電腦</small></button>
    <button class="mode" id="b7"><i>🏆</i><b>街機模式</b><small>連戰 5 場，最後挑戰強化版的自己</small></button>
@@ -907,7 +908,7 @@ function aiInput(me,op){
  if(a.pfw>0){a.pfw--;return i}
  // 即時反應（普通以上）：拆投、確反揮空、對空
  const free=me.y>=GY&&(me.st==='idle'||me.st==='walk'||me.st==='block');
- if(lv&&free&&op.atk&&!a.done){const oa=op.atk,R=Math.random();
+ if(lv&&free&&op.atk&&!a.done){const oa=op.atk,R=Math.random()/(a.pt==='counter'?1.25:1);
   if(oa.throw&&(oa.key==='th'||oa.key==='th2')&&op.t<=oa.su&&ad<100){a.done=1;if(R<[0,.35,.7][lv]){i.th=1;return i}}
   else if(op.st==='atk'&&!op.hit&&!oa.air&&op.t>oa.su+oa.ac&&oa.su+oa.ac+oa.rc-op.t>=10&&ad<115){a.done=1;if(R<[0,.4,.75][lv]){Object.assign(i,lv>1&&me.mt>=100?{d:1,sp:1}:{hp:1});return i}}
  }
@@ -915,7 +916,17 @@ function aiInput(me,op){
  if(a.t--<=0){
   a.t=[24,14,7][lv]+rnd(0,10);a.mv=0;a.blk=0;a.act=null;
   const r=Math.random(),pj=me.ch.sp.type==='proj';
-  if(op.st==='atk'&&ad<150&&r<[.25,.5,.78][lv]){a.blk=16;a.bw=Math.random()<[.35,.12,0][lv]}
+  const P=a.pt||'bal';if(P==='rush')a.t=Math.round(a.t*.7); // bal＝無性格（平衡模擬用）
+  if(op.st==='atk'&&ad<150&&r<Math.min(.95,[.25,.5,.78][lv]*(P==='counter'?1.25:P==='rush'?.65:1))){a.blk=16;a.bw=Math.random()<[.35,.12,0][lv]}
+  // 性格：猛攻型一直逼近；防守反擊型等對手出招；遠攻型保持距離放飛行道具；投技型貼身就抓
+  else if(P==='rush'&&ad>=115&&r<.55){a.mv=1;if(r<.3)a.act={dash:sg}}
+  else if(P==='counter'&&ad<220&&op.st!=='atk'&&r<.4){a.blk=12;a.bw=Math.random()<[.35,.12,0][lv]}
+  else if(P==='zone'&&ad<125&&r<.55)a.act=[{[to]:1,lp:1},{[to]:1,hk:1},{d:1,lk:1},{[aw]:1,hk:1}][rnd(0,4)];
+  else if(P==='zone'&&ad<240&&r<.8){a.mv=-1;if(r<.18&&me.x>110&&me.x<W-110)a.act={dash:-sg}}
+  else if(P==='zone'&&me.mt>=50&&r<.75)a.act=pj?{sp:1}:me.ch.sp2&&me.ch.sp2.type?{[to]:1,sp:1}:{[to]:1,hk:1};
+  else if(P==='zone'&&r<.6)a.mv=0;
+  else if(P==='grab'&&ad<95&&r<.5)a.act=me.ch.sp&&me.ch.sp.throw&&me.mt>=50?{sp:1}:me.ch.sp3&&me.ch.sp3.throw&&me.mt>=50?{[aw]:1,sp:1}:{th:1};
+  else if(P==='grab'&&ad>=95&&r<.55){a.mv=1;if(r<.18)a.act={dash:sg}}
   else if(lv&&op.st==='block'&&op.gd<40&&ad<120&&r<[0,.45,.7][lv])a.act=[{hp:1},{hk:1},{[to]:1,hp:1},{[to]:1,hk:1}][rnd(0,4)];
   else if(me.ch.sp2.type==='strike'&&me.mt>=50&&ad>170&&ad<300&&(op.y<GY-30||r<.12))a.act={[to]:1,sp:1};
   else if(me.ch.ex.throw&&me.mt>=100&&ad<110&&r<.35)a.act={d:1,sp:1};
@@ -937,7 +948,7 @@ function aiInput(me,op){
 }
 
 function startRound(){G.win=-1;G.wbk=0;p1.reset();p2.reset();projs=[];parts=[];G.cam={z:1,cx:W/2};G.phase='intro';G.pt=100;G.time=G.mu&32?99:60;G.tf=0;G.msg='ROUND '+G.round;G.mt=G.mm=100;sfx('round')}
-function startGame(m){rpSaveLast();REC=(m===1||m===2||m===4)&&!RP?{m,c:[sel[0],sel[1]],g:G.stage,a:[],b:[]}:null;G.mode=m;G.frame=0;G.hitstop=0;G.shake=0;for(const o of[pv1,pv2])for(const k in o)delete o[k];bg=makeBg(STG[G.stage]);p1=new F(CH[sel[0]],0);p2=new F(CH[sel[1]],1);smApply(m);hzApply();muApply();G.round=1;G.si=0;G.pause=false;document.getElementById('menu').style.display='none';startRound();G.vs=m===3?0:110;G.vm=110;if(G.vs)sfx('vs');if(m!==3)TUT=null;TR.rec=0;TR.tr=-1;TR.ok=0;FD=null;tbar()}
+function startGame(m){rpSaveLast();REC=(m===1||m===2||m===4)&&!RP?{m,c:[sel[0],sel[1]],g:G.stage,a:[],b:[]}:null;G.mode=m;G.frame=0;G.hitstop=0;G.shake=0;for(const o of[pv1,pv2])for(const k in o)delete o[k];bg=makeBg(STG[G.stage]);p1=new F(CH[sel[0]],0);p2=new F(CH[sel[1]],1);smApply(m);hzApply();muApply();aiApply();G.round=1;G.si=0;G.pause=false;document.getElementById('menu').style.display='none';startRound();G.vs=m===3?0:110;G.vm=110;if(G.vs)sfx('vs');if(m!==3)TUT=null;TR.rec=0;TR.tr=-1;TR.ok=0;FD=null;tbar()}
 function toMenu(){if(NET.room){netQuit(1);return}if(NET.watch&&typeof watchStop==='function')watchStop();rpSaveLast();RP=null;REC=null;arcEnd();chainEnd();G.phase='menu';G.mt=0;TUT=null;lab();tbar();rpLastBtn();document.getElementById('menu').style.display='flex'}
 function endRound(why){
  const ko1=p1.st==='ko',ko2=p2.st==='ko';let w=null;
@@ -1333,7 +1344,7 @@ function hud(){
   {const gw=w*.45,gx=k?x+w-gw:x,gy=y+h+2,gr=Math.max(0,f.gd??100)/100;ctx.fillStyle='#000a';ctx.fillRect(gx,gy,gw,5);ctx.fillStyle=gr<.35?(fl?'#ff6b6b':'#ff9f9f'):'#7ec8ff';ctx.fillRect(k?gx+gw-gw*gr:gx,gy,gw*gr,5)}
   {const bx2=k?mx-16:mx+mw+16,by2=my+5;ctx.beginPath();ctx.arc(bx2,by2,9,0,6.3);ctx.fillStyle=f.bu?'#ff4d6d':'#333a';ctx.fill();ctx.strokeStyle=f.bu?'#ffe14d':'#555';ctx.lineWidth=2;ctx.stroke();ctx.fillStyle=f.bu?'#fff':'#777';ctx.font='bold 11px '+FONT;ctx.textAlign='center';ctx.fillText('爆',bx2,by2+4);ctx.textAlign=k?'right':'left';dashIcon(k?bx2-22:bx2+22,by2,f)}
   ctx.font='bold 18px '+FONT;ctx.textAlign=k?'right':'left';ctx.fillStyle='#fff';
-  ctx.fillText((k?(G.mode===1?'電腦 ':G.mode===3?'木樁 ':'P2 '):'P1 ')+f.ch.n+(G.mode===4&&k===NET.slot?'（你）':'')+(f.sm?'　簡易':''),k?x+w:x,24);
+  ctx.fillText((k?(G.mode===1?'電腦 ':G.mode===3?'木樁 ':'P2 '):'P1 ')+f.ch.n+(G.mode===4&&k===NET.slot?'（你）':'')+(f.sm?'　簡易':'')+(k&&G.mode===1&&!RP&&f.ai.pt?'　'+PTN[f.ai.pt]:''),k?x+w:x,24);
   for(let j=0;j<2;j++){ctx.fillStyle=j<f.wins?'#ffe14d':'#fff3';ctx.beginPath();ctx.arc(k?x+w-8-j*20:x+8+j*20,my+30,7,0,6.3);ctx.fill()}
   const o=k?p1:p2;
   if(o.combo>=2){ctx.font='900 34px '+FONT;ctx.fillStyle='#ffe14d';ctx.strokeStyle='#000';ctx.lineWidth=5;const t=o.combo+' HIT! '+Math.round(o.cd);ctx.strokeText(t,k?x+w:x,150);ctx.fillText(t,k?x+w:x,150)}
@@ -2357,7 +2368,7 @@ function artHud(){
   ctx.restore();
   // 文字（不鏡像）
   const tx=k?W-(XL+14):XL+14;ctx.save();ctx.textAlign=k?'right':'left';ctx.font='italic 900 19px '+FONT;ctx.lineWidth=5;ctx.strokeStyle='#000';ctx.lineJoin='round';
-  const nm=(k?(G.mode===1?'CPU ':G.mode===3?'木樁 ':'P2 '):'P1 ')+f.ch.n+(G.mode===4&&k===NET.slot?'（你）':'')+(f.sm?'　簡易':'');ctx.strokeText(nm,tx,Y+BH+26);ctx.fillStyle='#fff';ctx.fillText(nm,tx,Y+BH+26);
+  const nm=(k?(G.mode===1?'CPU ':G.mode===3?'木樁 ':'P2 '):'P1 ')+f.ch.n+(G.mode===4&&k===NET.slot?'（你）':'')+(f.sm?'　簡易':'')+(k&&G.mode===1&&!RP&&f.ai.pt?'　'+PTN[f.ai.pt]:'');ctx.strokeText(nm,tx,Y+BH+26);ctx.fillStyle='#fff';ctx.fillText(nm,tx,Y+BH+26);
   {const bx2=k?W-(XR-BW*.5-18):XR-BW*.5-18,by2=Y+BH+9;ctx.beginPath();ctx.arc(bx2,by2,8,0,6.3);ctx.fillStyle=f.bu?'#ff4d6d':'#333a';ctx.fill();ctx.strokeStyle=f.bu?'#ffe14d':'#555';ctx.lineWidth=2;ctx.stroke();ctx.fillStyle=f.bu?'#fff':'#777';ctx.font='bold 10px '+FONT;ctx.textAlign='center';ctx.fillText('爆',bx2,by2+4);dashIcon(k?bx2+22:bx2-22,by2,f)}
   // 連段數
   const o=k?p1:p2;if(o.combo>=2){const cx=k?W-40:40,el=Math.min(1,(G.frame%1000)),sz=46;ctx.save();ctx.translate(cx,180);ctx.transform(1,0,-.2,1,0,0);ctx.textAlign=k?'right':'left';ctx.font='italic 900 '+sz+'px '+FONT;ctx.lineWidth=8;ctx.strokeStyle='#000';ctx.strokeText(o.combo,0,0);ctx.fillStyle=vgrad(-sz,sz,['#fff6a8','#ffb020','#e04010']);ctx.fillText(o.combo,0,0);
@@ -2521,6 +2532,18 @@ function dailyEnd(){if(DAILY){G.diff=DAILY.d0;G.stage=DAILY.g0;DAILY=null}}
 function dailyCard(){const b=$('b10');if(!b)return;const s=dailySpec(today()),best=dailyBest(s.day);b.querySelector('small').textContent=CH[s.me].n+' vs 強化版'+CH[s.op].n+'・'+muNames(s.mu)+(best?'　今日最佳 '+best:'')}
 $('b10').onclick=()=>{snd(500,.1);dailyStart()};
 muUI();dailyCard();
+// ===== 電腦性格 =====
+// 猛攻型一直逼近、防守反擊型等對手出招再反擊、遠攻型保持距離放飛行道具、投技型貼身就抓
+const PTN={rush:'猛攻型',counter:'防守反擊型',zone:'遠攻型',grab:'投技型'};
+// 角色預設性格（烈 鋼 影 雷 岩 霜 嵐 月 拳 蠍 蝶 機 刃 巫 獸 羽）
+const CHPT=['zone','rush','rush','zone','grab','zone','rush','counter','rush','counter','counter','zone','counter','zone','grab','zone'];
+let AIP='def';try{const v=localStorage.getItem('fd_aip');if(v&&(v==='def'||v==='rand'||PTN[v]))AIP=v}catch(e){}
+function aiPers(f){const c=CH.indexOf(f.ch);if(AIP==='rand'){const k=Object.keys(PTN);return k[Math.floor(Math.random()*k.length)]}return AIP==='def'?CHPT[c]||'rush':AIP}
+function aiApply(){if(!p1)return;p1.ai.pt=aiPers(p1);p2.ai.pt=aiPers(p2)}
+function aipUI(){const el=$('aipr');if(!el)return;const L=[['def','角色預設'],...Object.entries(PTN),['rand','🎲 隨機']];
+ el.innerHTML=L.map(([k,n])=>'<button data-k="'+k+'" class="'+(AIP===k?'on':'')+'">'+n+'</button>').join('');
+ el.querySelectorAll('button').forEach(b=>b.onclick=()=>{AIP=b.dataset.k;try{localStorage.setItem('fd_aip',AIP)}catch(e){}snd(600,.05);aipUI()})}
+aipUI();
 // ===== 輸入集中：每次 step 取得雙方輸入（訓練木樁、錄製、重播都走這裡）=====
 let RP=null,REC=null;
 function inputs(hs){
@@ -2773,6 +2796,7 @@ function helpRender(){
 <b>簡易操作：</b>設定裡可讓 P1／P2 各自切換。命中後不按方向、連按任一攻擊鍵會自動接 輕→輕腳→重拳→必殺（必殺要 50 氣），傷害 ×0.85。<br>
 <b>場景機關：</b>選單「機關」開啟後：夜城屋頂定時颳強風，把兩人往同一邊推（畫面會先預告方向）；黃昏港的木箱牆第一次被撞（血量 60% 以下）會碎裂、多受傷害；極光雪原被擊退會滑更遠；火山口定時噴發，地面發光的位置要閃開；竹林道場定時鐘響，雙方各加 15 氣。<br>
 <b>突變規則：</b>選單「規則」可複選：低重力、狂熱（氣快速回復、衝刺無冷卻）、劇毒擂台、玻璃大砲（傷害 ×1.7）、吸血擂台、持久戰（傷害 ×0.6、99 秒）；選「🎲 隨機」每場抽 1～2 條。連線時以房主的設定為準。<br>
+<b>電腦性格：</b>選單「電腦」可選：角色預設、猛攻型（一直逼近）、防守反擊型（等你出招再反擊）、遠攻型（保持距離、放飛行道具）、投技型（貼身就抓）或隨機。對戰時電腦名字旁會標出性格。<br>
 <b>每日挑戰：</b>每天一題固定的對戰（指定角色、場景、規則與強化版對手），一回合決勝，依剩餘體力與時間計分，保存當天最佳成績。<br>
 <b>訓練模式：</b>畫面下方的幀數條（綠＝起手、紅＝攻擊判定、藍＝收招、黃＝硬直，白框＝無敵）與左右的輸入紀錄。`,
   '角色':CH.map((c,i)=>`<b style="color:${c.col}">${c.n}・${c.ds}</b>（體力 ${c.hp}）　被動：${CHM[i].p}<br>　指令技：`+cmdList(c).map(x=>x[0]+' '+x[1]).join('　')+'<br>　必殺技：'+spList(i).map(x=>x[0]+' '+x[1]).join('　')).join('<br>'),

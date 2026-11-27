@@ -15,7 +15,8 @@ const N = +process.argv[2] || 20, DIFF = process.argv[3] === undefined ? 2 : +pr
   // PATCH 環境變數：先在頁面執行一段程式再模擬，用來試調數值，例如 PATCH='CH[4].hp=116'
   if (process.env.PATCH) await pg.evaluate(process.env.PATCH);
   const r = await pg.evaluate(([N, DIFF]) => {
-    const H0 = human; NOFX = 1; mute = true;
+    // 用無性格的中立打法比較角色本身（遊戲裡的電腦另有性格）
+    const H0 = human; NOFX = 1; mute = true; AIP = 'bal';
     human = (k) => (k === K1 ? aiInput(p1, p2) : NI);
     const n = CH.length, win = [], len = [], perfect = [];
     for (let i = 0; i < n; i++) { win.push(Array(n).fill(0)); len.push(Array(n).fill(0)) }
