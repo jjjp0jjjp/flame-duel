@@ -157,6 +157,27 @@ const ok = (name, cond, detail) => {
     out.replay = hash() === h && G.phase === 'over' && G.hz === 1 && G.mu === 24 && p1.sty === 1 && p2.sty === 1; RP = null; HZ = 0; G.stage = 0; MU = MU0; SST = SST0; toMenu();
     return out;
   });
+  // ---- 爬塔：贏了選強化卡、強化效果套用、輸了保存最高層數、帶強化的一層可以正確重播
+  const tower = await pg.evaluate(async () => {
+    localStorage.removeItem('fd_tower'); sel[0] = 5; const out = {};
+    const ko = (f) => { G.vs = 0; while (G.phase !== 'over') { if (G.phase === 'fight') f.st = 'ko'; step() } };
+    towerStart(); ko(p2); towerNext(); const cards = [...document.querySelectorAll('#tpick [data-id]')].map((b) => b.dataset.id);
+    // 指定選「力量」與「不屈」測效果
+    TOWER.pick.remove(); TOWER.pick = null; TOWER.perks.push('atk', 'bu'); TOWER.floor++; TOWER.hp = p1.hp; towerFight();
+    out.pick = cards.length === 3 && new Set(cards).size === 3 && TOWER.floor === 2 && Math.abs(p1.sdm - 1.1 * (SST[0] ? STY[5].dm || 1 : 1)) < 1e-9 && p1.bu === 2;
+    // 帶強化打一段隨機輸入，重播結果相同
+    const KS = ['KeyA', 'KeyD', 'KeyW', 'KeyS', 'KeyU', 'KeyI', 'KeyJ', 'KeyK', 'KeyO', 'KeyL']; G.vs = 0;
+    for (let i = 0; i < 1500 && G.phase !== 'over'; i++) { for (const k of KS) { if (Math.random() < 0.08) { keys[k] = keys[k] ? 0 : 1; if (keys[k]) pend[k] = 1 } } step() }
+    for (const k in keys) keys[k] = 0;
+    const hash = () => { const o = JSON.parse(snapAll()); delete o.v1; delete o.v2; delete o.a.ai; delete o.b.ai; return rbFnv(canon(o)) };
+    const si = G.si, h = hash(), T = TOWER, o = await codeDec(await codeEnc(rpPack())); TOWER = null; startReplay(o); G.vs = 0; while (G.si < si) step();
+    out.replay = hash() === h && p1.bu >= 1 && JSON.stringify(o.pk[0]) === '["atk","bu"]'; RP = null; TOWER = T;
+    towerFight(); ko(p1); towerNext(); out.lose = TOWER.done === 1 && towerBest(5) === 1; toMenu(); out.clean = !TOWER && !document.getElementById('tpick');
+    return out;
+  });
+  ok('爬塔：贏了出現 3 張不同的強化卡，選了之後效果套用', tower.pick);
+  ok('爬塔：帶強化的對戰可以正確重播', tower.replay);
+  ok('爬塔：輸了保存最高層數、回選單清乾淨', tower.lose && tower.clean);
   ok('隊伍戰：輪番上陣、輸的換人、最後判定勝負', chain.team);
   ok('生存：勝場累積、難度上升、保存最佳紀錄', chain.surv);
   ok('連戰結束後還原難度與回合設定', chain.restore);

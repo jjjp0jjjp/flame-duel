@@ -148,7 +148,7 @@ addEventListener('keydown',e=>{if(KCAP){e.preventDefault();kcapDone(e.code);retu
  if(G.vs>0&&G.mode!==4&&(e.code==='Enter'||e.code==='Space'))G.vs=1;
  if(e.code==='Enter'&&RP&&RP.end){toMenu();return}
  if(e.code==='KeyR'&&G.phase==='over'&&REC&&!bound(e.code))rpCopy();
- if(e.code==='Escape'&&G.phase==='over'&&(ARC||TEAM||SURV)){toMenu();return}
+ if(e.code==='Escape'&&G.phase==='over'&&(ARC||TEAM||SURV||TOWER||DAILY)){toMenu();return}
  if(G.phase==='over'&&(e.code==='ArrowLeft'||e.code==='KeyA'||e.code==='ArrowRight'||e.code==='KeyD')&&netPick(e.code==='ArrowLeft'||e.code==='KeyA'?-1:1))return;
  if(e.code==='Enter'&&G.phase==='over'&&!NET.watch){if(G.mode===4&&NET.on)netRematch();else chainNext()}
  if(e.code==='KeyQ'&&G.pause&&!bound(e.code)){G.pause=false;toMenu()}

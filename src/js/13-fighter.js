@@ -3,7 +3,7 @@ const DCD=40,DCDC=75;
 function passThru(s,t){const sg=t.x>=s.x?1:-1;s.x=Math.max(40,Math.min(W-40,t.x+sg*62));s.vx=0}
 class F{
 constructor(ch,side){this.ch=ch;this.side=side;this.wins=0;this.ai={t:0,mv:0,blk:0,act:null};this.reset()}
-reset(){this.x=this.side?W/2+170:W/2-170;this.y=GY;this.vx=0;this.vy=0;this.dir=this.side?-1:1;this.hp=this.ch.hp*(this.hm||1);this.lag=this.hp;this.mt=0;this.st='idle';this.t=0;this.atk=null;this.hit=false;this.stun=0;this.combo=0;this.cd=0;this.walk=0;this.flash=0;this.kt=0;this.kd=0;this.dt=0;this.dd=0;this.dcd=0;this.dcm=1;this.inv=0;this.buf=null;this.cl=[];this.db=null;this.jb=0;this.jh=0;this.ph=null;this.bu=1;this.gd=100;this.gbt=99}
+reset(){this.x=this.side?W/2+170:W/2-170;this.y=GY;this.vx=0;this.vy=0;this.dir=this.side?-1:1;this.hp=this.ch.hp*(this.hm||1);this.lag=this.hp;this.mt=this.pmt||0;this.st='idle';this.t=0;this.atk=null;this.hit=false;this.stun=0;this.combo=0;this.cd=0;this.walk=0;this.flash=0;this.kt=0;this.kd=0;this.dt=0;this.dd=0;this.dcd=0;this.dcm=1;this.inv=0;this.buf=null;this.cl=[];this.db=null;this.jb=0;this.jh=0;this.ph=null;this.bu=this.pbu||1;this.gd=100;this.gbt=99}
 pick(i,g){
  const fw=this.dir>0?i.r:i.l,bk=this.dir>0?i.l:i.r,dn=i.d;
  if(this.sm&&g&&this.st==='atk'&&this.atk&&!dn&&!fw&&!bk&&(i.lp||i.hp||i.lk||i.hk)){const nx=SMC[this.atk.key];if(nx&&(nx!=='sp'||this.mt>=50))return nx}
@@ -17,7 +17,7 @@ cc(a,m){if(this.cl.includes(m))return false;if(a.cn===4)return m==='ex';if(a.cn=
  rcIn(i){const r=this.r3||(this.r3=[0,0,0]);['lp','hp','lk'].forEach((k,j)=>{if(i[k])r[j]=4;else if(r[j]>0)r[j]--});if(r[0]&&r[1]&&r[2]&&(i.lp||i.hp||i.lk)){r[0]=r[1]=r[2]=0;return true}return false}
  setBuf(m){const sp=x=>x==='sp'||x==='sp2'||x==='sp3'||x==='sp4'||x==='ex'||x==='asp'||x==='upper';if(this.buf&&sp(this.buf.m)&&!sp(m)&&this.buf.t>=7)return;this.buf={m,t:10}}
  // 衝刺冷卻（幀，從衝刺開始算）：一般衝刺 DCD，攻擊命中後的衝刺取消 DCDC
- dashGo(s,cd){this.dcd=this.dcm=G.mu&2?0:(cd||DCD);this.dcm=this.dcm||1;gho(this,colOf(this));this.st='dash';this.dt=13;this.dd=s;this.inv=s!==this.dir?7:0;this.vx=s*8.5;spark(this.x,GY-4,'#b9a8d8',6,1);snd(180,.1,'sine',.04,500)}
+ dashGo(s,cd){this.dcd=this.dcm=G.mu&2?0:Math.round((cd||DCD)*(this.pdc||1));this.dcm=this.dcm||1;gho(this,colOf(this));this.st='dash';this.dt=13;this.dd=s;this.inv=s!==this.dir?7:0;this.vx=s*8.5;spark(this.x,GY-4,'#b9a8d8',6,1);snd(180,.1,'sine',.04,500)}
 start(m,nf){
  if(!nf&&m==='ex'&&this.mt<100&&this.mt>=50)m='sp';
  const ov=this.ch.mv&&this.ch.mv[m],so=this.sty&&styOf(this),a=Object.assign({key:m},ov&&ov.rep?{}:(MV[m]||this.ch[m]),ov,so&&so.mv&&so.mv[m]),air=this.y<GY-2;
@@ -37,7 +37,7 @@ update(i,o){
  {const fwN=this.dir>0?i.r:i.l;if(fwN&&!this.pfw&&g&&(this.st==='idle'||this.st==='walk'||(this.st==='block'&&this.stun===0)))this.pf=7;else if(this.pf>0)this.pf--;this.pfw=fwN}
  if(this.kd&&!g&&(i.lp||i.hp||i.lk||i.hk))this.tb=10;else if(this.tb>0)this.tb--;
  if(this.st==='block')this.gbt=0;else if(++this.gbt>60&&this.gd<100)this.gd=Math.min(100,this.gd+.25);
- if(this.bu&&this.st==='hit'&&i.th&&i.sp){this.bu=0;this.stun=0;this.kd=0;this.st='idle';this.vy=Math.min(this.vy,0);this.buf=null;this.start('burst');this.buf=null;if(!NOFX)burstFx(this)}
+ if(this.bu&&this.st==='hit'&&i.th&&i.sp){this.bu--;this.stun=0;this.kd=0;this.st='idle';this.vy=Math.min(this.vy,0);this.buf=null;this.start('burst');this.buf=null;if(!NOFX)burstFx(this)}
  let rc=0;{const rq=this.rcIn(i)||this.rcq;this.rcq=0;if(rq&&this.st==='atk'&&this.atk&&this.atk.key!=='burst'&&!this.atk.throw&&this.mt>=50){rc=1;const hit=this.hit;this.mt-=50;this.atk=null;this.st='idle';this.t=0;this.cl=[];this.buf=null;this.hit=false;this.hc=0;this.vx=g?0:this.vx*.3;if(!g)this.vy=Math.min(this.vy,-2);if(hit&&o.st==='hit')o.stun+=10;rcFx(this)}}
  if(this.st!=='ko'&&!rc){const m=this.pick(i,g);if(m)this.setBuf(m);else if(this.buf&&!(this.st==='down'&&this.dt<=14)&&--this.buf.t<=0)this.buf=null}
  if(this.jh){if(g&&this.vy>=0)this.jh=0;else if(!i.u&&this.vy<-6){this.vy*=.6;this.jh=0}}
@@ -123,7 +123,7 @@ getHit(src,a,px){
   this.hp=Math.max(1,this.hp-a.d*(a.ex?.2:.1));this.stun=a.gb?28:9;this.vx=sgn*a.kb*.9*(this.ch.kbr||1);this.mt=Math.min(100,this.mt+3);
   spark(this.x+this.dir*24,this.y-85,'#7ec8ff',8);if(!NOFX)P({t:'sh',x:this.x+this.dir*26,y:this.y-70,dir:this.dir,c:'#7ec8ff',l:12,g:0,dr:1});sfx('block');G.hitstop=Math.max(G.hitstop,3);return true}
  const ct=this.st==='atk'&&this.atk&&this.t<=this.atk.su&&!a.throw,pun=this.st==='atk'&&this.atk&&this.t>this.atk.su+this.atk.ac&&!a.throw,dm=a.d*Math.max(.4,1-.12*this.combo)*(ct?1.3:pun?1.2:1)*(src.pw>0?1.25:1)*(a.mk?(this.ch.pr||1):1)*(src.wk>0?.75:1)*(src.sm?.85:1)*(src.sdm||1)*(G.mu&8?1.7:1)*(G.mu&32?.6:1)*(src.ch.rg&&src.hp<src.ch.hp*(src.hm||1)*.35?1.3:1),last=!a.hits||(src.hc||0)+1>=a.hits;if(pun&&!NOFX)pp({x:this.x,y:this.y-150,vx:0,vy:-.6,l:55,m:55,txt:'確反！',c:'#ff4d6d',text:1,big:1});if(ct){pp({x:this.x,y:this.y-150,vx:0,vy:-.6,l:55,m:55,txt:'COUNTER!',c:'#ff7a3d',text:1,big:1});sfx('cancel')}
- this.jh=0;this.hp-=dm;if(G.mu&16&&src.hp>0)src.hp=Math.min(src.ch.hp*(src.hm||1),src.hp+dm*.35);this.cd+=dm;this.combo++;if(G.mode===3&&this===p2&&src===p1)trHit(a,this.combo);this.stun=Math.max(10,a.st-Math.min(8,Math.max(0,this.combo-4)*2))+(pun?4:0);this.st='hit';this.atk=null;this.flash=5;if(a.rev)this.x=Math.max(50,Math.min(W-50,2*px-this.x));this.vx=(this.x>=px?1:-1)*a.kb*(this.ch.kbr||1);if(a.su&&a.kb>0&&(this.x<=42||this.x>=W-42))src.vx=-sgn*Math.min(7,a.kb*.7);
+ this.jh=0;this.hp-=dm;if(src.pls&&src.hp>0)src.hp=Math.min(src.ch.hp*(src.hm||1),src.hp+dm*src.pls);if(this.pth&&src.hp>1)src.hp=Math.max(1,src.hp-dm*this.pth);if(G.mu&16&&src.hp>0)src.hp=Math.min(src.ch.hp*(src.hm||1),src.hp+dm*.35);this.cd+=dm;this.combo++;if(G.mode===3&&this===p2&&src===p1)trHit(a,this.combo);this.stun=Math.max(10,a.st-Math.min(8,Math.max(0,this.combo-4)*2))+(pun?4:0);this.st='hit';this.atk=null;this.flash=5;if(a.rev)this.x=Math.max(50,Math.min(W-50,2*px-this.x));this.vx=(this.x>=px?1:-1)*a.kb*(this.ch.kbr||1);if(a.su&&a.kb>0&&(this.x<=42||this.x>=W-42))src.vx=-sgn*Math.min(7,a.kb*.7);
  if(a.psn)this.pz=Math.max(this.pz||0,a.psn);
  if(a.wk)this.wk=Math.max(this.wk||0,a.wk);if(a.sl)this.sl=Math.max(this.sl||0,a.sl);if(a.drain)this.mt=Math.max(0,this.mt-a.drain);
  {const ls=(a.ls||0)+(src.ch.ls||0);if(ls)src.hp=Math.min(src.ch.hp*(src.hm||1),src.hp+dm*ls)}
