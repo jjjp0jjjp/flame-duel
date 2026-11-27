@@ -1,6 +1,7 @@
 // 平衡模擬：電腦對電腦打大量對局，輸出各角色組合的勝率
 //   node tools/balance.cjs [每組場數=20] [難度 0-2=2]
 //   PATCH='CH[4].hp=116' node tools/balance.cjs 40   先套用試調數值再模擬
+//   ROWSTY=1 node tools/balance.cjs 40                每列角色改用流派、對手用標準（看流派相對標準的強弱）
 // 注意：結果反映的是「這個 AI 用這個角色」的強弱，AI 不會每個角色的招都用得一樣好，
 // 只適合抓出明顯失衡（例如某角色對所有人都 > 60%），不能取代真人對戰的感受。
 const { chromium } = require('playwright');
@@ -14,7 +15,7 @@ const N = +process.argv[2] || 20, DIFF = process.argv[3] === undefined ? 2 : +pr
   await pg.waitForTimeout(200);
   // PATCH 環境變數：先在頁面執行一段程式再模擬，用來試調數值，例如 PATCH='CH[4].hp=116'
   if (process.env.PATCH) await pg.evaluate(process.env.PATCH);
-  const r = await pg.evaluate(([N, DIFF]) => {
+  const r = await pg.evaluate(([N, DIFF, ROWSTY]) => {
     // 用無性格的中立打法比較角色本身（遊戲裡的電腦另有性格）
     const H0 = human; NOFX = 1; mute = true; AIP = 'bal';
     human = (k) => (k === K1 ? aiInput(p1, p2) : NI);
@@ -24,7 +25,7 @@ const N = +process.argv[2] || 20, DIFF = process.argv[3] === undefined ? 2 : +pr
       for (let m = 0; m < N; m++) {
         // 左右各打一半，抵銷站位差異
         const sw = m % 2, a = sw ? j : i, c = sw ? i : j;
-        sel[0] = a; sel[1] = c; G.diff = DIFF; startGame(1); G.vs = 0;
+        sel[0] = a; sel[1] = c; G.diff = DIFF; SST = [0, 0]; startGame(1); G.vs = 0; if (ROWSTY) stySet(sw ? p2 : p1, 1);
         let s = 0; while (G.phase !== 'over' && s < 40000) { step(); s++ }
         const w = p1.wins > p2.wins ? 0 : p2.wins > p1.wins ? 1 : -1;
         if (w >= 0) win[i][j] += (w === 0) !== !!sw ? 1 : 0; else win[i][j] += 0.5;
@@ -34,7 +35,7 @@ const N = +process.argv[2] || 20, DIFF = process.argv[3] === undefined ? 2 : +pr
     }
     human = H0; NOFX = 0;
     return { names: CH.map((c) => c.n), win, len };
-  }, [N, DIFF]);
+  }, [N, DIFF, !!process.env.ROWSTY]);
   const pct = (x) => (100 * x / N).toFixed(0).padStart(4) + '%';
   console.log(`每組 ${N} 場、難度 ${DIFF}。列＝角色，欄＝對手，數字＝列角色勝率`);
   console.log('     ' + r.names.map((s) => '  ' + s + ' ').join(''));

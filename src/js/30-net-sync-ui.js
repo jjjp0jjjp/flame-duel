@@ -1,28 +1,28 @@
 function netHello(){
  const R=NET.room;if(!R||NET.started&&NET.slot===1)return;
- R.emit('hello',{s:NET.slot,c:sel[0],g:G.stage,sm:SIMPLE[0]}).catch(emitErr);
+ R.emit('hello',{s:NET.slot,c:sel[0],g:G.stage,sm:SIMPLE[0],st:SST[0]}).catch(emitErr);
  if(NET.slot===0&&NET.remote&&!NET.started){
   if(NET.pings.length<5){R.emit('png',{t:performance.now()}).catch(emitErr);return}
   if(!NET.sid){const a=[...NET.pings].sort((x,y)=>x-y),med=a[a.length>>1];NET.Dsel=med<=60?1:med<=120?2:med<=200?3:4;NET.sid=Math.random().toString(36).slice(2,8)}
-  R.emit('start',{sid:NET.sid,c0:sel[0],c1:NET.remote.c,g:G.stage,D:NET.Dsel,m:1,s:[SIMPLE[0],NET.remote.sm],hz:HZ,mu:NET.mup!=null?NET.mup:(NET.mup=muPick())}).catch(emitErr);
+  R.emit('start',{sid:NET.sid,c0:sel[0],c1:NET.remote.c,g:G.stage,D:NET.Dsel,m:1,s:[SIMPLE[0],NET.remote.sm],hz:HZ,mu:NET.mup!=null?NET.mup:(NET.mup=muPick()),st:[SST[0],NET.remote.st]}).catch(emitErr);
  }
 }
 function onPog(d){if(NET.slot===0&&!NET.started&&d&&typeof d.t==='number'){const r=performance.now()-d.t;if(r>0&&r<5000&&NET.pings.length<5)NET.pings.push(r)}}
 function onHello(d){
  if(!d||typeof d.s!=='number')return;
  if(d.s===NET.slot){setNs('這個房間已經有人佔了同樣的位置，請換一個房間代碼。');return}
- NET.remote={c:Math.max(0,Math.min(CH.length-1,d.c|0)),sm:d.sm?1:0};
+ NET.remote={c:Math.max(0,Math.min(CH.length-1,d.c|0)),sm:d.sm?1:0,st:d.st?1:0};
  if(NET.slot===0&&!NET.started)setNs('對手已加入，測量連線品質中…');
 }
 function onStart(d){
  if(NET.slot!==1||!d||typeof d.sid!=='string')return;
  const c0=Math.max(0,Math.min(CH.length-1,d.c0|0)),c1=Math.max(0,Math.min(CH.length-1,d.c1|0)),g=Math.max(0,Math.min(STG.length-1,d.g|0));
- if(!NET.started){NET.sid=d.sid;beginNet(c0,c1,g,d.D,1,d.s,d.hz,d.mu)}
+ if(!NET.started){NET.sid=d.sid;beginNet(c0,c1,g,d.D,1,d.s,d.hz,d.mu,d.st)}
  if(d.sid===NET.sid&&NET.room)NET.room.emit('ready',{sid:d.sid}).catch(emitErr);
 }
 function onReady(d){
  if(NET.slot!==0||NET.started||!d||d.sid!==NET.sid||!NET.remote)return;
- beginNet(sel[0],NET.remote.c,G.stage,NET.Dsel,1,[SIMPLE[0],NET.remote.sm],HZ,NET.mup!=null?NET.mup:muPick());
+ beginNet(sel[0],NET.remote.c,G.stage,NET.Dsel,1,[SIMPLE[0],NET.remote.sm],HZ,NET.mup!=null?NET.mup:muPick(),[SST[0],NET.remote.st]);
 }
 // ================= 連線對戰(回滾式同步) =================
 const RB_MAX=8;
@@ -34,17 +34,17 @@ function snapAll(){return JSON.stringify({g:[G.frame,G.hitstop,G.phase,G.round,G
 function loadAll(s){const o=JSON.parse(s),g=o.g;G.frame=g[0];G.hitstop=g[1];G.phase=g[2];G.round=g[3];G.time=g[4];G.tf=g[5];G.pt=g[6];G.msg=g[7];G.mt=g[8];G.mm=g[9];G.vs=g[10];G.win=g[11];G.si=g[12]|0;G.wbk=g[13]|0;
  restF(p1,o.a);restF(p2,o.b);projs=o.pr.map(p=>{p.own=p.own?p2:p1;return p});
  for(const k in pv1)delete pv1[k];Object.assign(pv1,o.v1);for(const k in pv2)delete pv2[k];Object.assign(pv2,o.v2)}
-function beginNet(c0,c1,g,D,m,sm,hz,mu){
+function beginNet(c0,c1,g,D,m,sm,hz,mu,st){
  clearInterval(NET.hb);
  const sv=[sel[0],sel[1],G.stage];
- NET.DL=Math.max(1,Math.min(4,D|0))||2;NET.m=m||1;NET.c=[c0,c1];NET.g=g;NET.pk=NET.slot?c1:c0;NET.rpk=NET.slot?c0:c1;NET.sm=Array.isArray(sm)?[sm[0]?1:0,sm[1]?1:0]:[0,0];NET.hz=hz?1:0;NET.mu=(mu|0)&63;NET.mup=null;
+ NET.DL=Math.max(1,Math.min(4,D|0))||2;NET.m=m||1;NET.c=[c0,c1];NET.g=g;NET.pk=NET.slot?c1:c0;NET.rpk=NET.slot?c0:c1;NET.sm=Array.isArray(sm)?[sm[0]?1:0,sm[1]?1:0]:[0,0];NET.hz=hz?1:0;NET.mu=(mu|0)&63;NET.mup=null;NET.st=Array.isArray(st)?[st[0]?1:0,st[1]?1:0]:[0,0];
  NET.started=true;NET.on=true;NET.tick=0;NET.loc={};NET.rem={};NET.used={};NET.snaps={};NET.rbFrom=null;NET.rbCount=0;NET.rbMax=0;
  NET.sendT={};NET.hash={};NET.rh={};NET.hl=null;NET.nextHash=29;NET.desync=false;NET.syncF=0;NET.dsAt=0;NET.resyncs=0;NET.rsT=0;NET.lastSrq=0;NET.stallT=0;NET.rtt=NET.rtt||0;NET.gone=false;
  NET.remHigh=NET.DL-1;NET.remAck=NET.DL-1;NET.remAd=0;NET.skip=0;NET.inp=[0,0];NET.reL=0;NET.reR=0;NET.gotM=0;NET.lastRe=0;NET.rst=null;
  for(let i=0;i<NET.DL;i++){NET.loc[i]=0;NET.rem[i]=0}
  sel[0]=c0;sel[1]=c1;G.stage=g;
  $('net').style.display='none';
- G.smo=NET.sm;G.hzo=NET.hz;G.muo=NET.mu;startGame(4);
+ G.smo=NET.sm;G.hzo=NET.hz;G.muo=NET.mu;G.sto=NET.st;startGame(4);
  sel[0]=sv[0];sel[1]=sv[1];
 }
 function netSend(){
@@ -113,8 +113,8 @@ function netRematch(){if(!NET.on||G.phase!=='over'||NET.reL)return;NET.reL=1;NET
 function onRem(d){if(!NET.on||!d||d.m!==NET.m||G.phase!=='over')return;if(typeof d.c==='number')NET.rpk=Math.max(0,Math.min(CH.length-1,d.c|0));NET.reR=1;netCheckRe()}
 // 再戰前換角：結算畫面按 ←／→（手機點畫面左右兩側）挑下一場的角色，送出再戰邀請後就鎖定
 function netPick(s){if(G.mode!==4||!NET.on||G.phase!=='over'||NET.reL)return false;NET.pk=(NET.pk+s+CH.length)%CH.length;snd(500+NET.pk*20,.05);return true}
-function netCheckRe(){if(NET.slot!==0||!NET.reL||!NET.reR)return;const m=NET.m+1,msg={m,c0:NET.pk,c1:NET.rpk,g:NET.g,D:NET.DL,s:NET.sm,hz:NET.hz,mu:MU.r?muRand():NET.mu};beginNet(msg.c0,msg.c1,msg.g,msg.D,m,msg.s,msg.hz,msg.mu);NET.rst=msg;NET.gotM=0;NET.lastRe=0}
-function onRst(d){if(NET.slot!==1||!d||typeof d.m!=='number'||d.m<=(NET.m||0))return;beginNet(Math.max(0,Math.min(CH.length-1,d.c0|0)),Math.max(0,Math.min(CH.length-1,d.c1|0)),Math.max(0,Math.min(STG.length-1,d.g|0)),d.D,d.m,d.s,d.hz,d.mu)}
+function netCheckRe(){if(NET.slot!==0||!NET.reL||!NET.reR)return;const m=NET.m+1,msg={m,c0:NET.pk,c1:NET.rpk,g:NET.g,D:NET.DL,s:NET.sm,hz:NET.hz,mu:MU.r?muRand():NET.mu,st:NET.st};beginNet(msg.c0,msg.c1,msg.g,msg.D,m,msg.s,msg.hz,msg.mu,msg.st);NET.rst=msg;NET.gotM=0;NET.lastRe=0}
+function onRst(d){if(NET.slot!==1||!d||typeof d.m!=='number'||d.m<=(NET.m||0))return;beginNet(Math.max(0,Math.min(CH.length-1,d.c0|0)),Math.max(0,Math.min(CH.length-1,d.c1|0)),Math.max(0,Math.min(STG.length-1,d.g|0)),d.D,d.m,d.s,d.hz,d.mu,d.st)}
 function netLeave(say){
  NET.on=false;clearInterval(NET.hb);
  NET.unsub.forEach(u=>{try{u()}catch(e){}});NET.unsub=[];

@@ -149,12 +149,12 @@ const ok = (name, cond, detail) => {
     // 延續體力的一回合對戰，重播後結果相同
     const KS = ['KeyA', 'KeyD', 'KeyW', 'KeyS', 'KeyU', 'KeyI', 'KeyJ', 'KeyK', 'KeyO', 'KeyL'];
     const hash = () => { const o = JSON.parse(snapAll()); delete o.v1; delete o.v2; delete o.a.ai; delete o.b.ai; return rbFnv(canon(o)) };
-    HZ = 1; G.stage = 3; const MU0 = MU; MU = { m: 8 | 16, r: 0 };
+    HZ = 1; G.stage = 3; const MU0 = MU; MU = { m: 8 | 16, r: 0 }; const SST0 = SST; SST = [1, 1];
     chainStart(2, 7, 1, 40, 70); G.vs = 0;
     for (let i = 0; i < 20000 && G.phase !== 'over'; i++) { for (const k of KS) { if (Math.random() < 0.06) { keys[k] = keys[k] ? 0 : 1; if (keys[k]) pend[k] = 1 } } step() }
     for (const k in keys) keys[k] = 0;
     const si = G.si, h = hash(), o = await codeDec(await codeEnc(rpPack())); startReplay(o); G.vs = 0; while (G.si < si) step();
-    out.replay = hash() === h && G.phase === 'over' && G.hz === 1 && G.mu === 24; RP = null; HZ = 0; G.stage = 0; MU = MU0; toMenu();
+    out.replay = hash() === h && G.phase === 'over' && G.hz === 1 && G.mu === 24 && p1.sty === 1 && p2.sty === 1; RP = null; HZ = 0; G.stage = 0; MU = MU0; SST = SST0; toMenu();
     return out;
   });
   ok('隊伍戰：輪番上陣、輸的換人、最後判定勝負', chain.team);
@@ -211,6 +211,10 @@ const ok = (name, cond, detail) => {
     const AIP0 = AIP; AIP = 'def'; sel[0] = 4; sel[1] = 3; startGame(1); const pd = [p1.ai.pt, p2.ai.pt];
     AIP = 'grab'; startGame(1); const pg2 = p2.ai.pt; AIP = 'rand'; startGame(1); const pr = p2.ai.pt; AIP = AIP0; toMenu();
     out.aipt = pd[0] === 'grab' && pd[1] === 'zone' && pg2 === 'grab' && !!PTN[pr];
+    // 角色流派：體力、速度、傷害倍率與招式覆寫都會套用
+    const SSTb = SST; SST = [1, 0]; sel[0] = 1; sel[1] = 0; startGame(2); const sOK = p1.sty === 1 && p2.sty === 0 && p1.hm === 1.06 && p1.hp === p1.ch.hp * 1.06 && p1.sspd === .9; p1.start('hp'); const arm = !!p1.atk.arm;
+    SST = [0, 0]; startGame(2); p1.start('hp'); const arm0 = !!p1.atk.arm; SST = SSTb; toMenu();
+    out.style = sOK && arm && !arm0;
     // 每日挑戰：同一天題目固定、不同天不同；開局套用規則與強化版對手
     const sA = dailySpec('2026-01-01'), sB = dailySpec('2026-01-01'), sC = dailySpec('2026-01-02');
     dailyStart(); const dOK = G.mu === dailySpec(today()).mu && G.mu > 0 && p2.hm === 1.15 && G.ft === 1 && G.diff === 2; toMenu();
@@ -244,7 +248,7 @@ const ok = (name, cond, detail) => {
     CALM = 1; FL = null; flash('#fff', .5, 200); const noFlash = FL === null; draw(); CALM = 0; flash('#fff', .5, 200); out.calm = noFlash && (FL !== null || !qHigh()); FL = null;
     return out;
   });
-  for (const [k, v] of Object.entries(mech)) ok('機制：' + { parry: '精準招架', punish: '確反加傷', tech: '受身與強制倒地', wall: '撞牆反彈', burst: '爆氣', guard: '防禦崩潰', simple: '簡易操作輔助連段', rc: '迅移取消', hazard: '場景機關（火山、雪原、強風、鐘聲）', art: '街機／經典畫風繪製', calm: '減少閃光', dashcd: '衝刺冷卻（衝刺取消冷卻較長）', mutators: '突變規則（低重力、玻璃大砲、吸血、持久戰、劇毒、狂熱）', daily: '每日挑戰（同一天題目固定）', aipt: '電腦性格（預設、指定、隨機）' }[k], v);
+  for (const [k, v] of Object.entries(mech)) ok('機制：' + { parry: '精準招架', punish: '確反加傷', tech: '受身與強制倒地', wall: '撞牆反彈', burst: '爆氣', guard: '防禦崩潰', simple: '簡易操作輔助連段', rc: '迅移取消', hazard: '場景機關（火山、雪原、強風、鐘聲）', art: '街機／經典畫風繪製', calm: '減少閃光', dashcd: '衝刺冷卻（衝刺取消冷卻較長）', mutators: '突變規則（低重力、玻璃大砲、吸血、持久戰、劇毒、狂熱）', daily: '每日挑戰（同一天題目固定）', aipt: '電腦性格（預設、指定、隨機）', style: '角色流派（體力、速度、招式覆寫）' }[k], v);
 
   // ---- 連段挑戰
   const tr = await pg.evaluate(() => {

@@ -35,6 +35,7 @@ function selUI(){
  [...$('ptabs').querySelectorAll('[data-p]')].forEach(b=>b.classList.toggle('on',+b.dataset.p===PT));
  const i=selUI.hv>=0?selUI.hv:sel[PT],ch=CH[i];
  $('pvinfo').innerHTML='<h3 style="color:'+ch.col+'">'+ch.n+'</h3><div>'+ch.ds+'</div>'+STAT.map(s=>'<div class="st"><span>'+s[0]+'</span><i><u style="width:'+Math.round(100*(ch[s[1]]-s[2])/(s[3]-s[2]))+'%;background:'+ch.col+'"></u></i><span>'+ch[s[1]]+'</span></div>').join('')+'<div class="ps">被動：'+CHM[i].p+'</div><div class="mv">'+CHM[i].m.slice(0,3).map(x=>x[0]+' '+x[1].replace(/（.*）/,'')).join('　')+'</div>';
+ styUI();
  $('vsline').innerHTML='<span style="color:'+CH[sel[0]].col+'">P1 '+CH[sel[0]].n+'</span>　VS　<span style="color:'+CH[sel[1]].col+'">'+CH[sel[1]].n+' P2</span>';
  [...$('dfseg').children].forEach(b=>b.classList.toggle('on',+b.dataset.v===G.diff));
  const sg=$('stgs');if(!sg.children.length)STG.forEach((S,k)=>{const b=document.createElement('button');b.title=S.n;const c=document.createElement('canvas');c.width=168;c.height=94;c.getContext('2d').drawImage(STH[k],0,0,168,94);b.appendChild(c);b.insertAdjacentHTML('beforeend','<span>'+S.n+'</span>');b.onclick=()=>{G.stage=k;lab()};sg.appendChild(b)});
@@ -250,6 +251,7 @@ function helpRender(){
 <b>簡易操作：</b>設定裡可讓 P1／P2 各自切換。命中後不按方向、連按任一攻擊鍵會自動接 輕→輕腳→重拳→必殺（必殺要 50 氣），傷害 ×0.85。<br>
 <b>場景機關：</b>選單「機關」開啟後：夜城屋頂定時颳強風，把兩人往同一邊推（畫面會先預告方向）；黃昏港的木箱牆第一次被撞（血量 60% 以下）會碎裂、多受傷害；極光雪原被擊退會滑更遠；火山口定時噴發，地面發光的位置要閃開；竹林道場定時鐘響，雙方各加 15 氣。<br>
 <b>突變規則：</b>選單「規則」可複選：低重力、狂熱（氣快速回復、衝刺無冷卻）、劇毒擂台、玻璃大砲（傷害 ×1.7）、吸血擂台、持久戰（傷害 ×0.6、99 秒）；選「🎲 隨機」每場抽 1～2 條。連線時以房主的設定為準。<br>
+<b>角色流派：</b>選角時在角色資訊下方切換「標準」或該角色的流派（每位角色一種，P1／P2 各自選）。流派會改動部分招式、體力、速度、傷害或集氣速度，說明會顯示在按鈕下方。街機與生存的對手流派隨機。<br>
 <b>電腦性格：</b>選單「電腦」可選：角色預設、猛攻型（一直逼近）、防守反擊型（等你出招再反擊）、遠攻型（保持距離、放飛行道具）、投技型（貼身就抓）或隨機。對戰時電腦名字旁會標出性格。<br>
 <b>每日挑戰：</b>每天一題固定的對戰（指定角色、場景、規則與強化版對手），一回合決勝，依剩餘體力與時間計分，保存當天最佳成績。<br>
 <b>訓練模式：</b>畫面下方的幀數條（綠＝起手、紅＝攻擊判定、藍＝收招、黃＝硬直，白框＝無敵）與左右的輸入紀錄。`,
@@ -294,14 +296,14 @@ function recPush(a,b){const k=G.si-1;REC.a[k]=encI(a);REC.b[k]=encI(b)}
 function rpNext(){const k=G.si-1,a=RP.a[k],b=RP.b[k];return[decI(a===undefined?0:a)||NI,decI(b===undefined?0:b)]}
 function rle(arr){const o=[];let v=null,c=0;for(let i=0;i<arr.length;i++){const x=arr[i]===undefined?0:arr[i];if(x===v)c++;else{if(c)o.push(v,c);v=x;c=1}}if(c)o.push(v,c);return o}
 function unrle(o){const a=[];for(let i=0;i+1<o.length;i+=2){const v=o[i]|0,c=Math.min(o[i+1]|0,40000);for(let k=0;k<c&&a.length<40000;k++)a.push(v)}return a}
-const rpPack=()=>({v:1,m:REC.m,c:REC.c,g:REC.g,h:REC.h||[1,1],ini:REC.ini,s:REC.s,hz:REC.hz,mu:REC.mu,a:rle(REC.a),b:rle(REC.b)});
+const rpPack=()=>({v:1,m:REC.m,c:REC.c,g:REC.g,h:REC.h||[1,1],ini:REC.ini,s:REC.s,hz:REC.hz,mu:REC.mu,st:REC.st,a:rle(REC.a),b:rle(REC.b)});
 function rpValid(o){return o&&o.v===1&&[1,2,4].includes(o.m)&&Array.isArray(o.c)&&o.c.length===2&&o.c.every(x=>Number.isInteger(x)&&x>=0&&x<CH.length)&&Number.isInteger(o.g)&&o.g>=0&&o.g<STG.length&&Array.isArray(o.a)&&Array.isArray(o.b)&&o.a.concat(o.b).every(Number.isInteger)&&(o.h===undefined||Array.isArray(o.h)&&o.h.length===2&&o.h.every(x=>typeof x==='number'&&x>=1&&x<=2))}
 function rpSaveLast(){if(!REC||RP||G.si<300)return;try{localStorage.setItem('fd_last',JSON.stringify(rpPack()))}catch(e){}}
 function startReplay(o){
  if(!rpValid(o))return false;
  const sv=[sel[0],sel[1],G.stage];REC=null;
  RP={a:unrle(o.a),b:unrle(o.b),end:0,m:o.m};RP.n=Math.max(RP.a.length,RP.b.length);
- sel[0]=o.c[0];sel[1]=o.c[1];G.stage=o.g;G.smo=Array.isArray(o.s)?o.s:[0,0];G.hzo=o.hz?1:0;G.muo=(o.mu|0)&63;startGame(o.m===4?2:o.m);if(o.h)[p1,p2].forEach((f,k)=>{if(o.h[k]!==1){f.hm=o.h[k];f.reset()}});if(o.ini&&typeof o.ini.ft==='number'&&Array.isArray(o.ini.hp)){G.ft=o.ini.ft;p1.hp=p1.lag=+o.ini.hp[0]||p1.hp;p2.hp=p2.lag=+o.ini.hp[1]||p2.hp}sel[0]=sv[0];sel[1]=sv[1];G.stage=sv[2];
+ sel[0]=o.c[0];sel[1]=o.c[1];G.stage=o.g;G.smo=Array.isArray(o.s)?o.s:[0,0];G.hzo=o.hz?1:0;G.muo=(o.mu|0)&63;G.sto=Array.isArray(o.st)?o.st:[0,0];startGame(o.m===4?2:o.m);if(o.h)[p1,p2].forEach((f,k)=>{if(o.h[k]!==1){f.hm=o.h[k];f.reset()}});if(o.ini&&typeof o.ini.ft==='number'&&Array.isArray(o.ini.hp)){G.ft=o.ini.ft;p1.hp=p1.lag=+o.ini.hp[0]||p1.hp;p2.hp=p2.lag=+o.ini.hp[1]||p2.hp}sel[0]=sv[0];sel[1]=sv[1];G.stage=sv[2];
  return true;
 }
 const pageURL=()=>location.href.split('#')[0];
@@ -334,7 +336,7 @@ let ARC=null;
 function arcStart(){let L=CH.map((_,i)=>i).filter(i=>i!==sel[0]);for(let i=L.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[L[i],L[j]]=[L[j],L[i]]}L=L.slice(0,4);L.push(sel[0]);
  ARC={L,i:0,me:sel[0],cont:0,d0:G.diff,g0:G.stage,s1:sel[1],res:null,done:0};arcFight()}
 function arcFight(){const boss=ARC.i===ARC.L.length-1;sel[0]=ARC.me;sel[1]=ARC.L[ARC.i];G.diff=boss?2:Math.min(2,ARC.d0+(ARC.i>=2?1:0));G.stage=ARC.i%STG.length;
- startGame(1);sel[1]=ARC.s1;G.stage=ARC.g0;if(boss){p2.hm=1.3;p2.reset();if(REC)REC.h=[1,1.3]}ARC.res=null;
+ startGame(1);sel[1]=ARC.s1;G.stage=ARC.g0;if(boss){p2.hm=(p2.hm||1)*1.3;p2.reset();if(REC)REC.h=[p1.hm||1,p2.hm]}ARC.res=null;
  ARC.dlg=boss?BOSSL:[INTRO[ARC.me],INTRO[ARC.L[ARC.i]]];G.vs=G.vm=200}
 function arcNext(){if(!ARC||!ARC.res)return;if(ARC.done){toMenu();return}
  if(ARC.res==='win'){ARC.i++;if(ARC.i>=ARC.L.length){ARC.done=1;G.msg='街機模式 通關！';G.mt=G.mm=0;sfx('round');

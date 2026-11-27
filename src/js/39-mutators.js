@@ -23,7 +23,7 @@ function dailySpec(day){const R=seedRng('fd-daily-'+day),me=Math.floor(R()*CH.le
 let DAILY=null;
 function dailyBest(day){try{return(JSON.parse(localStorage.getItem('fd_daily')||'{}'))[day]||null}catch(e){return null}}
 function dailyDesc(s){return'用「'+CH[s.me].n+'」在'+STG[s.g].n+'打倒強化版「'+CH[s.op].n+'」（體力 ×'+s.hm+'）　規則：'+muNames(s.mu)}
-function dailyStart(){const s=dailySpec(today());DAILY={s,res:null,d0:G.diff,g0:G.stage};G.diff=2;G.stage=s.g;G.muo=s.mu;chainStart(s.me,s.op,1,null,null);p2.hm=s.hm;p2.reset();if(REC){REC.h=[1,s.hm];REC.ini={ft:1,hp:[p1.hp,p2.hp]}}}
+function dailyStart(){const s=dailySpec(today());DAILY={s,res:null,d0:G.diff,g0:G.stage};G.diff=2;G.stage=s.g;G.muo=s.mu;chainStart(s.me,s.op,1,null,null);p2.hm=(p2.hm||1)*s.hm;p2.reset();if(REC){REC.h=[p1.hm||1,p2.hm];REC.ini={ft:1,hp:[p1.hp,p2.hp]}}}
 function dailyDone(){const D=DAILY;if(!D||D.score!=null||D.res!=='a')return;D.score=Math.round(p1.hp/(p1.ch.hp*(p1.hm||1))*100)+G.time*2;
  try{const r=JSON.parse(localStorage.getItem('fd_daily')||'{}');if(!r[D.s.day]||r[D.s.day]<D.score){r[D.s.day]=D.score;localStorage.setItem('fd_daily',JSON.stringify(r))}}catch(e){}}
 function dailyTip(){const D=DAILY;if(D.res==='a'){dailyDone();return'挑戰成功！得分 '+D.score+'（剩餘體力％＋剩餘秒數×2）　今日最佳 '+dailyBest(D.s.day)+'　按 Enter 回選單'}return'挑戰失敗…明天會有新題目，今天也可以再挑戰　按 Enter 回選單'}

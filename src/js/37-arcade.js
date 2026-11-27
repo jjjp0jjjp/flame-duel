@@ -30,7 +30,7 @@ function artHud(){
   ctx.restore();
   // 文字（不鏡像）
   const tx=k?W-(XL+14):XL+14;ctx.save();ctx.textAlign=k?'right':'left';ctx.font='italic 900 19px '+FONT;ctx.lineWidth=5;ctx.strokeStyle='#000';ctx.lineJoin='round';
-  const nm=(k?(G.mode===1?'CPU ':G.mode===3?'木樁 ':'P2 '):'P1 ')+f.ch.n+(G.mode===4&&k===NET.slot?'（你）':'')+(f.sm?'　簡易':'')+(k&&G.mode===1&&!RP&&f.ai.pt?'　'+PTN[f.ai.pt]:'');ctx.strokeText(nm,tx,Y+BH+26);ctx.fillStyle='#fff';ctx.fillText(nm,tx,Y+BH+26);
+  const nm=(k?(G.mode===1?'CPU ':G.mode===3?'木樁 ':'P2 '):'P1 ')+f.ch.n+(f.sty?'・'+STY[CH.indexOf(f.ch)].n:'')+(G.mode===4&&k===NET.slot?'（你）':'')+(f.sm?'　簡易':'')+(k&&G.mode===1&&!RP&&f.ai.pt?'　'+PTN[f.ai.pt]:'');ctx.strokeText(nm,tx,Y+BH+26);ctx.fillStyle='#fff';ctx.fillText(nm,tx,Y+BH+26);
   {const bx2=k?W-(XR-BW*.5-18):XR-BW*.5-18,by2=Y+BH+9;ctx.beginPath();ctx.arc(bx2,by2,8,0,6.3);ctx.fillStyle=f.bu?'#ff4d6d':'#333a';ctx.fill();ctx.strokeStyle=f.bu?'#ffe14d':'#555';ctx.lineWidth=2;ctx.stroke();ctx.fillStyle=f.bu?'#fff':'#777';ctx.font='bold 10px '+FONT;ctx.textAlign='center';ctx.fillText('爆',bx2,by2+4);dashIcon(k?bx2+22:bx2-22,by2,f)}
   // 連段數
   const o=k?p1:p2;if(o.combo>=2){const cx=k?W-40:40,el=Math.min(1,(G.frame%1000)),sz=46;ctx.save();ctx.translate(cx,180);ctx.transform(1,0,-.2,1,0,0);ctx.textAlign=k?'right':'left';ctx.font='italic 900 '+sz+'px '+FONT;ctx.lineWidth=8;ctx.strokeStyle='#000';ctx.strokeText(o.combo,0,0);ctx.fillStyle=vgrad(-sz,sz,['#fff6a8','#ffb020','#e04010']);ctx.fillText(o.combo,0,0);
