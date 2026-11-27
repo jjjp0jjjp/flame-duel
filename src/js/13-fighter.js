@@ -1,8 +1,9 @@
 // 穿身：攻擊者移到被攻擊者的另一側
+const DCD=40,DCDC=75;
 function passThru(s,t){const sg=t.x>=s.x?1:-1;s.x=Math.max(40,Math.min(W-40,t.x+sg*62));s.vx=0}
 class F{
 constructor(ch,side){this.ch=ch;this.side=side;this.wins=0;this.ai={t:0,mv:0,blk:0,act:null};this.reset()}
-reset(){this.x=this.side?W/2+170:W/2-170;this.y=GY;this.vx=0;this.vy=0;this.dir=this.side?-1:1;this.hp=this.ch.hp*(this.hm||1);this.lag=this.hp;this.mt=0;this.st='idle';this.t=0;this.atk=null;this.hit=false;this.stun=0;this.combo=0;this.cd=0;this.walk=0;this.flash=0;this.kt=0;this.kd=0;this.dt=0;this.dd=0;this.inv=0;this.buf=null;this.cl=[];this.db=null;this.jb=0;this.jh=0;this.ph=null;this.bu=1;this.gd=100;this.gbt=99}
+reset(){this.x=this.side?W/2+170:W/2-170;this.y=GY;this.vx=0;this.vy=0;this.dir=this.side?-1:1;this.hp=this.ch.hp*(this.hm||1);this.lag=this.hp;this.mt=0;this.st='idle';this.t=0;this.atk=null;this.hit=false;this.stun=0;this.combo=0;this.cd=0;this.walk=0;this.flash=0;this.kt=0;this.kd=0;this.dt=0;this.dd=0;this.dcd=0;this.dcm=1;this.inv=0;this.buf=null;this.cl=[];this.db=null;this.jb=0;this.jh=0;this.ph=null;this.bu=1;this.gd=100;this.gbt=99}
 pick(i,g){
  const fw=this.dir>0?i.r:i.l,bk=this.dir>0?i.l:i.r,dn=i.d;
  if(this.sm&&g&&this.st==='atk'&&this.atk&&!dn&&!fw&&!bk&&(i.lp||i.hp||i.lk||i.hk)){const nx=SMC[this.atk.key];if(nx&&(nx!=='sp'||this.mt>=50))return nx}
@@ -15,7 +16,8 @@ pick(i,g){
 cc(a,m){if(this.cl.includes(m))return false;if(a.cn===4)return m==='ex';if(a.cn===3)return m==='ap'||m==='ak'||m==='ex'||m==='asp';return a.cn&&m!==a.key&&m!=='th'&&m!=='th2'&&m!=='ap'&&m!=='ak'&&m!=='dive'&&(m==='sp'||m==='sp2'||m==='sp3'||m==='sp4'||m==='ex'||m==='upper'||a.cn===1)}
  rcIn(i){const r=this.r3||(this.r3=[0,0,0]);['lp','hp','lk'].forEach((k,j)=>{if(i[k])r[j]=4;else if(r[j]>0)r[j]--});if(r[0]&&r[1]&&r[2]&&(i.lp||i.hp||i.lk)){r[0]=r[1]=r[2]=0;return true}return false}
  setBuf(m){const sp=x=>x==='sp'||x==='sp2'||x==='sp3'||x==='sp4'||x==='ex'||x==='asp'||x==='upper';if(this.buf&&sp(this.buf.m)&&!sp(m)&&this.buf.t>=7)return;this.buf={m,t:10}}
- dashGo(s){gho(this,colOf(this));this.st='dash';this.dt=13;this.dd=s;this.inv=s!==this.dir?7:0;this.vx=s*8.5;spark(this.x,GY-4,'#b9a8d8',6,1);snd(180,.1,'sine',.04,500)}
+ // 衝刺冷卻（幀，從衝刺開始算）：一般衝刺 DCD，攻擊命中後的衝刺取消 DCDC
+ dashGo(s,cd){this.dcd=this.dcm=cd||DCD;gho(this,colOf(this));this.st='dash';this.dt=13;this.dd=s;this.inv=s!==this.dir?7:0;this.vx=s*8.5;spark(this.x,GY-4,'#b9a8d8',6,1);snd(180,.1,'sine',.04,500)}
 start(m,nf){
  if(!nf&&m==='ex'&&this.mt<100&&this.mt>=50)m='sp';
  const ov=this.ch.mv&&this.ch.mv[m],a=Object.assign({key:m},ov&&ov.rep?{}:(MV[m]||this.ch[m]),ov),air=this.y<GY-2;
@@ -29,7 +31,7 @@ start(m,nf){
 }
 update(i,o){
  const ch=this.ch,g=this.y>=GY,wasAir=!g;
- if(this.flash>0)this.flash--;const upE=i.u&&!this.pu;this.pu=i.u;if(this.jb>0)this.jb--;if(upE)this.jb=8;if(i.dash)this.db={d:i.dash,t:8};else if(this.db&&--this.db.t<=0)this.db=null;
+ if(this.flash>0)this.flash--;if(this.dcd>0)this.dcd--;const upE=i.u&&!this.pu;this.pu=i.u;if(this.jb>0)this.jb--;if(upE)this.jb=8;if(i.dash)this.db={d:i.dash,t:8};else if(this.db&&--this.db.t<=0)this.db=null;
  if(this.lag>this.hp)this.lag=Math.max(this.hp,this.lag-.35);
  if(this.pz>0){this.pz--;if(this.hp>1)this.hp=Math.max(1,this.hp-.07)}if(this.pw>0)this.pw--;if(this.wk>0)this.wk--;if(this.sl>0)this.sl--;
  {const fwN=this.dir>0?i.r:i.l;if(fwN&&!this.pfw&&g&&(this.st==='idle'||this.st==='walk'||(this.st==='block'&&this.stun===0)))this.pf=7;else if(this.pf>0)this.pf--;this.pfw=fwN}
@@ -46,7 +48,7 @@ update(i,o){
  else if(this.st==='atk'){
   const a=this.atk;this.t++;
   if(this.hit&&this.buf&&this.t>a.su&&this.cc(a,this.buf.m)&&this.start(this.buf.m,1)){ring(this.x+this.dir*30,this.y-70,'#fff');sfx('cancel')}
-  else if(this.hit&&this.db&&a.cn>=1&&a.cn<=3&&this.t>a.su&&g){const dd=this.db.d;this.db=null;this.atk=null;this.cl=[];this.dashGo(dd);ring(this.x,this.y-60,'#7fe3ff');sfx('cancel')}
+  else if(this.hit&&this.db&&!(this.dcd>0)&&a.cn>=1&&a.cn<=3&&this.t>a.su&&g){const dd=this.db.d;this.db=null;this.atk=null;this.cl=[];this.dashGo(dd,DCDC);ring(this.x,this.y-60,'#7fe3ff');sfx('cancel')}
   else if(this.hit&&a.cn===2&&this.t>a.su&&g&&this.jb>0){this.jb=0;this.atk=null;this.st='idle';this.cl=[];this.vy=-ch.jmp;this.jh=1;this.dj=0;ring(this.x,this.y-20,'#7fe3ff');snd(300,.12,'sine',.04,600)}
   else{
    fxMove(this,a,g);
@@ -73,7 +75,7 @@ update(i,o){
  else{
   if(g)this.dir=o.x>=this.x?1:-1;
   if(this.buf&&this.start(this.buf.m)){}
-  else if((i.dash||this.db)&&g){const dd=i.dash||this.db.d;this.db=null;this.dashGo(dd)}
+  else if((i.dash||this.db)&&g&&!(this.dcd>0)){const dd=i.dash||this.db.d;this.db=null;this.dashGo(dd)}
   else{
    this.st='idle';
    const mv=i.r-i.l,back=this.dir>0?i.l:i.r;

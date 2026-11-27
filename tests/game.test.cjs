@@ -192,6 +192,12 @@ const ok = (name, cond, detail) => {
     setup(1, 0); let crushed = false;
     for (let r = 0; r < 12 && !crushed; r++) { p1.x = 400; p2.x = 470; run(40, (k) => { crushed = crushed || (p2.st === 'hit' && p2.stun > 30); return [k === 0 ? { hp: 1 } : {}, { d: 1 }] }) }
     out.guard = crushed;
+    // 衝刺冷卻：衝刺後短時間內不能再衝刺；攻擊命中後的衝刺取消冷卻更長
+    const dashes = (n, f) => { let c = 0, prev = ''; run(n, (k) => { const r = f(k); if (p1.st === 'dash' && prev !== 'dash') c++; prev = p1.st; return [r, {}] }); return c };
+    setup(0, 0); p1.x = 200; p2.x = 760; const d1 = dashes(60, (k) => (k === 0 || k === 20 ? { dash: 1 } : {}));
+    setup(0, 0); p1.x = 200; p2.x = 760; const d2 = dashes(60, (k) => (k === 0 || k === 45 ? { dash: 1 } : {}));
+    setup(0, 0); let cancel = false, cd = 0; run(30, (k) => { if (!cancel && p1.st === 'dash') { cancel = true; cd = p1.dcd } return [k === 0 ? { lp: 1 } : k >= 5 && k <= 7 ? { dash: 1 } : {}, {}] });
+    out.dashcd = d1 === 1 && d2 === 2 && cancel && cd >= 70;
     // 簡易操作：連按輕拳自動接 輕→輕腳→重拳→必殺，傷害較低；並寫進重播
     const SV = SIMPLE; SIMPLE = [1, 0]; setup(0, 0); p1.mt = 60; let seen = [];
     run(70, (k) => { if (p1.st === 'atk' && p1.atk && !seen.includes(p1.atk.key)) seen.push(p1.atk.key); return [k % 3 === 0 ? { lp: 1 } : {}, {}] });
@@ -221,7 +227,7 @@ const ok = (name, cond, detail) => {
     CALM = 1; FL = null; flash('#fff', .5, 200); const noFlash = FL === null; draw(); CALM = 0; flash('#fff', .5, 200); out.calm = noFlash && (FL !== null || !qHigh()); FL = null;
     return out;
   });
-  for (const [k, v] of Object.entries(mech)) ok('機制：' + { parry: '精準招架', punish: '確反加傷', tech: '受身與強制倒地', wall: '撞牆反彈', burst: '爆氣', guard: '防禦崩潰', simple: '簡易操作輔助連段', rc: '迅移取消', hazard: '場景機關（火山、雪原、強風、鐘聲）', art: '街機／經典畫風繪製', calm: '減少閃光' }[k], v);
+  for (const [k, v] of Object.entries(mech)) ok('機制：' + { parry: '精準招架', punish: '確反加傷', tech: '受身與強制倒地', wall: '撞牆反彈', burst: '爆氣', guard: '防禦崩潰', simple: '簡易操作輔助連段', rc: '迅移取消', hazard: '場景機關（火山、雪原、強風、鐘聲）', art: '街機／經典畫風繪製', calm: '減少閃光', dashcd: '衝刺冷卻（衝刺取消冷卻較長）' }[k], v);
 
   // ---- 連段挑戰
   const tr = await pg.evaluate(() => {

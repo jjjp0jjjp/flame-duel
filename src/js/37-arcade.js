@@ -31,7 +31,7 @@ function artHud(){
   // 文字（不鏡像）
   const tx=k?W-(XL+14):XL+14;ctx.save();ctx.textAlign=k?'right':'left';ctx.font='italic 900 19px '+FONT;ctx.lineWidth=5;ctx.strokeStyle='#000';ctx.lineJoin='round';
   const nm=(k?(G.mode===1?'CPU ':G.mode===3?'木樁 ':'P2 '):'P1 ')+f.ch.n+(G.mode===4&&k===NET.slot?'（你）':'')+(f.sm?'　簡易':'');ctx.strokeText(nm,tx,Y+BH+26);ctx.fillStyle='#fff';ctx.fillText(nm,tx,Y+BH+26);
-  {const bx2=k?W-(XR-BW*.5-18):XR-BW*.5-18,by2=Y+BH+9;ctx.beginPath();ctx.arc(bx2,by2,8,0,6.3);ctx.fillStyle=f.bu?'#ff4d6d':'#333a';ctx.fill();ctx.strokeStyle=f.bu?'#ffe14d':'#555';ctx.lineWidth=2;ctx.stroke();ctx.fillStyle=f.bu?'#fff':'#777';ctx.font='bold 10px '+FONT;ctx.textAlign='center';ctx.fillText('爆',bx2,by2+4)}
+  {const bx2=k?W-(XR-BW*.5-18):XR-BW*.5-18,by2=Y+BH+9;ctx.beginPath();ctx.arc(bx2,by2,8,0,6.3);ctx.fillStyle=f.bu?'#ff4d6d':'#333a';ctx.fill();ctx.strokeStyle=f.bu?'#ffe14d':'#555';ctx.lineWidth=2;ctx.stroke();ctx.fillStyle=f.bu?'#fff':'#777';ctx.font='bold 10px '+FONT;ctx.textAlign='center';ctx.fillText('爆',bx2,by2+4);dashIcon(k?bx2+22:bx2-22,by2,f)}
   // 連段數
   const o=k?p1:p2;if(o.combo>=2){const cx=k?W-40:40,el=Math.min(1,(G.frame%1000)),sz=46;ctx.save();ctx.translate(cx,180);ctx.transform(1,0,-.2,1,0,0);ctx.textAlign=k?'right':'left';ctx.font='italic 900 '+sz+'px '+FONT;ctx.lineWidth=8;ctx.strokeStyle='#000';ctx.strokeText(o.combo,0,0);ctx.fillStyle=vgrad(-sz,sz,['#fff6a8','#ffb020','#e04010']);ctx.fillText(o.combo,0,0);
    const w0=ctx.measureText(String(o.combo)).width;ctx.font='italic 900 22px '+FONT;const hx=k?-w0-6:w0+6;ctx.strokeStyle='#000';ctx.lineWidth=5;ctx.strokeText('HITS',hx,0);ctx.fillStyle='#fff';ctx.fillText('HITS',hx,0);ctx.font='bold 14px '+FONT;ctx.strokeText(Math.round(o.cd)+' DMG',0,22);ctx.fillStyle='#ffd27a';ctx.fillText(Math.round(o.cd)+' DMG',0,22);ctx.restore()}
@@ -41,6 +41,8 @@ function artHud(){
  {const x0=W/2-44,x1=W/2+44,y0=16,y1=74;ctx.beginPath();ctx.moveTo(x0-6,y0);ctx.lineTo(x1+6,y0);ctx.lineTo(x1-4,y1);ctx.lineTo(x0+4,y1);ctx.closePath();ctx.fillStyle=vgrad(y0,y1-y0,['#1a1a30','#07070f']);ctx.fill();ctx.strokeStyle=GOLD;ctx.lineWidth=2.5;ctx.stroke();
   const t=G.mode===3?'∞':String(Math.max(0,G.time));ctx.textAlign='center';ctx.font='900 46px '+FONT;ctx.lineWidth=6;ctx.strokeStyle='#000';ctx.strokeText(t,W/2,64);ctx.fillStyle=vgrad(26,40,G.time<=10&&G.mode!==3&&(CALM||G.frame%20<10)?['#ffd0d0','#ff4040']:['#ffffff','#ffd27a']);ctx.fillText(t,W/2,64)}
 }
+// 衝刺冷卻圖示：冷卻中顯示剩餘時間的圓環
+function dashIcon(x,y,f){const c=f.dcd>0,r=c?f.dcd/(f.dcm||1):0;ctx.save();ctx.beginPath();ctx.arc(x,y,8,0,6.3);ctx.fillStyle=c?'#333a':'#2a7fffcc';ctx.fill();if(c){ctx.beginPath();ctx.moveTo(x,y);ctx.arc(x,y,8,-Math.PI/2,-Math.PI/2+6.283*r);ctx.closePath();ctx.fillStyle='#0009';ctx.fill()}ctx.strokeStyle=c?'#555':'#7fe3ff';ctx.lineWidth=2;ctx.beginPath();ctx.arc(x,y,8,0,6.3);ctx.stroke();ctx.fillStyle=c?'#888':'#fff';ctx.font='bold 10px '+FONT;ctx.textAlign='center';ctx.fillText('衝',x,y+4);ctx.restore()}
 // 回合字樣：斜體、漸層、粗黑邊，從側邊滑入並帶一條橫幅
 function arcMsg(el,al){
  const ov=G.phase==='over',sc=ov?.62:1,slide=Math.max(0,8-el)/8,msg=G.msg;

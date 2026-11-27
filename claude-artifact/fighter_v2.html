@@ -715,10 +715,11 @@ function quote(f){
  ctx.fillStyle='#111';ctx.textAlign='center';ctx.fillText(s,x,y+24);ctx.restore()}
 
 // 穿身：攻擊者移到被攻擊者的另一側
+const DCD=40,DCDC=75;
 function passThru(s,t){const sg=t.x>=s.x?1:-1;s.x=Math.max(40,Math.min(W-40,t.x+sg*62));s.vx=0}
 class F{
 constructor(ch,side){this.ch=ch;this.side=side;this.wins=0;this.ai={t:0,mv:0,blk:0,act:null};this.reset()}
-reset(){this.x=this.side?W/2+170:W/2-170;this.y=GY;this.vx=0;this.vy=0;this.dir=this.side?-1:1;this.hp=this.ch.hp*(this.hm||1);this.lag=this.hp;this.mt=0;this.st='idle';this.t=0;this.atk=null;this.hit=false;this.stun=0;this.combo=0;this.cd=0;this.walk=0;this.flash=0;this.kt=0;this.kd=0;this.dt=0;this.dd=0;this.inv=0;this.buf=null;this.cl=[];this.db=null;this.jb=0;this.jh=0;this.ph=null;this.bu=1;this.gd=100;this.gbt=99}
+reset(){this.x=this.side?W/2+170:W/2-170;this.y=GY;this.vx=0;this.vy=0;this.dir=this.side?-1:1;this.hp=this.ch.hp*(this.hm||1);this.lag=this.hp;this.mt=0;this.st='idle';this.t=0;this.atk=null;this.hit=false;this.stun=0;this.combo=0;this.cd=0;this.walk=0;this.flash=0;this.kt=0;this.kd=0;this.dt=0;this.dd=0;this.dcd=0;this.dcm=1;this.inv=0;this.buf=null;this.cl=[];this.db=null;this.jb=0;this.jh=0;this.ph=null;this.bu=1;this.gd=100;this.gbt=99}
 pick(i,g){
  const fw=this.dir>0?i.r:i.l,bk=this.dir>0?i.l:i.r,dn=i.d;
  if(this.sm&&g&&this.st==='atk'&&this.atk&&!dn&&!fw&&!bk&&(i.lp||i.hp||i.lk||i.hk)){const nx=SMC[this.atk.key];if(nx&&(nx!=='sp'||this.mt>=50))return nx}
@@ -731,7 +732,8 @@ pick(i,g){
 cc(a,m){if(this.cl.includes(m))return false;if(a.cn===4)return m==='ex';if(a.cn===3)return m==='ap'||m==='ak'||m==='ex'||m==='asp';return a.cn&&m!==a.key&&m!=='th'&&m!=='th2'&&m!=='ap'&&m!=='ak'&&m!=='dive'&&(m==='sp'||m==='sp2'||m==='sp3'||m==='sp4'||m==='ex'||m==='upper'||a.cn===1)}
  rcIn(i){const r=this.r3||(this.r3=[0,0,0]);['lp','hp','lk'].forEach((k,j)=>{if(i[k])r[j]=4;else if(r[j]>0)r[j]--});if(r[0]&&r[1]&&r[2]&&(i.lp||i.hp||i.lk)){r[0]=r[1]=r[2]=0;return true}return false}
  setBuf(m){const sp=x=>x==='sp'||x==='sp2'||x==='sp3'||x==='sp4'||x==='ex'||x==='asp'||x==='upper';if(this.buf&&sp(this.buf.m)&&!sp(m)&&this.buf.t>=7)return;this.buf={m,t:10}}
- dashGo(s){gho(this,colOf(this));this.st='dash';this.dt=13;this.dd=s;this.inv=s!==this.dir?7:0;this.vx=s*8.5;spark(this.x,GY-4,'#b9a8d8',6,1);snd(180,.1,'sine',.04,500)}
+ // 衝刺冷卻（幀，從衝刺開始算）：一般衝刺 DCD，攻擊命中後的衝刺取消 DCDC
+ dashGo(s,cd){this.dcd=this.dcm=cd||DCD;gho(this,colOf(this));this.st='dash';this.dt=13;this.dd=s;this.inv=s!==this.dir?7:0;this.vx=s*8.5;spark(this.x,GY-4,'#b9a8d8',6,1);snd(180,.1,'sine',.04,500)}
 start(m,nf){
  if(!nf&&m==='ex'&&this.mt<100&&this.mt>=50)m='sp';
  const ov=this.ch.mv&&this.ch.mv[m],a=Object.assign({key:m},ov&&ov.rep?{}:(MV[m]||this.ch[m]),ov),air=this.y<GY-2;
@@ -745,7 +747,7 @@ start(m,nf){
 }
 update(i,o){
  const ch=this.ch,g=this.y>=GY,wasAir=!g;
- if(this.flash>0)this.flash--;const upE=i.u&&!this.pu;this.pu=i.u;if(this.jb>0)this.jb--;if(upE)this.jb=8;if(i.dash)this.db={d:i.dash,t:8};else if(this.db&&--this.db.t<=0)this.db=null;
+ if(this.flash>0)this.flash--;if(this.dcd>0)this.dcd--;const upE=i.u&&!this.pu;this.pu=i.u;if(this.jb>0)this.jb--;if(upE)this.jb=8;if(i.dash)this.db={d:i.dash,t:8};else if(this.db&&--this.db.t<=0)this.db=null;
  if(this.lag>this.hp)this.lag=Math.max(this.hp,this.lag-.35);
  if(this.pz>0){this.pz--;if(this.hp>1)this.hp=Math.max(1,this.hp-.07)}if(this.pw>0)this.pw--;if(this.wk>0)this.wk--;if(this.sl>0)this.sl--;
  {const fwN=this.dir>0?i.r:i.l;if(fwN&&!this.pfw&&g&&(this.st==='idle'||this.st==='walk'||(this.st==='block'&&this.stun===0)))this.pf=7;else if(this.pf>0)this.pf--;this.pfw=fwN}
@@ -762,7 +764,7 @@ update(i,o){
  else if(this.st==='atk'){
   const a=this.atk;this.t++;
   if(this.hit&&this.buf&&this.t>a.su&&this.cc(a,this.buf.m)&&this.start(this.buf.m,1)){ring(this.x+this.dir*30,this.y-70,'#fff');sfx('cancel')}
-  else if(this.hit&&this.db&&a.cn>=1&&a.cn<=3&&this.t>a.su&&g){const dd=this.db.d;this.db=null;this.atk=null;this.cl=[];this.dashGo(dd);ring(this.x,this.y-60,'#7fe3ff');sfx('cancel')}
+  else if(this.hit&&this.db&&!(this.dcd>0)&&a.cn>=1&&a.cn<=3&&this.t>a.su&&g){const dd=this.db.d;this.db=null;this.atk=null;this.cl=[];this.dashGo(dd,DCDC);ring(this.x,this.y-60,'#7fe3ff');sfx('cancel')}
   else if(this.hit&&a.cn===2&&this.t>a.su&&g&&this.jb>0){this.jb=0;this.atk=null;this.st='idle';this.cl=[];this.vy=-ch.jmp;this.jh=1;this.dj=0;ring(this.x,this.y-20,'#7fe3ff');snd(300,.12,'sine',.04,600)}
   else{
    fxMove(this,a,g);
@@ -789,7 +791,7 @@ update(i,o){
  else{
   if(g)this.dir=o.x>=this.x?1:-1;
   if(this.buf&&this.start(this.buf.m)){}
-  else if((i.dash||this.db)&&g){const dd=i.dash||this.db.d;this.db=null;this.dashGo(dd)}
+  else if((i.dash||this.db)&&g&&!(this.dcd>0)){const dd=i.dash||this.db.d;this.db=null;this.dashGo(dd)}
   else{
    this.st='idle';
    const mv=i.r-i.l,back=this.dir>0?i.l:i.r;
@@ -1316,7 +1318,7 @@ function hud(){
   ctx.fillStyle='#fff8';ctx.fillRect(mx+mw/2-1,my,2,10);
   // 防禦耐久條（血條下方）與爆氣（氣槽旁）
   {const gw=w*.45,gx=k?x+w-gw:x,gy=y+h+2,gr=Math.max(0,f.gd??100)/100;ctx.fillStyle='#000a';ctx.fillRect(gx,gy,gw,5);ctx.fillStyle=gr<.35?(fl?'#ff6b6b':'#ff9f9f'):'#7ec8ff';ctx.fillRect(k?gx+gw-gw*gr:gx,gy,gw*gr,5)}
-  {const bx2=k?mx-16:mx+mw+16,by2=my+5;ctx.beginPath();ctx.arc(bx2,by2,9,0,6.3);ctx.fillStyle=f.bu?'#ff4d6d':'#333a';ctx.fill();ctx.strokeStyle=f.bu?'#ffe14d':'#555';ctx.lineWidth=2;ctx.stroke();ctx.fillStyle=f.bu?'#fff':'#777';ctx.font='bold 11px '+FONT;ctx.textAlign='center';ctx.fillText('爆',bx2,by2+4);ctx.textAlign=k?'right':'left'}
+  {const bx2=k?mx-16:mx+mw+16,by2=my+5;ctx.beginPath();ctx.arc(bx2,by2,9,0,6.3);ctx.fillStyle=f.bu?'#ff4d6d':'#333a';ctx.fill();ctx.strokeStyle=f.bu?'#ffe14d':'#555';ctx.lineWidth=2;ctx.stroke();ctx.fillStyle=f.bu?'#fff':'#777';ctx.font='bold 11px '+FONT;ctx.textAlign='center';ctx.fillText('爆',bx2,by2+4);ctx.textAlign=k?'right':'left';dashIcon(k?bx2-22:bx2+22,by2,f)}
   ctx.font='bold 18px '+FONT;ctx.textAlign=k?'right':'left';ctx.fillStyle='#fff';
   ctx.fillText((k?(G.mode===1?'電腦 ':G.mode===3?'木樁 ':'P2 '):'P1 ')+f.ch.n+(G.mode===4&&k===NET.slot?'（你）':'')+(f.sm?'　簡易':''),k?x+w:x,24);
   for(let j=0;j<2;j++){ctx.fillStyle=j<f.wins?'#ffe14d':'#fff3';ctx.beginPath();ctx.arc(k?x+w-8-j*20:x+8+j*20,my+30,7,0,6.3);ctx.fill()}
@@ -2030,7 +2032,7 @@ function artHud(){
   // 文字（不鏡像）
   const tx=k?W-(XL+14):XL+14;ctx.save();ctx.textAlign=k?'right':'left';ctx.font='italic 900 19px '+FONT;ctx.lineWidth=5;ctx.strokeStyle='#000';ctx.lineJoin='round';
   const nm=(k?(G.mode===1?'CPU ':G.mode===3?'木樁 ':'P2 '):'P1 ')+f.ch.n+(G.mode===4&&k===NET.slot?'（你）':'')+(f.sm?'　簡易':'');ctx.strokeText(nm,tx,Y+BH+26);ctx.fillStyle='#fff';ctx.fillText(nm,tx,Y+BH+26);
-  {const bx2=k?W-(XR-BW*.5-18):XR-BW*.5-18,by2=Y+BH+9;ctx.beginPath();ctx.arc(bx2,by2,8,0,6.3);ctx.fillStyle=f.bu?'#ff4d6d':'#333a';ctx.fill();ctx.strokeStyle=f.bu?'#ffe14d':'#555';ctx.lineWidth=2;ctx.stroke();ctx.fillStyle=f.bu?'#fff':'#777';ctx.font='bold 10px '+FONT;ctx.textAlign='center';ctx.fillText('爆',bx2,by2+4)}
+  {const bx2=k?W-(XR-BW*.5-18):XR-BW*.5-18,by2=Y+BH+9;ctx.beginPath();ctx.arc(bx2,by2,8,0,6.3);ctx.fillStyle=f.bu?'#ff4d6d':'#333a';ctx.fill();ctx.strokeStyle=f.bu?'#ffe14d':'#555';ctx.lineWidth=2;ctx.stroke();ctx.fillStyle=f.bu?'#fff':'#777';ctx.font='bold 10px '+FONT;ctx.textAlign='center';ctx.fillText('爆',bx2,by2+4);dashIcon(k?bx2+22:bx2-22,by2,f)}
   // 連段數
   const o=k?p1:p2;if(o.combo>=2){const cx=k?W-40:40,el=Math.min(1,(G.frame%1000)),sz=46;ctx.save();ctx.translate(cx,180);ctx.transform(1,0,-.2,1,0,0);ctx.textAlign=k?'right':'left';ctx.font='italic 900 '+sz+'px '+FONT;ctx.lineWidth=8;ctx.strokeStyle='#000';ctx.strokeText(o.combo,0,0);ctx.fillStyle=vgrad(-sz,sz,['#fff6a8','#ffb020','#e04010']);ctx.fillText(o.combo,0,0);
    const w0=ctx.measureText(String(o.combo)).width;ctx.font='italic 900 22px '+FONT;const hx=k?-w0-6:w0+6;ctx.strokeStyle='#000';ctx.lineWidth=5;ctx.strokeText('HITS',hx,0);ctx.fillStyle='#fff';ctx.fillText('HITS',hx,0);ctx.font='bold 14px '+FONT;ctx.strokeText(Math.round(o.cd)+' DMG',0,22);ctx.fillStyle='#ffd27a';ctx.fillText(Math.round(o.cd)+' DMG',0,22);ctx.restore()}
@@ -2040,6 +2042,8 @@ function artHud(){
  {const x0=W/2-44,x1=W/2+44,y0=16,y1=74;ctx.beginPath();ctx.moveTo(x0-6,y0);ctx.lineTo(x1+6,y0);ctx.lineTo(x1-4,y1);ctx.lineTo(x0+4,y1);ctx.closePath();ctx.fillStyle=vgrad(y0,y1-y0,['#1a1a30','#07070f']);ctx.fill();ctx.strokeStyle=GOLD;ctx.lineWidth=2.5;ctx.stroke();
   const t=G.mode===3?'∞':String(Math.max(0,G.time));ctx.textAlign='center';ctx.font='900 46px '+FONT;ctx.lineWidth=6;ctx.strokeStyle='#000';ctx.strokeText(t,W/2,64);ctx.fillStyle=vgrad(26,40,G.time<=10&&G.mode!==3&&(CALM||G.frame%20<10)?['#ffd0d0','#ff4040']:['#ffffff','#ffd27a']);ctx.fillText(t,W/2,64)}
 }
+// 衝刺冷卻圖示：冷卻中顯示剩餘時間的圓環
+function dashIcon(x,y,f){const c=f.dcd>0,r=c?f.dcd/(f.dcm||1):0;ctx.save();ctx.beginPath();ctx.arc(x,y,8,0,6.3);ctx.fillStyle=c?'#333a':'#2a7fffcc';ctx.fill();if(c){ctx.beginPath();ctx.moveTo(x,y);ctx.arc(x,y,8,-Math.PI/2,-Math.PI/2+6.283*r);ctx.closePath();ctx.fillStyle='#0009';ctx.fill()}ctx.strokeStyle=c?'#555':'#7fe3ff';ctx.lineWidth=2;ctx.beginPath();ctx.arc(x,y,8,0,6.3);ctx.stroke();ctx.fillStyle=c?'#888':'#fff';ctx.font='bold 10px '+FONT;ctx.textAlign='center';ctx.fillText('衝',x,y+4);ctx.restore()}
 // 回合字樣：斜體、漸層、粗黑邊，從側邊滑入並帶一條橫幅
 function arcMsg(el,al){
  const ov=G.phase==='over',sc=ov?.62:1,slide=Math.max(0,8-el)/8,msg=G.msg;
@@ -2389,7 +2393,7 @@ function helpRender(){
  const k=j=>'<b>'+KN(0,j)+'</b>',q=j=>'<b>'+KN(1,j)+'</b>';
  const T={
   '基本':`<b>三戰兩勝</b>，每回合 60 秒。攻擊、受擊都會累積氣槽：50 氣放<b>必殺</b>，100 氣放<b>超必殺</b>。<br>
-<b>P1 移動：</b>${k(0)}／${k(1)} 走，${k(2)} 跳（輕點是小跳），${k(3)} 蹲下防禦；連按兩下方向衝刺（後撤有無敵）。背對對手按住也會自動防禦。<br>
+<b>P1 移動：</b>${k(0)}／${k(1)} 走，${k(2)} 跳（輕點是小跳），${k(3)} 蹲下防禦；連按兩下方向衝刺（後撤有無敵），衝刺後約 0.7 秒內不能再衝刺。背對對手按住也會自動防禦。<br>
 <b>P1 出招：</b>${k(4)} 輕拳　${k(5)} 重拳　${k(6)} 輕腳　${k(7)} 重腳　${k(8)} 必殺　${k(9)} 投技<br>
 <b>P2：</b>${q(0)} ${q(1)} ${q(2)} ${q(3)} 移動；${q(4)} 輕拳　${q(5)} 重拳　${q(6)} 輕腳　${q(7)} 重腳　${q(8)} 必殺　${q(9)} 投技<br>
 按鍵可在上方「設定」更改。第一次玩建議先到「訓練模式」熟悉操作。`,
@@ -2398,7 +2402,7 @@ function helpRender(){
 <b>每個角色專屬：</b>→+輕拳、→+重拳、→+輕腳、→+重腳、←+輕拳、←+重拳、←+重腳、↓+輕拳、↓+重拳、↓+輕腳、空中重拳 這 11 個指令技每人都不同，名稱與特性見「角色」分頁或暫停畫面。<br>
 <b>上下段：</b>標示<b>中段</b>的招式和所有跳躍攻擊要<b>站著擋</b>（按住後方），<b>下段</b>要<b>蹲著擋</b>，擋錯會被打中。<br>
 <b>空中：</b>輕拳／重拳 空拳　輕腳／重腳 飛踢　↓+輕腳／重腳 俯衝踢<br>
-<b>連段：</b>輕攻擊命中或被防後可取消成其他招式；重攻擊可取消成必殺／升龍；升龍命中後可接空中拳腳；必殺後可接超必殺。同一連段每招只能用一次。命中後雙擊方向可衝刺取消，重攻擊命中後按跳可跳躍取消。<br>
+<b>連段：</b>輕攻擊命中或被防後可取消成其他招式；重攻擊可取消成必殺／升龍；升龍命中後可接空中拳腳；必殺後可接超必殺。同一連段每招只能用一次。命中後雙擊方向可衝刺取消（之後約 1.25 秒不能再衝刺；血條旁的「衝」變暗就是冷卻中），重攻擊命中後按跳可跳躍取消。<br>
 <b>防守：</b>對手投你時搶先按投技可拆投（指令投無法拆）；對手出招起手時打中他會觸發<b>反擊（傷害 +30%）</b>；倒地時先按招式可起身反擊。`,
   '進階系統':`<b>精準招架：</b>對手的攻擊快打到時，在地上<b>按一下 →（朝對手）</b>，7 幀內被打到就會招架：不受傷，還能立刻反擊。<br>
 <b>確反：</b>在對手招式收招時打中他，傷害 +20%、硬直更長，畫面顯示「確反！」。<br>
