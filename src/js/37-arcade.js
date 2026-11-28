@@ -66,7 +66,7 @@ function bgDraw(l){
 // 觀眾：剪影＋舞台色邊光，連段或重擊時歡呼
 let CROWD=null;
 function crowdDraw(l){
- if(!ART||!p1||G.stage===3||QM===3)return;
+ if(!ART||!p1||G.stage===3||G.stage===6||QM===3)return;
  if(!CROWD){CROWD=[];for(let i=0;i<44;i++)CROWD.push({x:-40+i*24+Math.random()*12,h:34+Math.random()*18,w:.85+Math.random()*.35,ph:Math.random()*6.3,c:Math.random()})}
  const S=STG[G.stage],hype=Math.min(1,G.shake/8+(Math.max(p1.combo,p2.combo)>=3?.6:0)+(G.phase==='ko'||G.phase==='over'?.8:0)),t=G.frame*.2,base=GY-1;
  ctx.save();ctx.translate(l*.12,0);
@@ -115,6 +115,8 @@ function fgDraw(){
   else if(st===1){ctx.rect(0,-34,170,34);ctx.moveTo(40,-34);ctx.arc(40,-46,14,Math.PI,0);ctx.rect(26,-46,28,12);ctx.moveTo(120,-34);ctx.arc(120,-44,11,Math.PI,0);ctx.rect(109,-44,22,10)}
   else if(st===2){ctx.moveTo(0,0);ctx.lineTo(0,-40);ctx.quadraticCurveTo(40,-62,80,-38);ctx.quadraticCurveTo(120,-50,160,-20);ctx.lineTo(170,0);ctx.closePath()}
   else if(st===3){ctx.moveTo(0,0);ctx.lineTo(0,-54);ctx.lineTo(36,-70);ctx.lineTo(70,-40);ctx.lineTo(110,-48);ctx.lineTo(150,-16);ctx.lineTo(160,0);ctx.closePath()}
+  else if(st===5){ctx.rect(0,-40,160,40);ctx.rect(14,-62,8,22);ctx.rect(110,-62,8,22);ctx.rect(10,-66,120,6)}
+  else if(st===6){for(let i=0;i<4;i++){ctx.moveTo(i*44,0);ctx.ellipse(i*44+20,-14-(i%2)*8,40,20,0,Math.PI,0)}}
   else{for(let i=0;i<9;i++){const x=i*18,h=30+((i*37)%28);ctx.moveTo(x,0);ctx.quadraticCurveTo(x+4,-h*.6,x+10+(i%2?6:-6),-h);ctx.quadraticCurveTo(x+8,-h*.5,x+14,0)}}
   ctx.fill();ctx.globalAlpha=.5;ctx.lineWidth=2;ctx.stroke();
   if(st===3){ctx.globalAlpha=.6+.3*Math.sin(G.frame*.1);ctx.strokeStyle='#ff6a2a';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(20,-40);ctx.lineTo(44,-30);ctx.lineTo(60,-36);ctx.stroke()}

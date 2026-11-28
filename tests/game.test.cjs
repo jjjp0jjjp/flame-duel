@@ -284,7 +284,18 @@ const ok = (name, cond, detail) => {
     const wind = (p1.x - wx[0]) * wd > 20 && (p2.x - wx[1]) * wd > 20;
     G.stage = 4; setup(0, 0); human = () => NI; while (G.frame % BC !== BC - 22) step(); p1.mt = p2.mt = 10; step(); step(); step(); human = H0;
     const bell = p1.mt >= 25 && p2.mt >= 25;
+    // 地下鐵：通電時只打到站在兩端的人；天空神殿：站滿符文得到強化
+    G.stage = 5; setup(0, 0); human = () => NI; p1.x = 60; p2.x = 480; while (G.frame % SC !== 545) { p1.x = 60; p2.x = 480; step() } human = H0;
+    const subway = p1.st === 'hit' && p1.hp < p1.ch.hp && p2.hp === p2.ch.hp;
+    G.stage = 6; setup(0, 0); human = () => NI; let nR = 0; while (G.frame % RC !== 300 && nR++ < 2000) step(); const rx = rnX(Math.floor(G.frame / RC)); for (let i = 0; i < 50; i++) { p1.x = rx; p2.x = rx > 450 ? 150 : 800; step() } human = H0;
+    const rune = p1.pw > 0 && p1.rnt === Math.floor(G.frame / RC) && !(p2.pw > 0);
+    // 開著新場景機關時，快照載入後重跑結果相同（連線回滾）
+    const rbHz = (st) => { G.stage = st; setup(0, 3); let sd = st * 31; const R = () => (sd = (sd * 16807) % 2147483647) / 2147483647; const inp = []; for (let i = 0; i < 1400; i++) inp.push([{ r: R() < .4 ? 1 : 0, l: R() < .3 ? 1 : 0, lp: R() < .1 ? 1 : 0, hk: R() < .06 ? 1 : 0 }, { l: R() < .4 ? 1 : 0, r: R() < .3 ? 1 : 0, hp: R() < .1 ? 1 : 0 }]);
+      const go = (from, to) => { let k = from; human = (K) => Object.assign({}, NI, inp[k][K === K1 ? 0 : 1]); for (; k < to; k++) step(); human = H0 };
+      go(0, 700); const mid = snapAll(); go(700, 1400); const h1 = snapAll(); loadAll(mid); go(700, 1400); return snapAll() === h1 };
+    const rbOK = rbHz(5) && rbHz(6);
     HZ = hz0; G.stage = 0;
+    out.hazard2 = subway && rune && rbOK;
     out.hazard = dOn >= 7 && dOff === 0 && sOn > sOff + 5 && wind && bell;
     // 兩種畫風都能正常繪製（只影響畫面，不影響模擬）
     setup(3, 9); run(20, (k) => [k % 4 === 0 ? { hp: 1 } : {}, {}]); const hb = hash0(); ART = 0; OLW = 1; OUTX = 0; draw(); ART = 1; OLW = 1.6; OUTX = 2.4; draw(); out.art = hash0() === hb;
@@ -292,7 +303,7 @@ const ok = (name, cond, detail) => {
     CALM = 1; FL = null; flash('#fff', .5, 200); const noFlash = FL === null; draw(); CALM = 0; flash('#fff', .5, 200); out.calm = noFlash && (FL !== null || !qHigh()); FL = null;
     return out;
   });
-  for (const [k, v] of Object.entries(mech)) ok('機制：' + { parry: '精準招架', punish: '確反加傷', tech: '受身與強制倒地', wall: '撞牆反彈', burst: '爆氣', guard: '防禦崩潰', simple: '簡易操作輔助連段', rc: '迅移取消', hazard: '場景機關（火山、雪原、強風、鐘聲）', art: '街機／經典畫風繪製', calm: '減少閃光', dashcd: '衝刺冷卻（衝刺取消冷卻較長）', mutators: '突變規則（低重力、玻璃大砲、吸血、持久戰、劇毒、狂熱）', daily: '每日挑戰（同一天題目固定）', mutators2: '突變規則（逆轉、天氣多變）', aipt: '電腦性格（預設、指定、隨機）', style: '角色流派（體力、速度、招式覆寫）' }[k], v);
+  for (const [k, v] of Object.entries(mech)) ok('機制：' + { parry: '精準招架', punish: '確反加傷', tech: '受身與強制倒地', wall: '撞牆反彈', burst: '爆氣', guard: '防禦崩潰', simple: '簡易操作輔助連段', rc: '迅移取消', hazard: '場景機關（火山、雪原、強風、鐘聲）', hazard2: '新場景機關（月台通電、神殿符文）與回滾一致', art: '街機／經典畫風繪製', calm: '減少閃光', dashcd: '衝刺冷卻（衝刺取消冷卻較長）', mutators: '突變規則（低重力、玻璃大砲、吸血、持久戰、劇毒、狂熱）', daily: '每日挑戰（同一天題目固定）', mutators2: '突變規則（逆轉、天氣多變）', aipt: '電腦性格（預設、指定、隨機）', style: '角色流派（體力、速度、招式覆寫）' }[k], v);
 
   // ---- 連段挑戰
   const tr = await pg.evaluate(() => {

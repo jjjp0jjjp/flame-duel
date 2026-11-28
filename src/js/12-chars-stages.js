@@ -165,6 +165,27 @@ function bgKind(b,S,r){
   g=b.createRadialGradient(640,170,4,640,170,90);g.addColorStop(0,'rgba(255,220,120,.95)');g.addColorStop(.4,'rgba(255,110,30,.6)');g.addColorStop(1,'rgba(255,60,10,0)');b.fillStyle=g;b.fillRect(520,60,240,200);
   b.lineCap='round';b.lineJoin='round';for(let i=0;i<3;i++){const x0=612+i*28,s=(i-1)*.9;b.beginPath();b.moveTo(x0,174);b.bezierCurveTo(x0+s*40,250,x0+s*90+(r()-.5)*30,330,x0+s*150,GY-4);b.strokeStyle='rgba(255,90,20,.35)';b.lineWidth=16;b.stroke();b.strokeStyle='#e8501a';b.lineWidth=7;b.stroke();b.strokeStyle='#ffb347';b.lineWidth=2.5;b.stroke()}
   b.fillStyle=S.b[1];for(let i=0;i<9;i++){const x=r()*W,w=40+r()*80,h=20+r()*50;b.beginPath();b.moveTo(x,GY);b.lineTo(x+w*.3,GY-h);b.lineTo(x+w*.7,GY-h*.7);b.lineTo(x+w,GY);b.closePath();b.fill()}
+ }else if(S.k==='subway'){
+  // 地下鐵月台：天花板、磁磚牆、停靠的列車、燈條
+  b.fillStyle='#0c0f18';b.fillRect(0,0,W,90);b.fillStyle='#1a2030';b.fillRect(0,90,W,10);
+  for(let x=40;x<W;x+=160){const g2=b.createLinearGradient(0,92,0,260);g2.addColorStop(0,'rgba(255,240,200,.35)');g2.addColorStop(1,'rgba(255,240,200,0)');b.fillStyle=g2;b.beginPath();b.moveTo(x+20,96);b.lineTo(x+60,96);b.lineTo(x+110,260);b.lineTo(x-30,260);b.closePath();b.fill();b.fillStyle='#fff6d8';b.fillRect(x+16,92,48,5)}
+  b.fillStyle='#2a3248';b.fillRect(0,100,W,GY-100);b.strokeStyle='rgba(255,255,255,.06)';b.lineWidth=1;for(let y=110;y<GY;y+=18){b.beginPath();b.moveTo(0,y);b.lineTo(W,y);b.stroke()}for(let x=0;x<W;x+=24){b.beginPath();b.moveTo(x,100);b.lineTo(x,GY);b.stroke()}
+  // 列車（月台後方）：車身、車窗、門
+  const ty=GY-170;b.fillStyle='#3a4a6a';b.fillRect(0,ty,W,150);b.fillStyle='#ffd23d';b.fillRect(0,ty+108,W,8);b.fillStyle='#2a3650';b.fillRect(0,ty+118,W,32);
+  for(let x=20;x<W;x+=130){b.fillStyle=r()<.7?'#fff3c0':'#4a5a7a';b.fillRect(x,ty+24,80,46);b.fillStyle='rgba(0,0,0,.35)';b.fillRect(x,ty+24,80,6);b.strokeStyle='#1a2238';b.lineWidth=3;b.strokeRect(x,ty+24,80,46);
+   if(r()<.5){b.fillStyle='#0c1220';b.fillRect(x+30+r()*30,ty+40,14,30)}}
+  for(let x=95;x<W;x+=260){b.fillStyle='#24304a';b.fillRect(x,ty+14,26,124);b.strokeStyle='#ffd23d';b.lineWidth=2;b.strokeRect(x,ty+14,26,124)}
+  // 站名牌（原創站名）與月台安全線
+  b.fillStyle='#e8ecf4';b.fillRect(W/2-90,128,180,34);b.fillStyle='#1a2a4a';b.font='bold 20px sans-serif';b.textAlign='center';b.fillText('烈焰町　3番線',W/2,152);b.textAlign='left';
+  b.fillStyle='rgba(255,210,60,.55)';b.fillRect(0,GY-6,W,6);
+ }else if(S.k==='sky'){
+  // 天空神殿：雲海、漂浮島、大理石柱
+  const cl=(x,y,w,h,a)=>{b.fillStyle='rgba(255,255,255,'+a+')';for(let i=0;i<5;i++){b.beginPath();b.ellipse(x+(i-2)*w*.22,y+(i%2)*h*.2,w*.3,h*.5,0,0,6.3);b.fill()}};
+  for(let i=0;i<10;i++)cl(r()*W,90+r()*180,120+r()*160,40+r()*30,.25+r()*.25);
+  for(let i=0;i<3;i++){const x=120+i*300+r()*60,y=170+r()*80,w=90+r()*60;b.fillStyle='#8a9ab8';b.beginPath();b.moveTo(x-w/2,y);b.lineTo(x+w/2,y);b.lineTo(x+w*.15,y+50);b.lineTo(x-w*.2,y+40);b.closePath();b.fill();b.fillStyle='#e8eef8';b.fillRect(x-w/2,y-6,w,8);
+   for(let k=0;k<3;k++){b.fillStyle='#f4f6fb';b.fillRect(x-w/2+10+k*(w-28)/2,y-46,8,40)}b.fillStyle='#dfe6f2';b.fillRect(x-w/2+4,y-52,w-8,7)}
+  for(let i=0;i<7;i++)cl(r()*W,GY-60+r()*40,200+r()*160,50,.55);
+  for(let x=30;x<W;x+=150){b.fillStyle='#f4f6fb';b.fillRect(x,GY-150,22,150);b.fillStyle='#d8e0ee';b.fillRect(x+16,GY-150,6,150);b.fillStyle='#e8eef8';b.fillRect(x-6,GY-160,34,12);b.fillRect(x-6,GY-8,34,8)}
  }else{
   let g=b.createLinearGradient(0,GY-220,0,GY);g.addColorStop(0,'rgba(220,255,200,0)');g.addColorStop(1,'rgba(220,255,200,.18)');b.fillStyle=g;b.fillRect(0,GY-220,W,220);
   for(let L=0;L<2;L++)for(let i=0;i<(L?16:24);i++){const x=r()*W,w=(L?14:8)+r()*(L?8:5);b.fillStyle=S.b[L];b.fillRect(x,0,w,GY);b.fillStyle='rgba(0,0,0,.25)';for(let y=30+r()*40;y<GY;y+=44+r()*20)b.fillRect(x-1,y,w+2,3);

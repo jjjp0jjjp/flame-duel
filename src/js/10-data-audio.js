@@ -53,7 +53,9 @@ const STG=[
  {n:'黃昏港',s:['#1b1034','#7b2d5f','#ff9a5a'],b:['#3a1f4a','#24123a'],w:'#ffe6a0',g:['#3a2540','#120a1c'],l:'#ffb36b',m:'#fff1b8'},
  {n:'極光雪原',s:['#04122b','#0b3b5e','#3fa7a0'],b:['#12344f','#0a2036'],w:'#bff6ff',g:['#25405c','#0a1624'],l:'#7fe3ff',m:'#e8f6ff'},
  {n:'火山口',k:'volcano',s:['#14040a','#4a1010','#ff5a1a'],b:['#2a0c0c','#160606'],w:'#ff8a3a',g:['#3a1410','#120404'],l:'#ff6a2a',m:'#ffb070'},
- {n:'竹林道場',k:'bamboo',s:['#0c1a14','#1f4a32','#a8d48a'],b:['#1d4a2a','#123020'],w:'#e8ffb0',g:['#5a4028','#2a1c10'],l:'#c9a36b',m:'#f4ffd8'}
+ {n:'竹林道場',k:'bamboo',s:['#0c1a14','#1f4a32','#a8d48a'],b:['#1d4a2a','#123020'],w:'#e8ffb0',g:['#5a4028','#2a1c10'],l:'#c9a36b',m:'#f4ffd8'},
+ {n:'地下鐵月台',k:'subway',s:['#07080f','#141a2a','#26324a'],b:['#1b2236','#10151f'],w:'#ffd86b',g:['#3a3f4a','#111318'],l:'#ffd23d',m:'#3a4258'},
+ {n:'天空神殿',k:'sky',s:['#1b3a6b','#4a7fc0','#bfe3ff'],b:['#e8eef8','#c8d4e8'],w:'#fff3c0',g:['#d8c8a8','#7a6a50'],l:'#ffe9a0',m:'#fffbe0'}
 ];
 function makeBg(S){
  const c=document.createElement('canvas'),rs=RS||1;c.width=Math.round(W*rs);c.height=Math.round(H*rs);const b=c.getContext('2d');b.scale(rs,rs);

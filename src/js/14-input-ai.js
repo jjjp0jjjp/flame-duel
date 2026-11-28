@@ -25,6 +25,9 @@ function aiInput(me,op){
  // 火山口機關：地面發光時離開噴口（難度越高越會躲）
  if(G.hz&&G.stage===3&&me.st!=='atk'&&me.st!=='hit'&&me.st!=='down'){const n=Math.floor(G.frame/VC),c=G.frame%VC,vx=vcX(n);
   if(c>=360&&c<450&&Math.abs(me.x-vx)<90){if(a.vn!==n){a.vn=n;a.vd=Math.random()<[.35,.75,.95][lv]}if(a.vd){const away=me.x<vx?'l':'r';if(me.x<70||me.x>W-70)i.u=1;i[away]=1;if(lv>1&&c<400&&!(me.x<90||me.x>W-90))i.dash=away==='r'?1:-1;return i}}}
+ // 地下鐵：兩端即將通電時往中間走；天空神殿：符文出現時去搶（難度越高越積極）
+ if(G.hz&&G.stage===5&&me.st!=='atk'&&me.st!=='hit'&&me.st!=='down'){const c=G.frame%SC;if(c>=470&&c<580&&(me.x<SEDGE+30||me.x>W-SEDGE-30)&&Math.random()<[.5,.85,1][lv]){i[me.x<W/2?'r':'l']=1;if(me.x<SEDGE||me.x>W-SEDGE)i.u=1;return i}}
+ if(G.hz&&G.stage===6&&me.st!=='atk'&&me.st!=='hit'&&me.st!=='down'&&me.y>=GY){const n=Math.floor(G.frame/RC),c=G.frame%RC;if(c>=300&&c<480&&p1.rnt!==n&&p2.rnt!==n){const rx=rnX(n),dx2=rx-me.x;if(a.rn!==n){a.rn=n;a.rg=Math.random()<[.3,.6,.85][lv]}if(a.rg){if(Math.abs(dx2)>20){i[dx2>0?'r':'l']=1;return i}if(ad>90)return i}}}
  // 迅移取消：命中後延長連段（氣夠且不想留超必殺時），或揮空收招太長時保命
  if(me.st==='atk'&&me.atk&&me.atk!==a.rcA&&me.mt>=50&&lv){const at=me.atk,rec=at.su+at.ac+at.rc-me.t;
   if(me.hit&&op.st==='hit'&&me.t>at.su+at.ac&&rec>6&&(at.cn===4||at.cn===0||at.cn===undefined)&&me.mt>=(lv>1?60:75)){a.rcA=at;if(Math.random()<[0,.12,.3][lv]){i.lp=i.hp=i.lk=1;a.t=3;a.rcN=1;return i}}

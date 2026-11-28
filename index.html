@@ -210,7 +210,9 @@ const STG=[
  {n:'黃昏港',s:['#1b1034','#7b2d5f','#ff9a5a'],b:['#3a1f4a','#24123a'],w:'#ffe6a0',g:['#3a2540','#120a1c'],l:'#ffb36b',m:'#fff1b8'},
  {n:'極光雪原',s:['#04122b','#0b3b5e','#3fa7a0'],b:['#12344f','#0a2036'],w:'#bff6ff',g:['#25405c','#0a1624'],l:'#7fe3ff',m:'#e8f6ff'},
  {n:'火山口',k:'volcano',s:['#14040a','#4a1010','#ff5a1a'],b:['#2a0c0c','#160606'],w:'#ff8a3a',g:['#3a1410','#120404'],l:'#ff6a2a',m:'#ffb070'},
- {n:'竹林道場',k:'bamboo',s:['#0c1a14','#1f4a32','#a8d48a'],b:['#1d4a2a','#123020'],w:'#e8ffb0',g:['#5a4028','#2a1c10'],l:'#c9a36b',m:'#f4ffd8'}
+ {n:'竹林道場',k:'bamboo',s:['#0c1a14','#1f4a32','#a8d48a'],b:['#1d4a2a','#123020'],w:'#e8ffb0',g:['#5a4028','#2a1c10'],l:'#c9a36b',m:'#f4ffd8'},
+ {n:'地下鐵月台',k:'subway',s:['#07080f','#141a2a','#26324a'],b:['#1b2236','#10151f'],w:'#ffd86b',g:['#3a3f4a','#111318'],l:'#ffd23d',m:'#3a4258'},
+ {n:'天空神殿',k:'sky',s:['#1b3a6b','#4a7fc0','#bfe3ff'],b:['#e8eef8','#c8d4e8'],w:'#fff3c0',g:['#d8c8a8','#7a6a50'],l:'#ffe9a0',m:'#fffbe0'}
 ];
 function makeBg(S){
  const c=document.createElement('canvas'),rs=RS||1;c.width=Math.round(W*rs);c.height=Math.round(H*rs);const b=c.getContext('2d');b.scale(rs,rs);
@@ -627,6 +629,27 @@ function bgKind(b,S,r){
   g=b.createRadialGradient(640,170,4,640,170,90);g.addColorStop(0,'rgba(255,220,120,.95)');g.addColorStop(.4,'rgba(255,110,30,.6)');g.addColorStop(1,'rgba(255,60,10,0)');b.fillStyle=g;b.fillRect(520,60,240,200);
   b.lineCap='round';b.lineJoin='round';for(let i=0;i<3;i++){const x0=612+i*28,s=(i-1)*.9;b.beginPath();b.moveTo(x0,174);b.bezierCurveTo(x0+s*40,250,x0+s*90+(r()-.5)*30,330,x0+s*150,GY-4);b.strokeStyle='rgba(255,90,20,.35)';b.lineWidth=16;b.stroke();b.strokeStyle='#e8501a';b.lineWidth=7;b.stroke();b.strokeStyle='#ffb347';b.lineWidth=2.5;b.stroke()}
   b.fillStyle=S.b[1];for(let i=0;i<9;i++){const x=r()*W,w=40+r()*80,h=20+r()*50;b.beginPath();b.moveTo(x,GY);b.lineTo(x+w*.3,GY-h);b.lineTo(x+w*.7,GY-h*.7);b.lineTo(x+w,GY);b.closePath();b.fill()}
+ }else if(S.k==='subway'){
+  // 地下鐵月台：天花板、磁磚牆、停靠的列車、燈條
+  b.fillStyle='#0c0f18';b.fillRect(0,0,W,90);b.fillStyle='#1a2030';b.fillRect(0,90,W,10);
+  for(let x=40;x<W;x+=160){const g2=b.createLinearGradient(0,92,0,260);g2.addColorStop(0,'rgba(255,240,200,.35)');g2.addColorStop(1,'rgba(255,240,200,0)');b.fillStyle=g2;b.beginPath();b.moveTo(x+20,96);b.lineTo(x+60,96);b.lineTo(x+110,260);b.lineTo(x-30,260);b.closePath();b.fill();b.fillStyle='#fff6d8';b.fillRect(x+16,92,48,5)}
+  b.fillStyle='#2a3248';b.fillRect(0,100,W,GY-100);b.strokeStyle='rgba(255,255,255,.06)';b.lineWidth=1;for(let y=110;y<GY;y+=18){b.beginPath();b.moveTo(0,y);b.lineTo(W,y);b.stroke()}for(let x=0;x<W;x+=24){b.beginPath();b.moveTo(x,100);b.lineTo(x,GY);b.stroke()}
+  // 列車（月台後方）：車身、車窗、門
+  const ty=GY-170;b.fillStyle='#3a4a6a';b.fillRect(0,ty,W,150);b.fillStyle='#ffd23d';b.fillRect(0,ty+108,W,8);b.fillStyle='#2a3650';b.fillRect(0,ty+118,W,32);
+  for(let x=20;x<W;x+=130){b.fillStyle=r()<.7?'#fff3c0':'#4a5a7a';b.fillRect(x,ty+24,80,46);b.fillStyle='rgba(0,0,0,.35)';b.fillRect(x,ty+24,80,6);b.strokeStyle='#1a2238';b.lineWidth=3;b.strokeRect(x,ty+24,80,46);
+   if(r()<.5){b.fillStyle='#0c1220';b.fillRect(x+30+r()*30,ty+40,14,30)}}
+  for(let x=95;x<W;x+=260){b.fillStyle='#24304a';b.fillRect(x,ty+14,26,124);b.strokeStyle='#ffd23d';b.lineWidth=2;b.strokeRect(x,ty+14,26,124)}
+  // 站名牌（原創站名）與月台安全線
+  b.fillStyle='#e8ecf4';b.fillRect(W/2-90,128,180,34);b.fillStyle='#1a2a4a';b.font='bold 20px sans-serif';b.textAlign='center';b.fillText('烈焰町　3番線',W/2,152);b.textAlign='left';
+  b.fillStyle='rgba(255,210,60,.55)';b.fillRect(0,GY-6,W,6);
+ }else if(S.k==='sky'){
+  // 天空神殿：雲海、漂浮島、大理石柱
+  const cl=(x,y,w,h,a)=>{b.fillStyle='rgba(255,255,255,'+a+')';for(let i=0;i<5;i++){b.beginPath();b.ellipse(x+(i-2)*w*.22,y+(i%2)*h*.2,w*.3,h*.5,0,0,6.3);b.fill()}};
+  for(let i=0;i<10;i++)cl(r()*W,90+r()*180,120+r()*160,40+r()*30,.25+r()*.25);
+  for(let i=0;i<3;i++){const x=120+i*300+r()*60,y=170+r()*80,w=90+r()*60;b.fillStyle='#8a9ab8';b.beginPath();b.moveTo(x-w/2,y);b.lineTo(x+w/2,y);b.lineTo(x+w*.15,y+50);b.lineTo(x-w*.2,y+40);b.closePath();b.fill();b.fillStyle='#e8eef8';b.fillRect(x-w/2,y-6,w,8);
+   for(let k=0;k<3;k++){b.fillStyle='#f4f6fb';b.fillRect(x-w/2+10+k*(w-28)/2,y-46,8,40)}b.fillStyle='#dfe6f2';b.fillRect(x-w/2+4,y-52,w-8,7)}
+  for(let i=0;i<7;i++)cl(r()*W,GY-60+r()*40,200+r()*160,50,.55);
+  for(let x=30;x<W;x+=150){b.fillStyle='#f4f6fb';b.fillRect(x,GY-150,22,150);b.fillStyle='#d8e0ee';b.fillRect(x+16,GY-150,6,150);b.fillStyle='#e8eef8';b.fillRect(x-6,GY-160,34,12);b.fillRect(x-6,GY-8,34,8)}
  }else{
   let g=b.createLinearGradient(0,GY-220,0,GY);g.addColorStop(0,'rgba(220,255,200,0)');g.addColorStop(1,'rgba(220,255,200,.18)');b.fillStyle=g;b.fillRect(0,GY-220,W,220);
   for(let L=0;L<2;L++)for(let i=0;i<(L?16:24);i++){const x=r()*W,w=(L?14:8)+r()*(L?8:5);b.fillStyle=S.b[L];b.fillRect(x,0,w,GY);b.fillStyle='rgba(0,0,0,.25)';for(let y=30+r()*40;y<GY;y+=44+r()*20)b.fillRect(x-1,y,w+2,3);
@@ -969,6 +992,9 @@ function aiInput(me,op){
  // 火山口機關：地面發光時離開噴口（難度越高越會躲）
  if(G.hz&&G.stage===3&&me.st!=='atk'&&me.st!=='hit'&&me.st!=='down'){const n=Math.floor(G.frame/VC),c=G.frame%VC,vx=vcX(n);
   if(c>=360&&c<450&&Math.abs(me.x-vx)<90){if(a.vn!==n){a.vn=n;a.vd=Math.random()<[.35,.75,.95][lv]}if(a.vd){const away=me.x<vx?'l':'r';if(me.x<70||me.x>W-70)i.u=1;i[away]=1;if(lv>1&&c<400&&!(me.x<90||me.x>W-90))i.dash=away==='r'?1:-1;return i}}}
+ // 地下鐵：兩端即將通電時往中間走；天空神殿：符文出現時去搶（難度越高越積極）
+ if(G.hz&&G.stage===5&&me.st!=='atk'&&me.st!=='hit'&&me.st!=='down'){const c=G.frame%SC;if(c>=470&&c<580&&(me.x<SEDGE+30||me.x>W-SEDGE-30)&&Math.random()<[.5,.85,1][lv]){i[me.x<W/2?'r':'l']=1;if(me.x<SEDGE||me.x>W-SEDGE)i.u=1;return i}}
+ if(G.hz&&G.stage===6&&me.st!=='atk'&&me.st!=='hit'&&me.st!=='down'&&me.y>=GY){const n=Math.floor(G.frame/RC),c=G.frame%RC;if(c>=300&&c<480&&p1.rnt!==n&&p2.rnt!==n){const rx=rnX(n),dx2=rx-me.x;if(a.rn!==n){a.rn=n;a.rg=Math.random()<[.3,.6,.85][lv]}if(a.rg){if(Math.abs(dx2)>20){i[dx2>0?'r':'l']=1;return i}if(ad>90)return i}}}
  // 迅移取消：命中後延長連段（氣夠且不想留超必殺時），或揮空收招太長時保命
  if(me.st==='atk'&&me.atk&&me.atk!==a.rcA&&me.mt>=50&&lv){const at=me.atk,rec=at.su+at.ac+at.rc-me.t;
   if(me.hit&&op.st==='hit'&&me.t>at.su+at.ac&&rec>6&&(at.cn===4||at.cn===0||at.cn===undefined)&&me.mt>=(lv>1?60:75)){a.rcA=at;if(Math.random()<[0,.12,.3][lv]){i.lp=i.hp=i.lk=1;a.t=3;a.rcN=1;return i}}
@@ -1434,6 +1460,8 @@ function amb(){const t=performance.now(),s=G.stage;ctx.save();for(let i=0;i<46;i
  else if(s===1){x=(i*131+Math.sin(t*.001+i)*30+W)%W;y=GY-((t*.03*k+i*47)%GY);ctx.fillStyle='rgba(255,'+(140+i*2)+',80,.7)';ctx.fillRect(x,y,k,k)}
  else if(s===2){x=(i*131+Math.sin(t*.0012+i)*40+W)%W;y=(t*.04*k+i*47)%GY;ctx.fillStyle='rgba(255,255,255,.75)';ctx.fillRect(x,y,k,k)}
  else if(s===3){x=(i*131+Math.sin(t*.002+i)*24+W)%W;y=GY-((t*.06*k+i*53)%GY);ctx.fillStyle=i%3?'rgba(255,140,40,.8)':'rgba(255,220,120,.9)';ctx.fillRect(x,y,k+.5,k+.5)}
+ else if(s===5){x=(i*97+t*.02*k)%W;y=100+((i*61+t*.01*k)%(GY-110));ctx.fillStyle='rgba(200,210,230,.25)';ctx.fillRect(x,y,k*.8,k*.8)}
+ else if(s===6){x=(i*131+t*.02*k+W)%W;y=(i*47+Math.sin(t*.001+i)*20)%GY;ctx.fillStyle=i%3?'rgba(255,250,220,.7)':'rgba(255,230,150,.85)';ctx.beginPath();ctx.arc(x,y,k*.9,0,6.3);ctx.fill()}
  else{x=(i*131+Math.sin(t*.0015+i)*60+W)%W;y=(t*.035*k+i*47)%GY;ctx.save();ctx.translate(x,y);ctx.rotate(t*.002*k+i);ctx.fillStyle=i%2?'rgba(140,200,110,.75)':'rgba(200,230,140,.7)';ctx.beginPath();ctx.ellipse(0,0,5+k,1.8,0,0,6.3);ctx.fill();ctx.restore()}}ctx.restore()}
 function draw(){
  ctx.setTransform(RS,0,0,RS,0,0);ctx.imageSmoothingQuality='high';
@@ -2443,7 +2471,11 @@ $('smbtn').onclick=()=>{const n=((SIMPLE[0]?1:0)+(SIMPLE[1]?2:0)+1)%4;SIMPLE=[n&
 function rcFx(f){if(NOFX)return;achEv('rc',f);const c=colOf(f);gho(f,c);ring(f.x,f.y-70,'#fff');ring(f.x,f.y-70,c);emb(f.x,f.y-70,c,18,6,16,4,1);pp({x:f.x,y:f.y-160,vx:0,vy:-.6,l:45,m:45,txt:'迅移！',c:'#7fe3ff',text:1,big:1});G.rcF=performance.now()+180;snd(1200,.12,'sine',.06,300);sfx('cancel')}
 // ---- 場景機關（選單可開關；開關值會跟著連線開局訊息與重播一起保存）
 let HZ=0;try{HZ=+(localStorage.getItem('fd_hz')||0)?1:0}catch(e){}
-const HZN=['夜城：屋頂定時颳強風','黃昏港：木箱牆可撞破','極光雪原：地面濕滑','火山口：定時噴發','竹林道場：定時鐘響，雙方加氣'];
+const HZN=['夜城：屋頂定時颳強風','黃昏港：木箱牆可撞破','極光雪原：地面濕滑','火山口：定時噴發','竹林道場：定時鐘響，雙方加氣','地下鐵月台：月台兩端定時通電','天空神殿：搶先站上符文可強化'];
+// 地下鐵：每 600 幀一次，前 60 幀警示燈，接著 40 幀兩端（左右 110px 內）通電
+const SC=600,SEDGE=110;
+// 天空神殿：每 540 幀一次，第 300～480 幀地面出現符文；先在上面站滿 40 幀的人得到 5 秒強化與 25 氣
+const RC=540,rnX=n=>200+((n*263+G.round*71)%560);
 function hzApply(){G.hz=G.hzo!=null?(G.hzo?1:0):HZ;G.hzo=null;if(REC&&G.hz)REC.hz=1}
 function hzLabel(){const b=$('hzbtn');if(b){b.textContent='場景機關：'+(HZ?'開':'關');b.classList.toggle('on',!!HZ);b.title=HZN.join('\n')}}
 // 火山：每 480 幀一次，前 60 幀地面發光預告，接著 30 幀岩漿柱；位置只由幀數決定（確定性）
@@ -2460,6 +2492,10 @@ function hzStep(){
    f.hzh=n;f.hp=Math.max(1,f.hp-7);f.st='hit';f.atk=null;f.buf=null;f.stun=22;f.kd=1;f.vy=-12;f.vx=(f.x<x?-1:1)*2.5;f.flash=6;G.hitstop=Math.max(G.hitstop,5);if(!NOFX){emb(f.x,f.y-40,'#ff8a3a',16,6,18,4,2);spark(f.x,f.y-50,'#ffd27a',10)}sfx('hitbig')}}
  if(hz===0||wx==='wind'){const n=Math.floor(G.frame/WC),c=G.frame%WC;if(c>=420&&c<510){const dr=wdDir(n);for(const f of[p1,p2])if(f.y>=GY&&f.st!=='down'&&f.st!=='ko')f.x=Math.max(40,Math.min(W-40,f.x+dr*1.1))}if(c===420)noise(.9,.08,700,'bandpass',300)}
  if(hz===4&&G.frame%BC===BC-20){for(const f of[p1,p2])if(f.st!=='ko')f.mt=Math.min(100,f.mt+15);if(!NOFX){P({ring:1,x:W/2,y:96,c:'#ffe14d',l:30,rs:9,lw:5});pp({x:W/2,y:140,vx:0,vy:-.4,l:60,m:60,txt:'鐘聲：雙方氣 +15',c:'#ffe14d',text:1})}snd(196,1.4,'sine',.12,190);snd(392,1,'sine',.05,380)}
+ if(hz===5){const n=Math.floor(G.frame/SC),c=G.frame%SC;if(c===540)noise(.3,.12,3000,'highpass',800);
+  if(c>=540&&c<580)for(const f of[p1,p2]){if(f.hzh===1000+n||f.st==='ko'||f.st==='down'||f.y<GY-2||(f.x>SEDGE&&f.x<W-SEDGE))continue;f.hzh=1000+n;f.hp=Math.max(1,f.hp-6);f.st='hit';f.atk=null;f.buf=null;f.stun=26;f.vx=(f.x<W/2?1:-1)*5;f.flash=8;G.hitstop=Math.max(G.hitstop,8);if(!NOFX){for(let i=0;i<5;i++)P({t:'zz',x:f.x,y:f.y-60,ang:rr_(0,6.28),len:rr_(20,40),c:i%2?'#ffe680':'#8fe8ff',l:10,g:0,dr:1});spark(f.x,f.y-60,'#fff3b0',10)}sfx('thunder')}}
+ if(hz===6){const n=Math.floor(G.frame/RC),c=G.frame%RC,x=rnX(n);if(c===300){p1.rnc=0;p2.rnc=0}
+  if(c>=300&&c<480&&p1.rnt!==n&&p2.rnt!==n)for(const f of[p1,p2]){const on=f.y>=GY&&Math.abs(f.x-x)<40&&f.st!=='hit'&&f.st!=='down'&&f.st!=='ko';f.rnc=on?(f.rnc||0)+1:0;if(f.rnc>=40){f.rnt=n;f.pw=300;f.mt=Math.min(100,f.mt+25);if(!NOFX){P({ring:1,x,y:GY-4,c:'#ffe9a0',l:24,rs:9,lw:6,flat:1});emb(x,GY-30,'#fff3b0',20,5,24,4,2);pp({x:f.x,y:f.y-160,vx:0,vy:-.6,l:55,m:55,txt:'神殿祝福！',c:'#ffe9a0',text:1,big:1})}snd(784,.5,'sine',.08,1568);break}}}
  if(hz===2||wx==='rain')for(const f of[p1,p2])if(f.y>=GY&&(f.st==='hit'||f.st==='block'||f.st==='down'||f.st==='dash'||f.st==='atk')&&Math.abs(f.vx)>.3){f.x=Math.max(40,Math.min(W-40,f.x+f.vx*.45));if(!NOFX&&G.frame%4===0)P({t:'e',x:f.x,y:GY-2,vx:-f.vx*.3,vy:-.5,l:14,s:2.5,c:'#e8f6ff',g:.05,dr:.9})}
 }
 // 黃昏港：第一次在血量 60% 以下被撞牆，木箱牆碎裂，額外傷害並彈得更遠
@@ -2470,6 +2506,8 @@ function hzDraw(){
  const wx=wxNow();if((!G.hz&&!wx)||!p1)return;ctx.save();const hz=G.hz?G.stage:-1;
  if(wx==='rain'&&!NOFX){ctx.strokeStyle='rgba(170,200,255,.35)';ctx.lineWidth=1.2;ctx.beginPath();for(let i=0;i<70;i++){const x=(i*137+G.frame*3)%(W+100)-50,y=(i*89+G.frame*14)%(GY+40)-40;ctx.moveTo(x,y);ctx.lineTo(x-4,y+16)}ctx.stroke()}
 
+ if(hz===5&&G.phase==='fight'){const c=G.frame%SC;if(c>=480&&c<580){const live=c>=540,fl=G.frame%10<5;ctx.globalCompositeOperation='lighter';for(const k of[0,1]){const x0=k?W-SEDGE:0;if(!live){ctx.fillStyle=fl?'rgba(255,60,40,.22)':'rgba(255,60,40,.08)';ctx.fillRect(x0,GY-200,SEDGE,200)}else{ctx.fillStyle='rgba(120,220,255,.18)';ctx.fillRect(x0,GY-200,SEDGE,200);ctx.strokeStyle='rgba(200,240,255,.9)';ctx.lineWidth=2;ctx.beginPath();for(let j=0;j<3;j++){let y=GY-190+j*12,x=x0+((G.frame*7+j*37)%SEDGE);ctx.moveTo(x,y);for(let s=0;s<8;s++){x+=(Math.random()-.5)*30;y+=24;ctx.lineTo(Math.max(x0,Math.min(x0+SEDGE,x)),y)}}ctx.stroke()}}ctx.globalCompositeOperation='source-over';if(!live){ctx.font='bold 16px '+FONT;ctx.textAlign='center';ctx.fillStyle=fl?'#ff6b6b':'#ffb0a0';ctx.fillText('⚠ 月台兩端即將通電',W/2,170)}}}
+ if(hz===6&&G.phase==='fight'){const n=Math.floor(G.frame/RC),c=G.frame%RC;if(c>=300&&c<480&&p1.rnt!==n&&p2.rnt!==n){const x=rnX(n),pr=Math.max(p1.rnc||0,p2.rnc||0)/40,pu=.6+.4*Math.sin(G.frame*.15);ctx.save();ctx.globalCompositeOperation='lighter';ctx.translate(x,GY-2);ctx.scale(1,.28);ctx.strokeStyle='rgba(255,233,160,'+pu+')';ctx.lineWidth=5;ctx.beginPath();ctx.arc(0,0,42,0,6.3);ctx.stroke();ctx.beginPath();for(let i=0;i<6;i++){const a=i/6*6.283+G.frame*.02;ctx.moveTo(Math.cos(a)*42,Math.sin(a)*42);ctx.lineTo(Math.cos(a+2.1)*42,Math.sin(a+2.1)*42)}ctx.stroke();if(pr>0){ctx.strokeStyle='#ffffff';ctx.lineWidth=7;ctx.beginPath();ctx.arc(0,0,50,-Math.PI/2,-Math.PI/2+6.283*pr);ctx.stroke()}ctx.restore()}}
  if(hz===1)[0,1].forEach(k=>{if(G.wbk===k+1)return;const x=k?W-44:0;crate(x,GY-44,44);crate(x,GY-88,44);crate(k?x+8:x-8,GY-124,36)});
  if((hz===0||wx==='wind')&&G.phase==='fight'){const n=Math.floor(G.frame/WC),c=G.frame%WC,dr=wdDir(n);if(c>=360&&c<510){const str=c<420?(c-360)/60*.35:1;ctx.globalCompositeOperation='lighter';ctx.strokeStyle='rgba(200,220,255,'+(.25*str)+')';ctx.lineWidth=2;ctx.beginPath();for(let i=0;i<18;i++){const y=140+((i*53)%300),x=((i*97+G.frame*(10+i%4*3)*dr)%(W+200)+W+200)%(W+200)-100;ctx.moveTo(x,y);ctx.lineTo(x-dr*(40+i%3*30)*str,y)}ctx.stroke();if(c<420){ctx.globalCompositeOperation='source-over';ctx.font='bold 18px '+FONT;ctx.textAlign='center';ctx.fillStyle='rgba(200,220,255,.8)';ctx.fillText(dr>0?'強風 ≫≫≫':'≪≪≪ 強風',W/2,170)}}}
  if(hz===4&&G.phase==='fight'){const c=G.frame%BC;if(c>=BC-80&&c<BC-20){const sw=Math.sin(c*.5)*.4*(c-(BC-80))/60;ctx.save();ctx.translate(W/2,104);ctx.rotate(sw);ctx.fillStyle='#c9a36b';ctx.strokeStyle='#2a1c10';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-12,0);ctx.quadraticCurveTo(-12,-18,0,-20);ctx.quadraticCurveTo(12,-18,12,0);ctx.lineTo(15,6);ctx.lineTo(-15,6);ctx.closePath();ctx.fill();ctx.stroke();ctx.restore()}}
@@ -2547,7 +2585,7 @@ function bgDraw(l){
 // 觀眾：剪影＋舞台色邊光，連段或重擊時歡呼
 let CROWD=null;
 function crowdDraw(l){
- if(!ART||!p1||G.stage===3||QM===3)return;
+ if(!ART||!p1||G.stage===3||G.stage===6||QM===3)return;
  if(!CROWD){CROWD=[];for(let i=0;i<44;i++)CROWD.push({x:-40+i*24+Math.random()*12,h:34+Math.random()*18,w:.85+Math.random()*.35,ph:Math.random()*6.3,c:Math.random()})}
  const S=STG[G.stage],hype=Math.min(1,G.shake/8+(Math.max(p1.combo,p2.combo)>=3?.6:0)+(G.phase==='ko'||G.phase==='over'?.8:0)),t=G.frame*.2,base=GY-1;
  ctx.save();ctx.translate(l*.12,0);
@@ -2596,6 +2634,8 @@ function fgDraw(){
   else if(st===1){ctx.rect(0,-34,170,34);ctx.moveTo(40,-34);ctx.arc(40,-46,14,Math.PI,0);ctx.rect(26,-46,28,12);ctx.moveTo(120,-34);ctx.arc(120,-44,11,Math.PI,0);ctx.rect(109,-44,22,10)}
   else if(st===2){ctx.moveTo(0,0);ctx.lineTo(0,-40);ctx.quadraticCurveTo(40,-62,80,-38);ctx.quadraticCurveTo(120,-50,160,-20);ctx.lineTo(170,0);ctx.closePath()}
   else if(st===3){ctx.moveTo(0,0);ctx.lineTo(0,-54);ctx.lineTo(36,-70);ctx.lineTo(70,-40);ctx.lineTo(110,-48);ctx.lineTo(150,-16);ctx.lineTo(160,0);ctx.closePath()}
+  else if(st===5){ctx.rect(0,-40,160,40);ctx.rect(14,-62,8,22);ctx.rect(110,-62,8,22);ctx.rect(10,-66,120,6)}
+  else if(st===6){for(let i=0;i<4;i++){ctx.moveTo(i*44,0);ctx.ellipse(i*44+20,-14-(i%2)*8,40,20,0,Math.PI,0)}}
   else{for(let i=0;i<9;i++){const x=i*18,h=30+((i*37)%28);ctx.moveTo(x,0);ctx.quadraticCurveTo(x+4,-h*.6,x+10+(i%2?6:-6),-h);ctx.quadraticCurveTo(x+8,-h*.5,x+14,0)}}
   ctx.fill();ctx.globalAlpha=.5;ctx.lineWidth=2;ctx.stroke();
   if(st===3){ctx.globalAlpha=.6+.3*Math.sin(G.frame*.1);ctx.strokeStyle='#ff6a2a';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(20,-40);ctx.lineTo(44,-30);ctx.lineTo(60,-36);ctx.stroke()}
@@ -3064,7 +3104,7 @@ function helpRender(){
 <b>防禦耐久：</b>血條下方的藍條。一直防禦會減少，歸零時<b>破防</b>，長時間硬直；不防禦一陣子會慢慢回復。<br>
 <b>迅移取消：</b>出招中同時按<b>輕拳＋重拳＋輕腳</b>（50 氣），立刻取消招式回到可行動；命中時使用，對手會多硬直一點，可延長連段或掩護失誤。<br>
 <b>簡易操作：</b>設定裡可讓 P1／P2 各自切換。命中後不按方向、連按任一攻擊鍵會自動接 輕→輕腳→重拳→必殺（必殺要 50 氣），傷害 ×0.85。<br>
-<b>場景機關：</b>選單「機關」開啟後：夜城屋頂定時颳強風，把兩人往同一邊推（畫面會先預告方向）；黃昏港的木箱牆第一次被撞（血量 60% 以下）會碎裂、多受傷害；極光雪原被擊退會滑更遠；火山口定時噴發，地面發光的位置要閃開；竹林道場定時鐘響，雙方各加 15 氣。<br>
+<b>場景機關：</b>選單「機關」開啟後：夜城屋頂定時颳強風，把兩人往同一邊推（畫面會先預告方向）；黃昏港的木箱牆第一次被撞（血量 60% 以下）會碎裂、多受傷害；極光雪原被擊退會滑更遠；火山口定時噴發，地面發光的位置要閃開；竹林道場定時鐘響，雙方各加 15 氣；地下鐵月台的兩端會定時通電（先有警示燈），別被逼到角落；天空神殿的地面會浮現符文，先在上面站滿約 0.7 秒的人得到 5 秒傷害 +25% 與 25 氣。<br>
 <b>突變規則：</b>選單「規則」可複選：低重力、狂熱（氣快速回復、衝刺無冷卻）、劇毒擂台、玻璃大砲（傷害 ×1.7）、吸血擂台、持久戰（傷害 ×0.6、99 秒）、逆轉（輸掉回合的一方下回合開場 50 氣、傷害 +10%）、天氣多變（每回合輪流雨天地滑、強風、濃霧）；選「🎲 隨機」每場抽 1～2 條。連線時以房主的設定為準。<br>
 <b>角色流派：</b>選角時在角色資訊下方切換「標準」或該角色的流派（每位角色一種，P1／P2 各自選）。流派會改動部分招式、體力、速度、傷害或集氣速度，說明會顯示在按鈕下方。街機與生存的對手流派隨機。<br>
 <b>電腦性格：</b>選單「電腦」可選：角色預設、猛攻型（一直逼近）、防守反擊型（等你出招再反擊）、遠攻型（保持距離、放飛行道具）、投技型（貼身就抓）或隨機。對戰時電腦名字旁會標出性格。<br>
