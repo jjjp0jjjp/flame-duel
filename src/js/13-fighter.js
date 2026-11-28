@@ -25,7 +25,7 @@ start(m,nf){
  if(m!=='burst'&&MV[m]&&!!MV[m].air!==air){this.buf=null;return false}
  if(a.cost){if(this.mt<a.cost){this.buf=null;return false}this.mt-=a.cost}
  this.st='atk';this.atk=a;this.t=0;this.hit=false;this.hc=0;this.hlt=0;this.pd=0;this.buf=null;if(nf)this.cl.push(m);else this.cl=[m];if(!air)this.vx=0;
- if(a.ex){G.hitstop=24;G.supEnd=performance.now()+850;G.supName=a.name;G.supCol=this.ch.col;G.supCh=CH.indexOf(this.ch);G.supSide=this===p1?0:1;G.shake=10;snd(100,.5,'sawtooth',.1,800)}
+ if(a.ex){G.hitstop=24;G.supEnd=performance.now()+850;G.supName=a.name;G.supCol=this.ch.col;G.supCh=chi(this.ch);G.supSide=this===p1?0:1;G.shake=10;snd(100,.5,'sawtooth',.1,800)}
  else sfx(/hp|hk|lunge|spin|upper|sweep|th/.test(m)?'heavy':'swoosh');
  return true;
 }
@@ -112,7 +112,7 @@ getHit(src,a,px){
  if(a.throw&&(a.key==='th'||a.key==='th2')&&((this.st==='atk'&&this.atk&&(this.atk.key==='th'||this.atk.key==='th2'))||(this.buf&&(this.buf.m==='th'||this.buf.m==='th2')&&this.buf.t>=5))){
   const sg=this.x>=px?1:-1;this.vx=sg*7;src.vx=-sg*7;this.stun=14;src.stun=14;this.st='hit';src.st='hit';this.atk=null;src.atk=null;this.buf=null;src.buf=null;
   ring(this.x,this.y-70,'#fff');ring(this.x,this.y-70,'#7ec8ff');pp({x:this.x,y:this.y-130,vx:0,vy:-.6,l:50,m:50,txt:'TECH!',c:'#7ec8ff',text:1,big:1});sfx('block');G.hitstop=Math.max(G.hitstop,6);return true}
- if(this.st==='atk'&&this.atk&&((this.ch.armor&&(this.atk.key==='hp'||this.atk.key==='hk'))||this.atk.arm)&&this.t<=this.atk.su&&!a.throw){this.hp=Math.max(1,this.hp-a.d*(this.ch.ar||.5));spark(this.x,this.y-80,'#ffd23d',8);ring(this.x,this.y-80,'#ffd23d');sfx('block');G.hitstop=Math.max(G.hitstop,4);return true}
+ if(this.st==='atk'&&this.atk&&((this.ch.armor&&(this.atk.key==='hp'||this.atk.key==='hk'))||this.atk.arm||this.parm)&&this.t<=this.atk.su&&!a.throw){this.hp=Math.max(1,this.hp-a.d*(this.ch.ar||.5));spark(this.x,this.y-80,'#ffd23d',8);ring(this.x,this.y-80,'#ffd23d');sfx('block');G.hitstop=Math.max(G.hitstop,4);return true}
  const sgn=this.x>=px?1:-1;
  // 上下段：中段（含跳躍攻擊）蹲著擋不住，下段站著擋不住
  const hi=a.ovh||(src.y<GY-2&&!a.mk),lo=a.low||a.key==='sweep',mis=this.st==='block'&&((hi&&this.bc)||(lo&&!this.bc));

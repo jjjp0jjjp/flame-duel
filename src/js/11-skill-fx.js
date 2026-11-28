@@ -8,7 +8,7 @@ const rok=(x,y,vx,vy,c)=>P({t:'rk',x,y,vx,vy,l:34+rnd(0,16),s:4+Math.random()*5,
 const slh=(x,y,ang,len,c,l)=>P({t:'sl',x,y,ang,len,l:l||12,c,g:0,dr:1});
 const gho=(f,tint)=>{const c=Object.assign({},f);c.tr=[];c.lt=-9;c.mt=0;c.hit=false;c.flash=0;c.tint=tint;P({t:'gh',f:c,l:14,g:0,dr:1})};
 function crk(x){const pts=[];let cx=-70;while(cx<70){pts.push([cx,(Math.random()-.5)*9]);cx+=9+Math.random()*10}P({t:'ck',x,y:GY+1,pts,l:55,g:0,dr:1})}
-const li_=f=>Math.max(0,CH.indexOf(f.ch));
+const li_=f=>chi(f.ch);
 // ---- 發光貼圖（依顏色快取）：取代 shadowBlur 與逐顆畫圓，光暈更柔、成本更低
 const hex6=c=>c.length===4?'#'+c[1]+c[1]+c[2]+c[2]+c[3]+c[3]:c.slice(0,7),GLW=new Map();
 function glowSpr(c){c=hex6(c);let s=GLW.get(c);if(s)return s;s=document.createElement('canvas');s.width=s.height=64;const g=s.getContext('2d'),r=g.createRadialGradient(32,32,0,32,32,32);

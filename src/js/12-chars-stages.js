@@ -256,7 +256,7 @@ function supPattern(ci,t,e){
  ctx.restore()}
 function portrait(ch,pose,x,y,sc,dir,side){ctx.save();ctx.translate(x,y);ctx.scale(sc,sc);ctx.translate(0,-GY);drawF({x:0,y:GY,dir,ch,side,st:'idle',pose,mt:0,flash:0,tr:[],ns:1,kt:0,atk:null,t:0,lt:G.frame});ctx.restore()}
 function supCine(k){
- const ci=G.supCh|0,ch=CH[ci],e=1-k,al=Math.min(1,k*4),sd=G.supSide?-1:1,t=performance.now()/1000;
+ const ci=G.supCh|0,ch=ci===BOSS.li?BOSS:CH[ci]||CH[0],e=1-k,al=Math.min(1,k*4),sd=G.supSide?-1:1,t=performance.now()/1000;
  ctx.save();ctx.fillStyle=`rgba(0,0,0,${.62*Math.min(1,k*3)})`;ctx.fillRect(0,0,W,H);
  ctx.globalAlpha=al;ctx.translate(W/2,H/2-30);ctx.rotate(-.08*sd);
  ctx.save();ctx.beginPath();ctx.rect(-W,-82,W*2,164);ctx.clip();
@@ -287,7 +287,7 @@ function vsScreen(){
  ctx.textAlign='center';ctx.font='bold 18px '+FONT;ctx.fillStyle='#fff';ctx.fillText('場景：'+STG[G.stage].n+(G.mode!==4?'　　Enter 跳過':''),W/2,H-24);
  ctx.restore()}
 function quote(f){
- const li=Math.max(0,CH.indexOf(f.ch)),s=QUO[li],x=f.x,y=f.y-178;
+ const li=chi(f.ch),s=QUO[li],x=f.x,y=f.y-178;
  ctx.save();ctx.font='bold 18px '+FONT;const w=ctx.measureText(s).width+28,h=36,l=x-w/2;
  ctx.fillStyle='#fff';ctx.strokeStyle='#0c0c1c';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(l+12,y);ctx.lineTo(l+w-12,y);ctx.arcTo(l+w,y,l+w,y+12,12);ctx.lineTo(l+w,y+h-12);ctx.arcTo(l+w,y+h,l+w-12,y+h,12);ctx.lineTo(x+8,y+h);ctx.lineTo(x,y+h+10);ctx.lineTo(x-6,y+h);ctx.lineTo(l+12,y+h);ctx.arcTo(l,y+h,l,y+h-12,12);ctx.lineTo(l,y+12);ctx.arcTo(l,y,l+12,y,12);ctx.closePath();ctx.fill();ctx.stroke();
  ctx.fillStyle='#111';ctx.textAlign='center';ctx.fillText(s,x,y+24);ctx.restore()}

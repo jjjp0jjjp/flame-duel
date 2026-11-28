@@ -115,7 +115,10 @@ const NI={l:0,r:0,u:0,d:0,dash:0,lp:0,hp:0,lk:0,hk:0,sp:0,th:0},rnd=(a,b)=>a+Mat
 // 火花：一般命中是會拉出光痕的火星（sk），落地／衝刺的塵土仍是小方塊
 function spark(x,y,c,n,g){if(NOFX)return;for(let i=0;i<n;i++){const a=Math.random()*6.28,s=2+Math.random()*(g?3:7),o={x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-(g?1:2),l:rnd(14,30),m:30,c,s:g?4:3};if(!g){o.t='sk';o.vx*=1.5;o.vy*=1.5;o.l=o.m=rnd(10,20);o.dr=.88}if(parts.length>700)parts.shift();parts.push(o)}}
 const ring=(x,y,c)=>NOFX||parts.push({x,y,ring:1,l:16,m:16,c});
-const hurt=f=>[f.x-24,f.y-((f.st==='block'&&f.bc)||(f.atk&&(f.atk.key==='sweep'||f.atk.low))?85:115),f.x+24,f.y];
+// 角色編號：一般角色是在 CH 裡的位置；頭目不在 CH 裡，用自己的 li
+const chi=ch=>ch&&ch.li!=null?ch.li:Math.max(0,CH.indexOf(ch));
+// 受擊範圍（頭目體型較大，依 sc 放大）
+const hurt=f=>{const s=f.sc||1;return[f.x-24*s,f.y-((f.st==='block'&&f.bc)||(f.atk&&(f.atk.key==='sweep'||f.atk.low))?85:115)*s,f.x+24*s,f.y]};
 const hbox=(f,a)=>{if(a.around)return[f.x-a.r,f.y+a.h-50,f.x+a.r,f.y+a.h+50];const x1=f.x+f.dir*18,x2=f.x+f.dir*a.r;return[Math.min(x1,x2),f.y+a.h-24,Math.max(x1,x2),f.y+a.h+24]};
 const ov=(a,b)=>a[0]<b[2]&&a[2]>b[0]&&a[1]<b[3]&&a[3]>b[1];
 

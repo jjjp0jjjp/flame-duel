@@ -75,7 +75,7 @@ function trRec(){if(TR.rec){TR.rec=0;if(TR.buf.length){TR.dm=5;TR.pi=0}}else{TR.
 function trReset(){p1.reset();p2.reset();projs=[];FD=null;G.cam={z:1,cx:W/2}}
 const MVN={lp:'輕拳',hp:'重拳',lk:'輕腳',hk:'重腳',jab:'前手刺拳',lunge:'突進肘擊',push:'推踢',spin:'迴旋踢',flip:'後空翻踢',upper:'升龍拳',sweep:'掃堂腿',th:'投技',th2:'背摔',ap:'空拳',ak:'飛踢',dive:'俯衝踢',ctr:'反擊'};
 const SPI={sp:0,sp2:1,sp3:2,asp:3,ex:4,sp4:5};
-const mvName=(f,k)=>(f.ch.nm&&f.ch.nm[k])||(k==='sp4'&&f.ch.sp4n?f.ch.sp4n.replace(/（.*）/,''):0)||MVN[k]||(SPI[k]!==undefined?CHM[CH.indexOf(f.ch)].m[SPI[k]][1].replace(/（.*）/,''):k);
+const mvName=(f,k)=>(f.ch.nm&&f.ch.nm[k])||(k==='sp4'&&f.ch.sp4n?f.ch.sp4n.replace(/（.*）/,''):0)||MVN[k]||(SPI[k]!==undefined?CHM[chi(f.ch)].m[SPI[k]][1].replace(/（.*）/,''):k);
 const actable=f=>f.y>=GY&&(f.st==='idle'||f.st==='walk'||(f.st==='block'&&f.stun===0));
 function trainTick(){
  fmRec();
@@ -226,7 +226,7 @@ const cmdTag=a=>a.burn?'（燃燒）':a.thru?'（穿身）':a.knock?'（擊倒�
 const cmdList=ch=>CMDK.map(([k,l])=>[l,ch.nm[k]+cmdTag(ch.mv[k])]);
 const BKL=[['lp','輕拳'],['hp','重拳'],['lk','輕腳'],['hk','重腳'],['ap','空中輕拳'],['ak','空中腳']];
 const basicList=ch=>BKL.filter(([k])=>ch.nm&&ch.nm[k]).map(([k,l])=>[l,ch.nm[k]+cmdTag(ch.mv[k])]);
-const spList=i=>CHM[i].m.concat(CH[i].sp4n?[['↓+投技',CH[i].sp4n]]:[]);
+const spList=i=>(CHM[i]||{m:[]}).m.concat(CH[i]&&CH[i].sp4n?[['↓+投技',CH[i].sp4n]]:[]);
 let HTAB='基本';
 function helpRender(){
  const k=j=>'<b>'+KN(0,j)+'</b>',q=j=>'<b>'+KN(1,j)+'</b>';
@@ -257,6 +257,7 @@ function helpRender(){
 <b>角色流派：</b>選角時在角色資訊下方切換「標準」或該角色的流派（每位角色一種，P1／P2 各自選）。流派會改動部分招式、體力、速度、傷害或集氣速度，說明會顯示在按鈕下方。街機與生存的對手流派隨機。<br>
 <b>電腦性格：</b>選單「電腦」可選：角色預設、猛攻型（一直逼近）、防守反擊型（等你出招再反擊）、遠攻型（保持距離、放飛行道具）、投技型（貼身就抓）或隨機。對戰時電腦名字旁會標出性格。<br>
 <b>成就：</b>選單下方的「🏆 成就」可查看 15 個成就與進度，只計算自己的對戰（重播、觀戰、訓練不算），保存在這台裝置。<br>
+<b>頭目戰：</b>挑戰體型 1.5 倍的原創頭目「焰帝」（體力 320、重攻擊霸體、幾乎不會被擊退、會防禦）。招式有劈砸、掃踢、踏地（下段）、炎浪（下段）、追蹤焰柱與霸體衝撞；體力剩一半時覺醒，速度與傷害提高、所有攻擊起手都有霸體，並會放三道焰雨。一回合決勝、99 秒，保存最快討伐時間。<br>
 <b>爬塔挑戰：</b>一路對戰電腦，每層一回合決勝，體力延續（每層回復 25%）。每贏一層從 3 張強化卡選 1 張（力量、強韌、鬥志、迅捷、嗜血、蓄勢、不屈、荊棘、靈動、休整），可以疊加；越高層對手越強，每 5 層是精英層並帶隨機規則。輸了結束，依角色保存最高層數。<br>
 <b>每日挑戰：</b>每天一題固定的對戰（指定角色、場景、規則與強化版對手），一回合決勝，依剩餘體力與時間計分，保存當天最佳成績。<br>
 <b>訓練模式：</b>畫面下方的幀數條（綠＝起手、紅＝攻擊判定、藍＝收招、黃＝硬直，白框＝無敵）與左右的輸入紀錄。`,
@@ -278,7 +279,7 @@ function pauseScreen(){
   ['↓+重腳 掃堂腿（下段）　←+投技 背摔　↓+必殺 超必殺（100 氣）　↓+投技 第六必殺　中段要站著擋、下段要蹲著擋','#fff'],
   ['連段：輕→重→必殺→超必殺；同一連段每招只能用一次；命中後可衝刺或跳躍取消；輕拳＋重拳＋輕腳 迅移取消（50 氣）','#cfd2ff'],['','#fff']];
  const who=[p1].concat(G.mode===2&&p2.ch!==p1.ch?[p2]:[]);
- who.forEach(f=>{const i=CH.indexOf(f.ch);const cl=cmdList(f.ch).map(x=>x[0]+' '+x[1].replace(/（.*）/,''));L.push([f.ch.n+' 基本技：'+basicList(f.ch).map(x=>x[0]+' '+x[1].replace(/（.*）/,'')).join('　'),f.ch.col]);L.push([cl.slice(0,6).join('　'),f.ch.col]);L.push([cl.slice(6).join('　'),f.ch.col]);L.push([spList(i).map(x=>x[0]+' '+x[1].replace(/（.*）/,'')).join('　'),f.ch.col]);L.push(['被動：'+CHM[i].p,f.ch.col2])});
+ who.filter(f=>!f.ch.boss).forEach(f=>{const i=chi(f.ch);const cl=cmdList(f.ch).map(x=>x[0]+' '+x[1].replace(/（.*）/,''));L.push([f.ch.n+' 基本技：'+basicList(f.ch).map(x=>x[0]+' '+x[1].replace(/（.*）/,'')).join('　'),f.ch.col]);L.push([cl.slice(0,6).join('　'),f.ch.col]);L.push([cl.slice(6).join('　'),f.ch.col]);L.push([spList(i).map(x=>x[0]+' '+x[1].replace(/（.*）/,'')).join('　'),f.ch.col]);L.push(['被動：'+CHM[i].p,f.ch.col2])});
  L.push(['','#fff'],['按 P 或 Esc 繼續　按 Q 回到選單　F2 判定框'+(G.hb?'（開）':''),'#ffe14d']);
  ctx.font='15px '+FONT;L.forEach((l,i)=>{ctx.fillStyle=l[1];ctx.fillText(l[0],W/2,120+i*30)});ctx.restore();
 }

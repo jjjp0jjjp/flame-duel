@@ -28,8 +28,8 @@ function onReady(d){
 const RB_MAX=8;
 function rbFnv(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
 function canon(v){if(Array.isArray(v))return'['+v.map(canon).join(',')+']';if(v&&typeof v==='object')return'{'+Object.keys(v).sort().map(k=>k+':'+canon(v[k])).join(',')+'}';return JSON.stringify(v)}
-function snapF(f){const o={};for(const k in f){if(k==='tr'||k==='lt'||k==='ph')continue;o[k]=k==='ch'?CH.indexOf(f[k]):f[k]}return o}
-function restF(f,o){const tr=f.tr,lt=f.lt;for(const k of Object.keys(f))delete f[k];Object.assign(f,o);f.ch=CH[o.ch];f.tr=tr||[];f.lt=lt;f.ph=null}
+function snapF(f){const o={};for(const k in f){if(k==='tr'||k==='lt'||k==='ph')continue;o[k]=k==='ch'?chi(f[k]):f[k]}return o}
+function restF(f,o){const tr=f.tr,lt=f.lt;for(const k of Object.keys(f))delete f[k];Object.assign(f,o);f.ch=o.ch===BOSS.li?BOSS:CH[o.ch];f.tr=tr||[];f.lt=lt;f.ph=null}
 function snapAll(){return JSON.stringify({g:[G.frame,G.hitstop,G.phase,G.round,G.time,G.tf,G.pt,G.msg,G.mt,G.mm,G.vs|0,G.win,G.si|0,G.wbk|0],a:snapF(p1),b:snapF(p2),pr:projs.map(p=>{const o=Object.assign({},p);o.own=p.own===p1?0:1;return o}),v1:pv1,v2:pv2})}
 function loadAll(s){const o=JSON.parse(s),g=o.g;G.frame=g[0];G.hitstop=g[1];G.phase=g[2];G.round=g[3];G.time=g[4];G.tf=g[5];G.pt=g[6];G.msg=g[7];G.mt=g[8];G.mm=g[9];G.vs=g[10];G.win=g[11];G.si=g[12]|0;G.wbk=g[13]|0;
  restF(p1,o.a);restF(p2,o.b);projs=o.pr.map(p=>{p.own=p.own?p2:p1;return p});
@@ -148,7 +148,7 @@ addEventListener('keydown',e=>{if(KCAP){e.preventDefault();kcapDone(e.code);retu
  if(G.vs>0&&G.mode!==4&&(e.code==='Enter'||e.code==='Space'))G.vs=1;
  if(e.code==='Enter'&&RP&&RP.end){toMenu();return}
  if(e.code==='KeyR'&&G.phase==='over'&&REC&&!bound(e.code))rpCopy();
- if(e.code==='Escape'&&G.phase==='over'&&(ARC||TEAM||SURV||TOWER||DAILY)){toMenu();return}
+ if(e.code==='Escape'&&G.phase==='over'&&(ARC||TEAM||SURV||TOWER||DAILY||BOSSF)){toMenu();return}
  if(G.phase==='over'&&(e.code==='ArrowLeft'||e.code==='KeyA'||e.code==='ArrowRight'||e.code==='KeyD')&&netPick(e.code==='ArrowLeft'||e.code==='KeyA'?-1:1))return;
  if(e.code==='Enter'&&G.phase==='over'&&!NET.watch){if(G.mode===4&&NET.on)netRematch();else chainNext()}
  if(e.code==='KeyQ'&&G.pause&&!bound(e.code)){G.pause=false;toMenu()}

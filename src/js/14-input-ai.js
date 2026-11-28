@@ -13,6 +13,7 @@ const K1=[['KeyA','P0l','T0l'],['KeyD','P0r','T0r'],['KeyW','P0u','T0u'],['KeyS'
 const K2=[['ArrowLeft','P1l'],['ArrowRight','P1r'],['ArrowUp','P1u'],['ArrowDown','P1d'],['Numpad4','KeyZ','P1a'],['Numpad5','KeyX','P1b'],['Numpad1','KeyV','P1x'],['Numpad2','KeyB','P1y'],['Numpad6','KeyC','P1s'],['Numpad3','KeyN','P1t']];
 const pv1={},pv2={};
 function aiInput(me,op){
+ if(me.boss)return bossInput(me,op);
  const a=me.ai,lv=G.diff,i=Object.assign({},NI),dx=op.x-me.x,ad=Math.abs(dx),to=dx>0?'r':'l',aw=dx>0?'l':'r',sg=dx>0?1:-1;
  if(me.kd&&me.y<GY){if(!a.tk){a.tk=1;if(Math.random()<[.1,.4,.7][lv]){i.lp=1;return i}}}else a.tk=0;
  if(me.st==='hit'&&me.combo>=3&&me.bu){if(!a.bd){a.bd=1;if(Math.random()<[0,.4,.7][lv]){i.th=1;i.sp=1;return i}}}else if(me.combo===0)a.bd=0;

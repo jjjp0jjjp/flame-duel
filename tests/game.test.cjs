@@ -190,6 +190,24 @@ const ok = (name, cond, detail) => {
     return out;
   });
   ok('成就：自己獲勝才解鎖、電腦贏不算、累計型要達到次數、重播不計', ach.win && ach.cpu && ach.count && ach.replay && ach.panel, JSON.stringify(ach));
+  const boss = await pg.evaluate(() => {
+    localStorage.removeItem('fd_boss'); ACS = { u: {}, n: {}, w: [] }; const out = {};
+    sel[0] = 4; bossStart(); G.vs = 0; out.setup = p2.ch === BOSS && p2.sc === 1.5 && !CH.includes(BOSS) && G.ft === 1 && G.time === 99 && !!HEAD[16];
+    // 亂打一陣、畫面與暫停畫面都能畫
+    const KS = ['KeyA', 'KeyD', 'KeyW', 'KeyS', 'KeyU', 'KeyI', 'KeyJ', 'KeyK', 'KeyO', 'KeyL'];
+    for (let i = 0; i < 1500 && G.phase !== 'over'; i++) { for (const k of KS) { if (Math.random() < .1) { keys[k] = keys[k] ? 0 : 1; if (keys[k]) pend[k] = 1 } } p1.hp = Math.max(p1.hp, 50); step(); if (i % 100 === 0) { draw(); G.pause = true; draw(); G.pause = false } }
+    for (const k in keys) keys[k] = 0;
+    // 體力過半後覺醒
+    p2.hp = p2.ch.hp * .4; for (let i = 0; i < 60; i++) step(); out.phase2 = BOSSF.ph === 2 && p2.parm === 1;
+    // 頭目放超必殺「焰雨」：特寫畫面要能畫（頭目不在角色清單裡）
+    p2.st = 'idle'; p2.atk = null; p2.mt = 100; p2.start('ex'); for (let i = 0; i < 5; i++) step(); G.supEnd = performance.now() + 500; draw(); out.phase2 = out.phase2 && G.supCh === BOSS.li;
+    // 打倒頭目：保存成績、解鎖成就
+    while (G.phase !== 'over') { if (G.phase === 'fight') p2.st = 'ko'; step() } chainTip(); out.win = BOSSF.res === 'a' && bossBest() > 0 && !!ACS.u.boss;
+    toMenu(); out.clean = !BOSSF && G.diff !== undefined; localStorage.removeItem('fd_ach'); ACS = { u: {}, n: {}, w: [] };
+    return out;
+  });
+  ok('頭目戰：焰帝放大、不在角色清單、能正常對戰與暫停', boss.setup, JSON.stringify(boss));
+  ok('頭目戰：體力過半覺醒、打倒後保存成績與成就、回選單清乾淨', boss.phase2 && boss.win && boss.clean);
   ok('爬塔：贏了出現 3 張不同的強化卡，選了之後效果套用', tower.pick);
   ok('爬塔：帶強化的對戰可以正確重播', tower.replay);
   ok('爬塔：輸了保存最高層數、回選單清乾淨', tower.lose && tower.clean);

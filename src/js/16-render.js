@@ -38,7 +38,7 @@ const LOOKA=[
  {skin:'#c08a60',top:'#e9ecef',dk:'#9aa3b0',top2:'#1d3557',ua:'#c08a60',fa:'#c08a60',hand:'#3a2412',th:'#1d3557',sn:'#c08a60',shoe:'#1d1d2b',belt:'#1d3557',hair:'#e9ecef',hb:'#1d3557',col:'#9aa3b0',col2:'#e9ecef'},
  {skin:'#f0caa8',top:'#7a3e1d',dk:'#3e1f0e',top2:'#ffb703',ua:'#7a3e1d',fa:'#f0caa8',hand:'#c7a27a',th:'#2b2d42',sn:'#2b2d42',shoe:'#1a120c',belt:'#ffb703',hair:'#f4e3b2',hb:'#ffb703',col:'#ffb703',col2:'#ffe8a8'}];
 const altOf=f=>!!f&&f.side===1&&!!p1&&!!p2&&p1.ch===p2.ch;
-const colOf=f=>altOf(f)?LOOKA[CH.indexOf(f.ch)].col:f.ch.col;
+const colOf=f=>altOf(f)?LOOKA[chi(f.ch)].col:f.ch.col;
 // 細節配色：褲子寬鬆度、護腕、鞋底、鞋帶／分趾鞋
 const LOOK2=[{bag:1.25,wrap:'#f4f4f4',sole:'#b9bccb',lace:1},{bag:1.05,wrap:'#c8d2e6',sole:'#151a2a'},{bag:1,wrap:'#5a3aa8',sole:'#0c0818',tabi:1},{bag:1,wrap:'#2a2f4a',sole:'#11131f'},{bag:1.3,wrap:'#efdcb8',sole:'#1a120c'},{bag:1.15,wrap:'#ffffff',sole:'#9fc8e0'},{bag:1,wrap:'#95d5b2',sole:'#1a120c',tabi:1},{bag:1.3,wrap:'#f6e0a8',sole:'#1a120c'},{bag:1,wrap:'#ffffff',sole:'#d0d0d8',lace:1,gl:1.45},{bag:1,wrap:'#a3e635',sole:'#0a0e06',tabi:1},{bag:1.2,wrap:'#ffd166',sole:'#c44da8'},{bag:1.1,wrap:'#2b2f3a',sole:'#111318',gl:1.2},{bag:1.35,wrap:'#ffffff',sole:'#1a120c',tabi:1},{bag:1.2,wrap:'#e9c46a',sole:'#0a1418'},{bag:1.15,wrap:'#e0d0b0',sole:'#1a120c',gl:1.15},{bag:1.05,wrap:'#c7a27a',sole:'#1a120c'}];
 // 顏色變亮（k>0）或變暗（k<0），結果快取
@@ -46,11 +46,12 @@ const SHC=new Map();
 function shade(c,k){const key=c+k;let v=SHC.get(key);if(v)return v;const n=parseInt(c.slice(1),16);let r=n>>16,g=n>>8&255,b=n&255;if(k<0){r*=1+k;g*=1+k;b*=1+k}else{r+=(255-r)*k;g+=(255-g)*k;b+=(255-b)*k}v='rgb('+(r|0)+','+(g|0)+','+(b|0)+')';SHC.set(key,v);return v}
 const IK=(A,B,l1,l2,s)=>{const dx=B[0]-A[0],dy=B[1]-A[1],dd=Math.hypot(dx,dy)||1;if(dd>=l1+l2-.5)return[A[0]+dx*l1/(l1+l2),A[1]+dy*l1/(l1+l2)];const a=(l1*l1-l2*l2+dd*dd)/(2*dd),h=Math.sqrt(Math.max(0,l1*l1-a*a));return[A[0]+dx*a/dd-dy/dd*h*s,A[1]+dy*a/dd+dx/dd*h*s]};
 function drawF(f){
- const d=f.dir,ch=f.ch,w=ch.w,li=Math.max(0,CH.indexOf(ch)),AL=altOf(f),L=AL?LOOKA[li]:LOOK[li],CC=AL?L.col:ch.col,CC2=AL?L.col2:ch.col2,GA=ctx.globalAlpha,fl=f.flash>0||!!f.tint,C=c=>f.tint||(fl?'#fff':c),OUT='#0c0c1c';
+ const d=f.dir,ch=f.ch,w=ch.w,li=chi(ch),AL=altOf(f),L=AL?LOOKA[li]:LOOK[li],CC=AL?L.col:ch.col,CC2=AL?L.col2:ch.col2,GA=ctx.globalAlpha,fl=f.flash>0||!!f.tint,C=c=>f.tint||(fl?'#fff':c),OUT='#0c0c1c';
  if(!f.ns){ctx.fillStyle='rgba(0,0,0,.35)';ctx.beginPath();ctx.ellipse(f.x,GY+3,Math.max(10,30-(GY-f.y)*.08),7,0,0,6.3);ctx.fill()}
  ctx.save();ctx.translate(f.x+(f.st==='hit'&&G.hitstop>0?(Math.random()-.5)*6:0),f.y);
  if(f.st==='ko')ctx.rotate(-d*Math.min(1.5,f.kt*.1));
  if(f.st==='down')ctx.rotate(-d*1.5*Math.min(1,f.dt/16));
+ if(f.sc)ctx.scale(f.sc,f.sc);
  if(ART){ctx.scale(1.02,1.05);const q=squash(f);if(q)ctx.scale(q[0],q[1])}
  ctx.lineCap='round';ctx.lineJoin='round';
  let hip=-52,sh=-98+Math.sin(G.frame*.12)*1.5,ln=0,ff=[16,0],bf=[-16,0],fh=[34,-84],bh=[22,-72],kl=0,trk=null;
@@ -136,6 +137,7 @@ function drawF(f){
  if(li===2){const sx0=SHl[0],sy0=sh+2,wv=G.frame*.25-(f.vx||0)*.1;ctx.strokeStyle=OUT;ctx.lineWidth=9+OUTX;ctx.beginPath();ctx.moveTo(sx0,sy0);ctx.quadraticCurveTo(sx0-d*22,sy0+8+Math.sin(wv)*4,sx0-d*44,sy0+2+Math.sin(wv+1)*7);ctx.stroke();ctx.strokeStyle=C(L.belt);ctx.lineWidth=6;ctx.stroke();if(!fl){ctx.strokeStyle=shade(L.belt,.35);ctx.lineWidth=1.5;ctx.stroke()}}
  if(li===5){const wv=Math.sin(G.frame*.12)*2;limb([hx-d*hr*.55,hy-2],[hx-d*(hr+3+wv),hy+30],6.5,2.2,1.5,L.hair)} // 霜的長髮（在身後，上粗下細）
  if(li===6){const wv=G.frame*.3-(f.vx||0)*.12;for(const[o,c2]of[[0,OUT],[1,C(L.hb)]]){ctx.strokeStyle=c2;ctx.lineWidth=o?3.5:6;ctx.beginPath();ctx.moveTo(hx-d*12,hy-7);ctx.quadraticCurveTo(hx-d*30,hy-4+Math.sin(wv)*5,hx-d*(52+Math.sin(wv*.7)*4),hy-10+Math.sin(wv+1)*8);ctx.stroke()}}
+ if(ch.boss&&!fl)bossDeco(hx,hy,d);
  if(li===15){const q=[SHl[0]-d*12,sh+4];ctx.save();ctx.translate(q[0],q[1]);ctx.rotate(-.45*d);ctx.fillStyle=C('#6b4226');ctx.strokeStyle=OUT;ctx.lineWidth=1.8*OLW;ctx.fillRect(-6,-6,12,40);ctx.strokeRect(-6,-6,12,40);ctx.strokeStyle=C('#e9ecef');ctx.lineWidth=1.5;for(const o of[-3,0,3]){ctx.beginPath();ctx.moveTo(o,-6);ctx.lineTo(o,-16);ctx.stroke()}ctx.fillStyle=C(L.hb);for(const o of[-3,0,3]){ctx.beginPath();ctx.moveTo(o-2,-16);ctx.lineTo(o,-22);ctx.lineTo(o+2,-16);ctx.fill()}ctx.restore()}
  // 後側手腳（稍暗，做出前後層次）
  ctx.globalAlpha=GA*.82;arm(-3,bh);leg(bf,1);ctx.globalAlpha=GA;
@@ -341,7 +343,7 @@ function hud(){
   {const gw=w*.45,gx=k?x+w-gw:x,gy=y+h+2,gr=Math.max(0,f.gd??100)/100;ctx.fillStyle='#000a';ctx.fillRect(gx,gy,gw,5);ctx.fillStyle=gr<.35?(fl?'#ff6b6b':'#ff9f9f'):'#7ec8ff';ctx.fillRect(k?gx+gw-gw*gr:gx,gy,gw*gr,5)}
   {const bx2=k?mx-16:mx+mw+16,by2=my+5;ctx.beginPath();ctx.arc(bx2,by2,9,0,6.3);ctx.fillStyle=f.bu?'#ff4d6d':'#333a';ctx.fill();ctx.strokeStyle=f.bu?'#ffe14d':'#555';ctx.lineWidth=2;ctx.stroke();ctx.fillStyle=f.bu?'#fff':'#777';ctx.font='bold 11px '+FONT;ctx.textAlign='center';ctx.fillText('爆',bx2,by2+4);ctx.textAlign=k?'right':'left';dashIcon(k?bx2-22:bx2+22,by2,f)}
   ctx.font='bold 18px '+FONT;ctx.textAlign=k?'right':'left';ctx.fillStyle='#fff';
-  ctx.fillText((k?(G.mode===1?'電腦 ':G.mode===3?'木樁 ':'P2 '):'P1 ')+f.ch.n+(f.sty?'・'+STY[CH.indexOf(f.ch)].n:'')+(G.mode===4&&k===NET.slot?'（你）':'')+(f.sm?'　簡易':'')+(k&&G.mode===1&&!RP&&f.ai.pt?'　'+PTN[f.ai.pt]:''),k?x+w:x,24);
+  ctx.fillText((k?(G.mode===1?'電腦 ':G.mode===3?'木樁 ':'P2 '):'P1 ')+f.ch.n+(f.sty?'・'+STY[chi(f.ch)].n:'')+(G.mode===4&&k===NET.slot?'（你）':'')+(f.sm?'　簡易':'')+(k&&G.mode===1&&!RP&&PTN[f.ai.pt]?'　'+PTN[f.ai.pt]:''),k?x+w:x,24);
   for(let j=0;j<2;j++){ctx.fillStyle=j<f.wins?'#ffe14d':'#fff3';ctx.beginPath();ctx.arc(k?x+w-8-j*20:x+8+j*20,my+30,7,0,6.3);ctx.fill()}
   const o=k?p1:p2;
   if(o.combo>=2){ctx.font='900 34px '+FONT;ctx.fillStyle='#ffe14d';ctx.strokeStyle='#000';ctx.lineWidth=5;const t=o.combo+' HIT! '+Math.round(o.cd);ctx.strokeText(t,k?x+w:x,150);ctx.fillText(t,k?x+w:x,150)}
