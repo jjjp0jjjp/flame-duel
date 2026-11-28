@@ -761,6 +761,36 @@ const BASIC=[
  {lp:['弓柄擊',{d:5,su:3,anim:'jab',fx:'feather'}],hp:['弓背揮',{d:10,su:7,r:98,kb:13,anim:'bowswing',fx:'feather'}],lk:['輕躍踢',{d:6,su:4,r:92,anim:'front',fx:'feather'}],hk:['鷹踢',{d:12,su:8,r:112,h:-72,sl:30,anim:'axe',fx:'feather'}],ap:['空肘',{d:6,su:3,anim:'aelbow',fx:'feather'}],ak:['羽落',{d:9,su:5,h:-22,sl:20,anim:'adive',fx:'feather'}]}];
 const BKEYS=['lp','hp','lk','hk','ap','ak'];
 BASIC.forEach((c,i)=>{const ch=CH[i];if(!ch)return;ch.mv=ch.mv||{};ch.nm=ch.nm||{};for(const k of BKEYS){if(!c[k])continue;ch.nm[k]=c[k][0];ch.mv[k]=Object.assign({rep:1},MV[k],c[k][1])}});
+// ===== 指令技的動作與特效：依招式性質＋角色武器自動挑選（已指定 anim 的不動）=====
+const ELEM=['fire','metal','dark','elec','rock','ice','wind','staff','impact','poison','petal','jet','blade','soul','claw','feather'];
+// 武器風格：棍（月）、刀（刃）、爪（蠍、獸）、扇（蝶）、弓（羽）、掌（雷、巫）
+const WPN={7:'staff',12:'blade',9:'claw',14:'claw',10:'fan',15:'bow',3:'palm',13:'palm'};
+const CMDKEYS=['jab','lunge','push','spin','flip','upper','dhp','dlk','blp','bhp','ahp'];
+const KICK={push:1,spin:1,flip:1,dlk:1};
+// 是不是腳技：看招式名稱（有些角色的腳類按鍵其實是拳技或武器技，例如拳的「左右連拳」）
+const isKick=(k,nm)=>/[腳踢膝踵腿]/.test(nm||'')?true:/[拳掌肘爪扇斬刺鞭錘靠手咒射割棍鐮]/.test(nm||'')?false:!!KICK[k];
+function pickAnim(k,a,w,nm){
+ if(a.nohit||a.counter||a.throw||a.type||!a.r)return null;
+ if(k==='ahp')return w==='blade'||w==='staff'||w==='fan'?'aslash':w==='claw'?'aclaw':w==='palm'?'apalm':'aelbow';
+ const kick=isKick(k,nm);
+ if(a.low)return kick?'lowkick':'staffsweep'; // 下段：腳技低踢；拳技與武器技蹲低橫掃
+ if(a.ovh)return kick?'axe':w==='blade'?'slash':w==='staff'?'swing':'hammer';
+ if(k==='upper')return w==='blade'||w==='staff'?'rslash':'upper';
+ if((a.hits||0)>=2)return kick?'spin':w==='fan'?'fan':w==='palm'?'palm':'double';
+ if(kick)return k==='spin'?(w==='claw'?'tailkick':'round'):k==='flip'?'round':'front';
+ if(KICK[k])return k==='spin'||k==='flip'?(w==='blade'?'slash':w==='claw'?'claw':'hook'):w==='claw'?'claw':'straight';
+ if(k==='dhp')return w==='blade'?'rslash':'upper';
+ if(w==='staff')return k==='bhp'?'swing':'thrust';
+ if(w==='blade')return k==='jab'?'thrust':'slash';
+ if(w==='claw')return k==='lunge'&&a.vx>=6?'bite':'claw';
+ if(w==='fan')return 'fan';
+ if(w==='bow')return k==='bhp'||k==='lunge'?'bowswing':'jab';
+ if(w==='palm')return k==='lunge'?'straight':'palm';
+ if(k==='blp')return 'palm';
+ if(k==='bhp')return 'hook';
+ if(k==='lunge')return a.r<90?'elbow':'straight';
+ return 'jab'}
+CH.forEach((ch,i)=>{for(const k of CMDKEYS){const m=ch.mv&&ch.mv[k];if(!m||m.anim)continue;const a=Object.assign({},MV[k],m),an=pickAnim(k,a,WPN[i],ch.nm[k]);if(an)m.anim=an;if(an&&!m.fx)m.fx=ELEM[i]}});
 // 穿身：攻擊者移到被攻擊者的另一側
 const DCD=40,DCDC=75;
 function passThru(s,t){const sg=t.x>=s.x?1:-1;s.x=Math.max(40,Math.min(W-40,t.x+sg*62));s.vx=0}
