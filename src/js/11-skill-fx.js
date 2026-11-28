@@ -24,6 +24,7 @@ function fxMove(f,a,g){
  const li=li_(f),k=a.key,t=f.t,d=f.dir,x=f.x,y=f.y,act=t>a.su&&t<=a.su+a.ac,ex=x+d*a.r*.9,ey=y+(a.h||-70);
  if(t===1&&(a.ovh||a.low)&&!a.air){const c=a.ovh?'#ffd23d':'#7ec8ff',sg=a.ovh?1:-1,yy=a.ovh?y-150:GY-8;P({t:'fn',x,y:yy,l:16,g:0,dr:1,draw:(p,al)=>{ctx.save();ctx.globalAlpha=al;ctx.fillStyle=c;ctx.strokeStyle='#000';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(p.x-10,p.y-7*sg);ctx.lineTo(p.x+10,p.y-7*sg);ctx.lineTo(p.x,p.y+7*sg);ctx.closePath();ctx.fill();ctx.stroke();ctx.restore()}})}
  if(t===1&&(k==='sp'||k==='sp2'||k==='sp3'||k==='asp'||k==='ex')){const c=colOf(f);flare(x+d*26,y-82,c,k==='ex'?72:40,k==='ex'?10:6);if(k==='ex'){P({ring:1,x,y:y-60,c,l:18,rs:9,lw:6});emb(x,y-60,c,18,6,24,5,1);spark(x,y-60,c,14)}}
+ if(a.fx&&act&&(t===a.su+1||(a.hits&&(t-a.su-1)%(a.gap||4)===0)))basicFx(f,a,ex,ey);
  if(a.vx&&act){if(t%2===0)gho(f,colOf(f));if(g)smk(x-d*16,GY-8,10,'#9aa0b8',20)}
  if(li===0){
   if(k==='sp3'&&t>=a.su&&t<=a.su+a.ac+6){for(let i=0;i<6;i++)emb(x+d*rr_(12,32),y-rr_(25,135),Math.random()<.5?'#ffcf4a':'#ff6a1a',1,1.4,20,rr_(6,12),1.8);if(t===a.su)P({ring:1,flat:1,x,y:GY-2,c:'#ff7a2a',l:16,rs:6,lw:5})}

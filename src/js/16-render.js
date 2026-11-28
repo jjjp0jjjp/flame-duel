@@ -63,7 +63,8 @@ function drawF(f){
  if(f.st==='dash'){ln=f.dd===d?10:-10;ff=[26,0];bf=[-26,0]}
  if(f.st==='atk'&&a){
   const tot=a.su+a.ac,e=f.t<=a.su?(ART?antic(f.t/Math.max(1,a.su)):f.t/a.su*.7):f.t<=tot?(ART&&f.t===a.su+1?1.08:1):Math.max(0,1-(f.t-tot)/a.rc),k=a.key;
-  if(k==='lp'||k==='hp'||k==='ap'||k==='ahp'||k==='blp'||k==='bhp'||k==='lunge'||k==='jab'){ln=(k==='hp'?10:k==='lunge'?20:6)*e;fh=[34+(a.r-34)*e,k==='lunge'?-92:-86]}
+  if(a.anim&&ANIM[a.anim]){const q=ANIM[a.anim](a,e,f.t<=a.su?0:Math.min(1,(f.t-a.su)/Math.max(1,a.ac)),f,hip,sh);if(q.hip!=null)hip=q.hip;if(q.sh!=null)sh=q.sh;if(q.ff)ff=q.ff;if(q.bf)bf=q.bf;if(q.fh)fh=q.fh;if(q.bh)bh=q.bh;if(q.ln!=null)ln=q.ln;kl=q.kl?1:0}
+  else if(k==='lp'||k==='hp'||k==='ap'||k==='ahp'||k==='blp'||k==='bhp'||k==='lunge'||k==='jab'){ln=(k==='hp'?10:k==='lunge'?20:6)*e;fh=[34+(a.r-34)*e,k==='lunge'?-92:-86]}
   else if(k==='lk'||k==='hk'||k==='spin'||k==='push'||k==='flip'){kl=1;ln=-8*e;ff=[16+(a.r-16)*e,(k==='spin'?-70:a.h)*e]}
   else if(k==='ak'||a.dive){kl=1;ln=-6*e;ff=[20+(a.r-20)*e,-28-6*e];bf=[-6,-12]}
   else if(k==='upper'||(k==='sp3'&&a.lift)){ln=8*e;fh=[22+8*e,-98-48*e]}
@@ -311,7 +312,7 @@ function drawF(f){
  if(li===10&&!f.tint){const H=R(fh);fan(H[0]+d*4,H[1]-4,15,d>0?-.2:Math.PI+.2,C(L.top),C(L.top2))} // 蝶拿著扇子
  ctx.restore();
  // 中毒：冒綠色泡泡；強化：火焰光環
- if(f.pz>0&&!f.tint){ctx.save();for(let k=0;k<3;k++){const yy=f.y-70-((G.frame*1.4+k*24)%70),xx=f.x+Math.sin(G.frame*.1+k*2)*14;ctx.globalAlpha=.75;ctx.fillStyle='#a3e635';ctx.strokeStyle='#2f3b1f';ctx.lineWidth=1;ctx.beginPath();ctx.arc(xx,yy,3+k,0,6.3);ctx.fill();ctx.stroke()}ctx.restore()}
+ if(f.pz>0&&!f.tint){ctx.save();for(let k=0;k<3;k++){const yy=f.y-70-((G.frame*1.4+k*24)%70),xx=f.x+Math.sin(G.frame*.1+k*2)*14;ctx.globalAlpha=.75;ctx.fillStyle=f.pzc?'#ff8a3a':'#a3e635';ctx.strokeStyle='#2f3b1f';ctx.lineWidth=1;ctx.beginPath();ctx.arc(xx,yy,3+k,0,6.3);ctx.fill();ctx.stroke()}ctx.restore()}
  if(f.wk>0&&!f.tint){ctx.save();ctx.strokeStyle='rgba(199,125,255,.8)';ctx.lineWidth=2;ctx.setLineDash([4,4]);ctx.lineDashOffset=G.frame;ctx.beginPath();ctx.ellipse(f.x,f.y-2,30,8,0,0,6.3);ctx.stroke();ctx.restore()}
  if(f.sl>0&&!f.tint){ctx.save();ctx.strokeStyle='rgba(67,97,238,.85)';ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(f.x,f.y-4,24,6,0,0,6.3);ctx.stroke();ctx.restore()}
  if(ch.rg&&f.hp<ch.hp*(f.hm||1)*.35&&f.st!=='ko'&&!f.tint)glow(f.x,f.y-60,74+Math.sin(G.frame*.5)*8,'#c1121f',.35); // 狂暴

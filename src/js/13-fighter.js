@@ -120,20 +120,20 @@ getHit(src,a,px){
  if(!a.throw&&!mis&&this.st==='block'&&this.y>=GY&&this.dir*(px-this.x)>0){
   if(TUT&&this===p1)TUT.blk++;this.gd-=a.d*2.2*(a.gb?2:1);if(this.gd<=0){this.gd=60;this.stun=40;this.st='hit';this.vx=sgn*4;if(!NOFX){pp({x:this.x,y:this.y-150,vx:0,vy:-.6,l:50,m:50,txt:'防禦崩潰！',c:'#ff6b6b',text:1,big:1});P({ring:1,x:this.x,y:this.y-70,c:'#ff6b6b',l:18,rs:8,lw:7});sfx('ko')}G.hitstop=Math.max(G.hitstop,12);return true}if(a.drain)this.mt=Math.max(0,this.mt-a.drain);if(a.thru)passThru(src,this);
   if(a.gb){this.mt=Math.max(0,this.mt-10);if(!NOFX)pp({x:this.x,y:this.y-150,vx:0,vy:-.6,l:45,m:45,txt:'破防！',c:'#ff6b6b',text:1,big:1})}
-  this.hp=Math.max(1,this.hp-a.d*(a.ex?.2:.1));this.stun=a.gb?28:9;this.vx=sgn*a.kb*.9*(this.ch.kbr||1);this.mt=Math.min(100,this.mt+3);
+  this.hp=Math.max(1,this.hp-a.d*(a.ex?.2:.1)*(a.chip||1));this.stun=a.gb?28:9;this.vx=sgn*a.kb*.9*(this.ch.kbr||1);this.mt=Math.min(100,this.mt+3);
   spark(this.x+this.dir*24,this.y-85,'#7ec8ff',8);if(!NOFX)P({t:'sh',x:this.x+this.dir*26,y:this.y-70,dir:this.dir,c:'#7ec8ff',l:12,g:0,dr:1});sfx('block');G.hitstop=Math.max(G.hitstop,3);return true}
  const ct=this.st==='atk'&&this.atk&&this.t<=this.atk.su&&!a.throw,pun=this.st==='atk'&&this.atk&&this.t>this.atk.su+this.atk.ac&&!a.throw,dm=a.d*Math.max(.4,1-.12*this.combo)*(ct?1.3:pun?1.2:1)*(src.pw>0?1.25:1)*(a.mk?(this.ch.pr||1):1)*(src.wk>0?.75:1)*(src.sm?.85:1)*(src.sdm||1)*(src.rv?1.1:1)*(G.mu&8?1.7:1)*(G.mu&32?.6:1)*(src.ch.rg&&src.hp<src.ch.hp*(src.hm||1)*.35?1.3:1),last=!a.hits||(src.hc||0)+1>=a.hits;if(pun&&!NOFX)pp({x:this.x,y:this.y-150,vx:0,vy:-.6,l:55,m:55,txt:'確反！',c:'#ff4d6d',text:1,big:1});if(ct){pp({x:this.x,y:this.y-150,vx:0,vy:-.6,l:55,m:55,txt:'COUNTER!',c:'#ff7a3d',text:1,big:1});sfx('cancel')}
  this.jh=0;this.hp-=dm;if(src.pls&&src.hp>0)src.hp=Math.min(src.ch.hp*(src.hm||1),src.hp+dm*src.pls);if(this.pth&&src.hp>1)src.hp=Math.max(1,src.hp-dm*this.pth);if(G.mu&16&&src.hp>0)src.hp=Math.min(src.ch.hp*(src.hm||1),src.hp+dm*.35);this.cd+=dm;this.combo++;if(this.combo>=10&&!NOFX)achEv('combo',{src,n:this.combo});if(G.mode===3&&this===p2&&src===p1)trHit(a,this.combo);this.stun=Math.max(10,a.st-Math.min(8,Math.max(0,this.combo-4)*2))+(pun?4:0);this.st='hit';this.atk=null;this.flash=5;if(a.rev)this.x=Math.max(50,Math.min(W-50,2*px-this.x));this.vx=(this.x>=px?1:-1)*a.kb*(this.ch.kbr||1);if(a.su&&a.kb>0&&(this.x<=42||this.x>=W-42))src.vx=-sgn*Math.min(7,a.kb*.7);
- if(a.psn)this.pz=Math.max(this.pz||0,a.psn);
+ if(a.psn){this.pz=Math.max(this.pz||0,a.psn);this.pzc=0}if(a.burn){this.pz=Math.max(this.pz||0,a.burn);this.pzc=1}
  if(a.wk)this.wk=Math.max(this.wk||0,a.wk);if(a.sl)this.sl=Math.max(this.sl||0,a.sl);if(a.drain)this.mt=Math.max(0,this.mt-a.drain);
  {const ls=(a.ls||0)+(src.ch.ls||0);if(ls)src.hp=Math.min(src.ch.hp*(src.hm||1),src.hp+dm*ls)}
  if(a.thru)passThru(src,this);
  if(last&&(a.launch||a.knock||a.throw)){this.vy=a.throw?-8:a.knock?-6:-10;this.kd=1;this.nt=a.throw||a.key==='sweep'||a.ex?1:0}
  else if(this.y<GY){this.vy=Math.min(this.vy,-3);this.kd=1}
- src.mt=Math.min(100,src.mt+dm*1.3*(src.ch.mg||1)*(src.smg||1));this.mt=Math.min(100,this.mt+dm*.7);
+ src.mt=Math.min(100,src.mt+dm*1.3*(src.ch.mg||1)*(src.smg||1)*(a.mg||1));this.mt=Math.min(100,this.mt+dm*.7);
  const big=a.d>12;
  spark(this.x,this.y-75,big?'#ffe14d':'#ffffff',big?18:11);hitFx(src,a,this);pp({x:this.x+rnd(-20,20),y:this.y-120,vx:0,vy:-1.1,l:38,m:38,txt:String(Math.round(dm)),c:big?'#ffe14d':'#fff',text:1});if(big||a.ex)ring(this.x,this.y-75,big?'#ffe14d':'#fff');
- G.hitstop=Math.max(G.hitstop,a.hits&&!last?3:a.ex?12:big?8:5);G.pz=Math.max(G.pz||0,a.ex?.07:big?.045:.02);G.shake=Math.max(G.shake,a.d*.8);
+ G.hitstop=Math.max(G.hitstop,a.hits&&!last?3:a.ex?12:big?8:5);if(a.hs)G.hitstop=Math.max(G.hitstop,a.hs);G.pz=Math.max(G.pz||0,a.ex?.07:big?.045:.02);G.shake=Math.max(G.shake,a.d*.8);
  sfx(a.throw?'throw':big?'hitbig':'hit',this.combo);
  if(this.hp<=0&&G.mode===3&&this===p2){this.hp=this.ch.hp}else if(this.hp<=0){this.hp=0;this.st='ko';this.kt=0;this.vy=-9;this.vx=sgn*6;this.stun=0;this.atk=null;this.kd=0}
  return true;

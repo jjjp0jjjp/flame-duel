@@ -57,7 +57,8 @@ const ok = (name, cond, detail) => {
       const N = 3000, inp = [];
       for (let i = 0; i < N; i++) inp.push(KS.map((k) => (rand() < (k.includes('A') || k.includes('D') || k.includes('Arrow') ? 0.35 : 0.12) ? 1 : 0)));
       const run = (from, snap) => {
-        if (snap) loadAll(snap);
+        // 載入快照前清掉殘留的按鍵（上一輪若停在不讀輸入的幀，按鍵會留在佇列；連線回滾用網路輸入，不經過這裡）
+        if (snap) { for (const k in pend) pend[k] = 0; for (const k in keys) keys[k] = 0; loadAll(snap) }
         let mid = null;
         for (let i = from; i < N; i++) {
           if (i === 1500) mid = snapAll();
@@ -223,8 +224,8 @@ const ok = (name, cond, detail) => {
     setup(0, 0); let bursted = false;
     run(80, (k) => { if (p2.st === 'hit' && p2.combo >= 2 && p2.bu) return [{}, { th: 1, sp: 1 }]; if (!p2.bu) bursted = true; return [[0, 6, 12, 18].includes(k) ? (k % 12 ? { hp: 1 } : { lp: 1 }) : {}, {}] });
     out.burst = bursted && p2.bu === 0 && (p1.kd === 1 || p1.st === 'down' || p1.st === 'hit');
-    // 防禦耐久：一直擋重攻擊會破防
-    setup(1, 0); let crushed = false;
+    // 防禦耐久：一直擋重攻擊會破防（用機的衝擊拳：不是中段，蹲著擋得住）
+    setup(11, 0); let crushed = false;
     for (let r = 0; r < 12 && !crushed; r++) { p1.x = 400; p2.x = 470; run(40, (k) => { crushed = crushed || (p2.st === 'hit' && p2.stun > 30); return [k === 0 ? { hp: 1 } : {}, { d: 1 }] }) }
     out.guard = crushed;
     // 衝刺冷卻：衝刺後短時間內不能再衝刺；攻擊命中後的衝刺取消冷卻更長
