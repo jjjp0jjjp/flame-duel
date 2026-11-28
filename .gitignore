@@ -4,3 +4,4 @@ node_modules/
 *.png
 *.log
 .dev.vars
+tests/visual-out/

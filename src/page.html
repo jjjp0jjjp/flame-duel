@@ -1,0 +1,146 @@
+<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!--@HEAD-->
+<style>
+:root{--bg:#05060f;--fg:#f2f2f7;--ac:#ff5a4d;--pn:#161a33;--bd:#3a4080;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--padh:0px;--pb:52px}
+@media (pointer:coarse){:root{--padh:170px}}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);font-family:'Noto Sans TC','Microsoft JhengHei',system-ui,sans-serif}
+body{display:flex;flex-direction:column;align-items:center;justify-content:center}
+canvas{width:100%;max-width:1600px;max-width:min(1600px,100vw,calc((100vh - var(--padh))*16/9));max-width:min(1600px,100vw,calc((100dvh - var(--padh))*16/9));height:auto;display:block;background:#000}
+#menu{position:fixed;top:0;left:0;right:0;bottom:0;overflow:auto;background:radial-gradient(circle at 50% 20%,#3a1850,#0b0b24 70%);display:flex;flex-direction:column;align-items:center;padding:24px 16px;z-index:5}
+#menu>*{flex:none}#menu::before,#menu::after{content:"";margin:auto}
+h1{margin:0;font-size:clamp(40px,9vw,76px);font-weight:900;background:linear-gradient(#ffe14d,#ff4d4d);-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:.1em}
+.sub{margin:0 0 16px;letter-spacing:.5em;color:#ff9db8;font-size:13px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center;margin:5px 0;font-size:15px}
+button{font:inherit;color:var(--fg);background:var(--pn);border:2px solid var(--bd);border-radius:10px;padding:8px 14px;cursor:pointer}
+button:hover{border-color:var(--ac)}
+.big{font-size:20px;font-weight:700;min-width:240px;margin:6px;padding:12px 20px;background:linear-gradient(#ff5a4d,#c0283c);border-color:#ff9db8}
+.help{margin-top:14px;max-width:620px;font-size:13px;line-height:1.8;background:#0008;border:1px solid var(--bd);border-radius:12px;padding:12px 16px;color:#cfd2ff}
+.help b{color:#ffe14d}
+#pad{display:none;width:100%;max-width:620px;justify-content:space-between;align-items:center;padding:8px 12px;gap:8px}
+#pad .a{display:grid;gap:5px;grid-template-columns:repeat(4,var(--pb))}
+#pad button{width:var(--pb);height:var(--pb);padding:0;font-size:14px;user-select:none;-webkit-user-select:none;touch-action:none;border-radius:50%}#pad button.q{background:#3a1830;border-color:#ff9db8;font-size:13px}
+#stick{width:calc(var(--pb)*2.2);height:calc(var(--pb)*2.2);border-radius:50%;background:#161a33cc;border:2px solid var(--bd);position:relative;touch-action:none;flex:none}#knob{position:absolute;left:25%;top:25%;width:50%;height:50%;border-radius:50%;background:var(--ac);opacity:.85;pointer-events:none}
+#tbar{display:none;gap:6px;flex-wrap:wrap;justify-content:center;padding:6px}#tbar button{padding:4px 10px;font-size:13px}
+#mhead{text-align:center;margin-bottom:6px}
+h1{filter:drop-shadow(0 0 22px #ff4d4d55);background-size:100% 200%;animation:shine 6s ease-in-out infinite}
+@keyframes shine{0%,100%{background-position:0 0}50%{background-position:0 100%}}
+#mmain{display:grid;gap:14px;width:100%;max-width:1120px;grid-template-columns:1fr}
+@media (min-width:900px){#mmain{grid-template-columns:1.12fr 1fr;align-items:start}}
+.panel{background:linear-gradient(160deg,#151832e6,#0b0b1ee6);border:1px solid #3a4080;border-radius:18px;padding:14px;box-shadow:0 12px 40px #0009}
+#grid{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;padding:4px;background:#04050c;border:1px solid #2a2f5a;border-radius:8px}
+.cell{position:relative;aspect-ratio:1;padding:0;border:0;border-radius:3px;overflow:hidden;line-height:0;filter:brightness(.72) saturate(.8);transition:filter .12s}
+.cell:hover,.cell.p1,.cell.p2{filter:none}.cell canvas{width:100%;height:100%;display:block;max-width:none;background:none}
+.cell .nm{position:absolute;left:0;right:0;bottom:0;padding:10px 6px 3px;line-height:1.1;font-weight:900;font-size:17px;text-align:left;text-shadow:0 1px 3px #000;background:linear-gradient(transparent,#000d)}
+.cell.p1{box-shadow:inset 0 0 0 3px #ff5a4d}.cell.p2{box-shadow:inset 0 0 0 3px #3a7dff}.cell.p1.p2{box-shadow:inset 0 0 0 3px #ff5a4d,inset 0 0 0 6px #3a7dff}
+.cell.cur{animation:blink 1s steps(2,end) infinite}@keyframes blink{50%{filter:brightness(1.25)}}
+.cell .bd{position:absolute;top:5px;font-size:10px;font-weight:900;padding:1px 5px;line-height:1.4;border-radius:4px;color:#fff}.cell .b1{left:5px;background:#ff5a4d}.cell .b2{right:5px;background:#3a7dff}
+#pvbox{display:grid;grid-template-columns:150px 1fr;gap:12px;margin-top:12px;align-items:center}
+#pv{width:150px;height:170px;max-width:none;border-radius:14px;background:none}
+#pvinfo{font-size:13px;line-height:1.6}#pvinfo h3{margin:0;font-size:22px}#pvinfo .mv{color:#cfd2ff;font-size:12px}
+#vsline{text-align:center;margin-top:8px;font-weight:900;font-size:18px;letter-spacing:.05em}
+.opt{display:flex;align-items:center;gap:10px;margin:4px 0 10px;flex-wrap:wrap}.opt>span{color:#aab;font-size:13px;width:32px}
+.seg{display:inline-flex;border:2px solid var(--bd);border-radius:10px;overflow:hidden}.seg button{border:0;border-radius:0;padding:6px 14px}.seg button.on{background:var(--ac);color:#fff}
+#stgs{display:flex;gap:6px;flex-wrap:wrap}#stgs button{padding:0;border-radius:8px;overflow:hidden;position:relative;line-height:0}#stgs canvas{width:84px;height:47px;max-width:none;background:none}
+.sty{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:8px;font-size:13px}.sty>span{color:#aab}.sty button{padding:3px 10px;font-size:13px}.sty button.on{border-color:#ff9d2e;background:#3a2410}.sty small{flex-basis:100%;color:#cfd2ff}
+.chips{display:flex;flex-wrap:wrap;gap:5px}.chips button{padding:4px 9px;font-size:13px}.chips button.on{border-color:#ff9d2e;background:#3a2410;box-shadow:0 0 8px #ff9d2e66}
+#hzbtn.on{border-color:#ff8a3a;box-shadow:0 0 8px #ff8a3a88}#stgs span{position:absolute;left:0;right:0;bottom:0;font-size:11px;line-height:1.5;background:#0008}#stgs button.on{border-color:#ffe14d;box-shadow:0 0 10px #ffe14d88}
+#mgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.mode{display:grid;grid-template-columns:40px 1fr;column-gap:6px;text-align:left;padding:10px 12px;border-radius:14px;background:linear-gradient(135deg,#2a1a44,#161a33);position:relative}
+.mode i{grid-row:1/3;font-style:normal;font-size:26px;align-self:center}.mode b{font-size:16px}.mode small{color:#aab;font-size:12px;line-height:1.3}
+.mode.main{background:linear-gradient(135deg,#ff5a4d,#a0203a);border-color:#ff9db8}.mode.main small{color:#ffe0e0}
+/* 街機畫風的選單：斜體標題、斜切卡片與面板、金色邊線 */
+body.art h1{font-style:italic;transform:skewX(-8deg);background:linear-gradient(#fffbe0 10%,#ffd21a 45%,#ff8a1a 70%,#c0200a);-webkit-background-clip:text;background-clip:text;filter:drop-shadow(0 3px 0 #120400) drop-shadow(0 0 14px #ff6a2a66)}
+body.art .sub{font-style:italic;color:#ffd27a}
+body.art .panel{border-radius:4px;border-color:#d9a64066;border-top:3px solid #d9a640;clip-path:polygon(0 0,calc(100% - 18px) 0,100% 18px,100% 100%,18px 100%,0 calc(100% - 18px))}
+body.art .mode{border-radius:3px;clip-path:polygon(10px 0,100% 0,calc(100% - 10px) 100%,0 100%);padding-left:18px;border-left:4px solid #d9a640}
+body.art .mode b{font-style:italic;letter-spacing:.04em}
+body.art .mode.main{border-left-color:#fff3d0}
+body.art .tabs button,body.art .seg button,body.art #hzbtn{border-radius:3px;font-style:italic}
+body.art .mode.hot::after{top:4px;right:16px}body.art .cell{border-radius:0}body.art #grid{border-radius:2px;border-color:#d9a64055}
+.mode.hot::after{content:"推薦";position:absolute;top:-8px;right:8px;background:#3ddc6a;color:#06210f;font-size:11px;font-weight:900;padding:1px 7px;border-radius:8px}
+.achl{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:6px;margin:10px 0;max-height:60vh;overflow:auto}.achl>div{background:#0b0b1e;border:1px solid #2a2f5a;border-radius:6px;padding:6px 8px;opacity:.55}.achl>div.on{opacity:1;border-color:#d9a640}.achl b{display:block;font-size:14px}.achl small{color:#aab;font-size:12px}
+.cards{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:12px 0}.cards button{width:min(170px,28vw);min-height:110px;display:flex;flex-direction:column;gap:8px;align-items:center;justify-content:center;border-color:#d9a640;background:linear-gradient(160deg,#2a1a44,#161a33)}.cards button b{font-size:20px;color:#ffd21a}.cards button small{color:#cfd2ff;font-size:13px}.cards button:hover{transform:translateY(-3px);box-shadow:0 6px 18px #d9a64055}
+#tpick{position:fixed;inset:0;background:#000c;z-index:20;display:flex;align-items:center;justify-content:center;padding:16px}.tp{background:#151832;border:1px solid #3a4080;border-radius:16px;padding:16px;max-width:560px;width:100%}.tp-row{display:flex;gap:10px;align-items:center;margin:8px 0}.tp-row>span{width:40px;color:#aab}.tp-slots{display:flex;gap:8px}.tp-slots span{border:2px solid #3a4080;border-radius:8px;padding:4px 14px;font-weight:900}.tp-slots .em{color:#555}#tpG{display:grid;grid-template-columns:repeat(8,1fr);gap:3px;margin:10px 0}#tpS:disabled{opacity:.4}
+#rec{color:#ffe14d;font-size:13px;text-align:center;margin:10px 0 2px}
+@media (max-width:520px){#mgrid{grid-template-columns:1fr}#pvbox{grid-template-columns:110px 1fr}#pv{width:110px;height:125px}.cell .nm{font-size:14px}}
+
+#sinfo{display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:12px;margin:6px 0;background:#0006;border-radius:10px;padding:8px 10px}.st{display:flex;align-items:center;gap:6px;margin:2px 0}.st span:first-child{width:30px;color:#aab}.st i{flex:1;height:7px;background:#fff2;border-radius:4px;overflow:hidden}.st u{display:block;height:100%}.ps{color:#cfd2ff;margin-top:3px}
+@media (pointer:coarse){#pad{display:flex}}
+/* 手機直式：畫面靠上、按鈕靠下（拇指好按） */
+#rot{display:none;color:#8a8fa8;font-size:13px;letter-spacing:.1em}
+@media (pointer:coarse) and (orientation:portrait){body{justify-content:space-between;padding-top:8px}#rot{display:block}#pad{padding-bottom:max(14px,env(safe-area-inset-bottom,0px))}}
+/* 手機橫式：畫面佔滿高度，按鈕半透明疊在畫面下方兩側 */
+@media (pointer:coarse) and (orientation:landscape){
+ :root{--padh:0px;--pb:46px}
+ #pad{position:fixed;left:0;right:0;bottom:0;max-width:none;padding:6px max(10px,env(safe-area-inset-right,0px)) max(6px,env(safe-area-inset-bottom,0px)) max(10px,env(safe-area-inset-left,0px));pointer-events:none;z-index:3;align-items:flex-end}
+ #pad>*{pointer-events:auto}
+ #pad .a{grid-template-columns:repeat(5,var(--pb));gap:4px}
+ #pad button{background:#161a3399;border-color:#3a408099;font-size:12px}#pad button.q{background:#3a183099;border-color:#ff9db899;font-size:11px}
+ #stick{background:#161a3366;width:calc(var(--pb)*2.4);height:calc(var(--pb)*2.4)}
+}
+/* 矮螢幕（手機橫放）的選單：角色格子 8 欄、左右兩欄排版 */
+@media (max-height:520px) and (orientation:landscape){#menu{padding:10px 12px}h1{font-size:34px}.sub{margin-bottom:6px}#mmain{grid-template-columns:1.1fr 1fr;align-items:start}#grid{grid-template-columns:repeat(8,1fr)}.cell .nm{font-size:11px}}
+input{font:inherit;background:var(--pn);color:var(--fg);border:2px solid var(--bd);border-radius:10px;padding:8px 12px;width:130px;text-align:center;text-transform:lowercase}
+textarea{width:100%;font:12px/1.4 ui-monospace,Menlo,Consolas,monospace;background:var(--pn);color:var(--fg);border:2px solid var(--bd);border-radius:10px;padding:8px;resize:none;word-break:break-all;margin:4px 0}
+#net .lb{display:flex;justify-content:space-between;align-items:center;margin-top:6px}
+#net .lb button{padding:4px 12px;font-size:13px}
+#rcode{display:none;font:900 56px/1.1 ui-monospace,Menlo,Consolas,monospace;letter-spacing:.25em;color:#fff;text-align:center;margin:8px 0 2px;text-shadow:0 0 18px #ff5a4d}
+#rc2{width:130px;font-size:20px;letter-spacing:.3em}
+#manual summary,#adv summary{cursor:pointer;color:#ffe14d}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}.tabs button{padding:4px 12px;font-size:13px}.tabs button.on{border-color:var(--ac);background:#3a1830}
+#help{min-height:150px}#keytab table{border-collapse:collapse;margin:6px auto}#keytab td{padding:3px 6px;text-align:center}#keytab button{min-width:74px;padding:4px 8px;font-size:13px}#keytab button.wait{border-color:#ffe14d;color:#ffe14d}
+input[type=range]{width:90px;padding:0}
+</style></head><body>
+<noscript><p style="color:#fff;padding:20px;text-align:center">此遊戲需要啟用 JavaScript 才能執行。</p></noscript>
+<canvas id="c" width="960" height="540"></canvas>
+<div id="rot">↻ 把手機橫放，畫面會更大</div>
+<div id="obar" style="display:none;gap:8px;justify-content:center;padding:6px"><button id="ob-rp">複製重播連結</button><button id="ob-mn">回選單</button></div>
+<div id="tbar"><button id="tb-hb"></button><button id="tb-dm"></button><button id="tb-rec"></button><button id="tb-tr"></button><button id="tb-rs">重置位置</button></div>
+<div id="pad"><div id="stick"><div id="knob"></div></div>
+<div class="a"><button data-k="T0a">輕拳</button><button data-k="T0b">重拳</button><button data-k="T0s">必殺</button><button data-k="T0e,T0a" class="q">升龍</button><button data-k="T0x">輕腳</button><button data-k="T0y">重腳</button><button data-k="T0t">投</button><button data-k="T0e,T0s" class="q">超必</button><button data-k="T0t,T0s" class="q">爆氣</button><button data-k="T0a,T0b,T0x" class="q">迅移</button></div></div>
+<div id="menu">
+<header id="mhead"><h1>烈焰對決</h1><p class="sub">FLAME DUEL</p></header>
+<div id="mmain">
+ <section id="roster" class="panel">
+  <div class="tabs" id="ptabs"><button data-p="0" class="on">選擇 P1</button><button data-p="1">選擇 P2／電腦</button><button id="rnd" title="隨機選擇">🎲 隨機</button></div>
+  <div id="grid"></div>
+  <div id="pvbox"><canvas id="pv" width="300" height="340"></canvas><div id="pvinfo"></div></div>
+  <div id="vsline"></div>
+ </section>
+ <section id="modes" class="panel">
+  <div class="opt"><span>難度</span><div class="seg" id="dfseg"><button data-v="0">簡單</button><button data-v="1">普通</button><button data-v="2">困難</button></div></div>
+  <div class="opt"><span>場景</span><div id="stgs"></div></div>
+  <div class="opt"><span>機關</span><button id="hzbtn"></button></div>
+  <div class="opt"><span>規則</span><div id="mutr" class="chips"></div></div>
+  <div class="opt"><span>電腦</span><div id="aipr" class="chips"></div></div>
+  <div id="mgrid">
+   <button class="mode main" id="b1"><i>🥊</i><b>單人 vs 電腦</b><small>三戰兩勝，挑戰電腦</small></button>
+   <button class="mode" id="b7"><i>🏆</i><b>街機模式</b><small>連戰 5 場，最後挑戰強化版的自己</small></button>
+   <button class="mode" id="b8"><i>⚔️</i><b>3 對 3 隊伍戰</b><small>各選 3 人輪番上陣，體力延續</small></button>
+   <button class="mode" id="b9"><i>♾️</i><b>生存模式</b><small>無限連戰，看你能撐幾場</small></button>
+   <button class="mode" id="b10"><i>📅</i><b>每日挑戰</b><small></small></button>
+   <button class="mode" id="b11"><i>🗼</i><b>爬塔挑戰</b><small></small></button>
+   <button class="mode" id="b12"><i>👹</i><b>頭目戰</b><small></small></button>
+   <button class="mode" id="b2"><i>👥</i><b>雙人對戰</b><small>同一台裝置兩人對打</small></button>
+   <button class="mode" id="b4"><i>🌐</i><b>連線對戰</b><small>輸入房間代碼和朋友對戰</small></button>
+   <button class="mode" id="b3"><i>🎯</i><b>訓練模式</b><small>判定框、幀數、連段挑戰</small></button>
+   <button class="mode" id="b5"><i>📘</i><b>新手教學</b><small>9 步學會基本操作</small></button>
+   <button class="mode" id="b6" style="display:none"><i>🎬</i><b>觀看上一場重播</b><small>重看最近一場對戰</small></button>
+  </div>
+  <div id="rec"></div>
+  <div class="row"><button id="bset">⚙ 設定（按鍵・音量・畫質）</button><button id="bach">🏆 成就</button></div>
+ </section>
+</div>
+<!--@NETUI-->
+<div id="set" class="help" style="display:none"><b>設定</b>
+<div class="row" style="justify-content:flex-start">主音量 <input type="range" min="0" max="1" step=".05" data-v="all"> 音樂 <input type="range" min="0" max="1" step=".05" data-v="mus"> 音效 <input type="range" min="0" max="1" step=".05" data-v="sfx"></div>
+<div id="keytab"></div>
+<div class="row"><button id="qbtn"></button><button id="smbtn"></button><button id="artbtn"></button><button id="calmbtn"></button><button id="psz"></button><button id="kdef">恢復預設按鍵</button><button id="sclose">完成</button></div>
+<div style="font-size:12px;color:#aab">點按鈕後按下想用的鍵（Esc 取消）。同一個鍵只能對應一個動作，重複時會自動從舊的位置移除。設定只存在這個瀏覽器。</div></div>
+<div class="help" id="help"><div class="tabs" id="htabs"></div><div id="hbody"></div></div>
+</div>
+<script>
+/*@JS*/
+</script></body></html>

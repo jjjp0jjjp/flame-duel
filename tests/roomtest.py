@@ -24,7 +24,7 @@ with sync_playwright() as p:
         pg = ctx.new_page(); pg.on('pageerror', lambda e: errs.append(str(e)[:150])); pg.goto(BASE); pg.wait_for_timeout(300); return pg
     A = page(); B = page(); st0 = stats(A)
     # 1. 房主建立房間
-    A.evaluate("sel[0]=3;G.stage=3;lab()"); B.evaluate("sel[0]=4;lab()")
+    A.evaluate("sel[0]=3;G.stage=3;MU={m:8,r:0};lab()"); B.evaluate("sel[0]=4;MU={m:0,r:0};lab()")
     A.click('#b4'); A.click('#rh')
     A.wait_for_function("document.getElementById('rcode').textContent.length===4", timeout=8000)
     code = A.inner_text('#rcode')
@@ -38,6 +38,7 @@ with sync_playwright() as p:
     B.fill('#rc2', code); B.press('#rc2', 'Enter')
     A.wait_for_function("G.mode===4&&G.phase!=='menu'", timeout=15000); B.wait_for_function("G.mode===4&&G.phase!=='menu'", timeout=15000)
     ok('房客輸入代碼後雙方自動連上並開戰', True, A.evaluate("[p1.ch.n,p2.ch.n,STG[G.stage].n]"))
+    ok('突變規則以房主為準，雙方一致', A.evaluate("G.mu") == 8 and B.evaluate("G.mu") == 8, [A.evaluate("G.mu"), B.evaluate("G.mu")])
     A.wait_for_timeout(500)
     st = stats(A); d = {'opened': st['opened'] - st0['opened'], 'msgs': st['msgs'] - st0['msgs'], 'rooms': st['rooms']}; st = d
     ok('連上後配對連線全部關閉（不再佔用伺服器）', len(st['rooms']) == 0, st)
@@ -45,16 +46,37 @@ with sync_playwright() as p:
     A.wait_for_timeout(2500); play([A, B], 120); A.wait_for_timeout(800)
     ha = A.evaluate("NET.hash"); hb = B.evaluate("NET.hash"); com = [k for k in ha if k in hb]; mm = [k for k in com if ha[k] != hb[k]]
     ok('對戰中兩邊狀態同步', len(com) >= 5 and not mm, f'檢查點 {len(com)} 不一致 {len(mm)}')
+    # 3b. 人為讓房客狀態錯開 → 偵測到不同步 → 自動用房主的快照重新同步
+    B.evaluate("(()=>{p2.hp-=9;p1.x+=11;for(const k in NET.snaps){const o=JSON.parse(NET.snaps[k]);o.b.hp-=9;o.a.x+=11;NET.snaps[k]=JSON.stringify(o)}})()")
+    play([A, B], 80); A.wait_for_timeout(1500)
+    rs = B.evaluate("NET.resyncs"); sf = B.evaluate("NET.syncF"); ha = A.evaluate("NET.hash"); hb = B.evaluate("NET.hash")
+    com = [k for k in hb if k in ha and int(k) >= sf]; mm = [k for k in com if ha[k] != hb[k]]
+    ok('狀態錯開時自動重新同步', rs >= 1 and len(com) >= 2 and not mm and not A.evaluate("NET.desync") and not B.evaluate("NET.desync"), f'重新同步 {rs} 次，之後檢查點 {len(com)} 個、不一致 {len(mm)}')
+    # 3c. 對戰中途斷線 → 雙方用同一個房間代碼自動重新連上，接回原本的對戰
+    t0 = A.evaluate("NET.tick")
+    B.evaluate("(()=>{const pc=PC;PC=null;try{pc.close()}catch(e){}netDrop()})()")
+    A.wait_for_function("NET.reconn>=1", timeout=25000); B.wait_for_function("NET.reconn>=1", timeout=25000)
+    play([A, B], 60); A.wait_for_timeout(1500)
+    ha = A.evaluate("NET.hash"); hb = B.evaluate("NET.hash"); com = [k for k in ha if k in hb and int(k) > t0]; mm = [k for k in com if ha[k] != hb[k]]
+    ok('對戰中斷線後自動重新連上並接續同一場', A.evaluate("G.mode===4&&NET.on&&!NET.rc") and B.evaluate("G.mode===4&&NET.on&&!NET.rc") and A.evaluate("NET.tick") > t0 + 20 and len(com) >= 2 and not mm, f'斷線前 {t0} 幀，接回後檢查點 {len(com)} 不一致 {len(mm)}')
     # 4. 打完再戰（走資料通道，不需要伺服器）
-    for i in range(1200):
+    # 隨機亂按常常打到時間到，一局最多三回合；CI 機器慢時要多等一點
+    for i in range(3600):
         if A.evaluate("G.phase") == 'over' and B.evaluate("G.phase") == 'over': break
         for pg in (A, B): pg.evaluate("ks=>{for(const k of ks){const v=Math.random()<.4?1:0;keys[k]=v;if(v)pend[k]=1}}", KS)
         A.wait_for_timeout(100)
     for pg in (A, B): pg.evaluate("for(const k of Object.keys(keys))keys[k]=0")
     A.wait_for_timeout(500)
+    ok('雙方打到結算畫面', A.evaluate("G.phase") == 'over' and B.evaluate("G.phase") == 'over', A.evaluate("[G.phase,G.round,p1.wins,p2.wins]"))
+    # 再戰前換角：房客往右換兩個、房主往左換一個
+    c0 = A.evaluate("NET.c[0]"); c1 = A.evaluate("NET.c[1]")
+    B.keyboard.press('ArrowRight'); B.keyboard.press('ArrowRight'); A.keyboard.press('ArrowLeft')
     B.keyboard.press('Enter'); A.wait_for_timeout(600); A.keyboard.press('Enter')
     A.wait_for_function("NET.m===2&&G.phase!=='over'", timeout=10000); B.wait_for_function("NET.m===2&&G.phase!=='over'", timeout=10000)
     ok('整局打完後可直接再戰', True, A.evaluate("[NET.m,G.phase]"))
+    n = A.evaluate("CH.length"); want = [(c0 - 1) % n, (c1 + 2) % n]
+    got = [A.evaluate("[CH.indexOf(p1.ch),CH.indexOf(p2.ch)]"), B.evaluate("[CH.indexOf(p1.ch),CH.indexOf(p2.ch)]")]
+    ok('再戰前可以換角色，雙方看到的一致', got[0] == want and got[1] == want, f'{[c0, c1]} -> {got[0]}')
     A.keyboard.press('Escape'); B.wait_for_timeout(3500)
     ok('一方離開後雙方回到選單', A.evaluate("G.phase") == 'menu' and B.evaluate("G.phase") == 'menu')
     # 5. 邀請連結
@@ -104,6 +126,24 @@ with sync_playwright() as p:
     M1.fill('#theirs', M2.input_value('#mine'))
     M1.wait_for_function("G.mode===4&&G.phase!=='menu'", timeout=15000); M2.wait_for_function("G.mode===4&&G.phase!=='menu'", timeout=15000)
     ok('手動交換代碼的備援方式仍然可用', True)
+    # 10. 觀戰：房主開放觀戰，第三人用代碼觀戰，畫面狀態和對戰雙方一致；對戰中新的對手會被擋下
+    W1 = page(); W2 = page(); W3 = page(); W4 = page()
+    W1.evaluate("sel[0]=7;G.stage=4;lab()"); W2.evaluate("sel[0]=11;lab()")
+    W1.click('#b4'); W1.check('#wopen'); W1.click('#rh'); W1.wait_for_function("document.getElementById('rcode').textContent.length===4", timeout=8000); wc = W1.inner_text('#rcode')
+    ok('開放觀戰的房間會顯示「複製觀戰連結」', W1.is_visible('#rwl'))
+    W2.click('#b4'); W2.fill('#rc2', wc); W2.click('#rj')
+    W1.wait_for_function("G.mode===4&&G.phase!=='menu'", timeout=15000); W2.wait_for_function("G.mode===4&&G.phase!=='menu'", timeout=15000)
+    W4.click('#b4'); W4.fill('#rc2', wc); W4.click('#rj'); W4.wait_for_function("document.getElementById('ns').textContent.includes('已經有對手')", timeout=8000)
+    ok('對戰進行中新的對手會被擋下', True, W4.inner_text('#ns'))
+    W1.click('#rwl') if W1.is_visible('#rwl') else None
+    W3.goto(BASE + '#w=' + wc); W3.wait_for_function("NET.watch&&G.mode===4&&G.phase!=='menu'", timeout=20000)
+    ok('觀戰者用連結就能進入觀戰畫面', True, W3.evaluate("[p1.ch.n,p2.ch.n]"))
+    play([W1, W2], 80); W1.wait_for_timeout(2500)
+    ha = W1.evaluate("NET.hash"); hw = W3.evaluate("NET.watch?NET.watch.h:{}"); com = [k for k in hw if k in ha]; mm = [k for k in com if ha[k] != hw[k]]
+    ok('觀戰畫面和對戰雙方完全一致', len(com) >= 3 and not mm, f'檢查點 {len(com)} 不一致 {len(mm)}')
+    W3.keyboard.press('Escape'); W3.wait_for_timeout(500)
+    ok('觀戰者按 Esc 離開，不影響對戰', W3.evaluate("G.phase==='menu'&&!NET.watch") and W1.evaluate("NET.on&&G.mode===4"))
+    W1.keyboard.press('Escape'); W2.wait_for_timeout(3500)
     print('\n'.join(res)); print('頁面錯誤:', errs or '無')
     print('RESULT', 'PASS' if all(r.startswith('PASS') for r in res) and not errs else 'FAIL')
     b.close()
